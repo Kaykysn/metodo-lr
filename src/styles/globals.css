@@ -295,6 +295,30 @@ html.lite.theme-switching *::after {
   transition: none !important;
 }
 
+/* Botão de fechar (X) de painéis em tela cheia: destaque suave em vermelho, pulsando devagar
+   para chamar atenção sem parecer um alerta de erro. Respeita prefers-reduced-motion abaixo. */
+.close-x-highlight {
+  animation: close-x-pulse 2.8s ease-in-out infinite;
+}
+@keyframes close-x-pulse {
+  0%, 100% {
+    background-color: rgb(248 113 113 / 0.12);
+    border-color: rgb(248 113 113 / 0.3);
+    color: rgb(255 205 198);
+  }
+  50% {
+    background-color: rgb(248 113 113 / 0.28);
+    border-color: rgb(248 113 113 / 0.6);
+    color: rgb(255 180 171);
+  }
+}
+.lite .close-x-highlight {
+  animation: none;
+  background-color: rgb(248 113 113 / 0.16);
+  border-color: rgb(248 113 113 / 0.4);
+  color: rgb(255 205 198);
+}
+
 @keyframes body-map-confirm {
   from {
     opacity: 0.9;

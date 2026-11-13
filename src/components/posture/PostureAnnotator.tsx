@@ -481,7 +481,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
             <p className="text-lg font-bold">{VIEW_LABEL[view]}{photo.profileSide ? ` — perfil ${photo.profileSide}` : ""}</p>
             <p className="text-xs text-[#b7c4c9]">{set.capturedOn.split("-").reverse().join("/")} · {set.assessorName}{baseVersion ? ` · versão ${baseVersion}` : ""}</p>
           </div>
-          <button type="button" onClick={tryClose} aria-label="Fechar análise" className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-white/15 hover:bg-white/10"><X className="h-5 w-5" /></button>
+          <button type="button" onClick={tryClose} aria-label="Fechar análise" className="close-x-highlight inline-flex h-11 w-11 items-center justify-center rounded-lg border transition-colors hover:bg-[#f87171]/35"><X className="h-5 w-5" /></button>
         </div>
 
         {photo.mirrorConfirmed === null && (

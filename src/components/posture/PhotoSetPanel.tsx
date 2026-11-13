@@ -352,7 +352,7 @@ export function PhotoViewer({ url, title, onClose, mirrored = false }: { url: st
     <div ref={ref} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} onKeyDown={(e) => e.key === "Escape" && onClose()} className="fixed inset-0 z-[60] flex flex-col bg-[#0f1418] text-white outline-none">
       <div className="flex items-center justify-between gap-2 p-3">
         <p className="font-semibold">{title}</p>
-        <button type="button" onClick={onClose} aria-label="Fechar" className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-white/20 hover:bg-white/10"><X className="h-5 w-5" /></button>
+        <button type="button" onClick={onClose} aria-label="Fechar" className="close-x-highlight inline-flex h-11 w-11 items-center justify-center rounded-lg border transition-colors hover:bg-[#f87171]/35"><X className="h-5 w-5" /></button>
       </div>
       <div className="relative flex-1">
         {/* eslint-disable-next-line @next/next/no-img-element */}
