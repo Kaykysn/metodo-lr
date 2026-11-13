@@ -16,8 +16,16 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createRouteClient();
+    // DIAGNÓSTICO TEMPORÁRIO (13/11/2026): só nomes de cookie e o tipo do erro, nada sensível.
+    // Remover depois de entender por que o login com Google falha no projeto novo.
+    const { cookies } = await import("next/headers");
+    const cookieNames = (await cookies()).getAll().map((c) => c.name);
+    console.log(JSON.stringify({ diag: "auth_callback", cookieNames, hasVerifier: cookieNames.some((n) => n.includes("code-verifier")) }));
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) return go(origin, "/login?erro=sessao");
+    if (error) {
+      console.log(JSON.stringify({ diag: "exchange_error", message: error.message, status: error.status, code: error.code }));
+      return go(origin, "/login?erro=sessao");
+    }
     const { data } = await supabase.auth.getUser();
     if (!data.user) return go(origin, "/login?erro=sessao");
     const { data: profile } = await supabase.from("profiles").select("status").eq("id", data.user.id).maybeSingle();
