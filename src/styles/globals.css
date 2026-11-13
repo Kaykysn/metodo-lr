@@ -1,0 +1,354 @@
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color: rgb(var(--text-primary));
+    background-color: rgb(var(--bg-page));
+  }
+
+  body {
+    font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100vh;
+    background-color: rgb(var(--bg-page));
+    color: rgb(var(--text-primary));
+  }
+
+  /* Transição breve só depois de uma troca explícita de tema (classe aplicada pelo seletor) */
+  html.theme-switching,
+  html.theme-switching *,
+  html.theme-switching *::before,
+  html.theme-switching *::after {
+    transition-property: background-color, border-color, color, fill, stroke !important;
+    transition-duration: 160ms !important;
+    transition-timing-function: ease !important;
+  }
+
+  /* Foco acessível visível em todos os temas */
+  :focus-visible {
+    outline: 2px solid rgb(var(--focus-ring));
+    outline-offset: 2px;
+  }
+
+  input,
+  select,
+  textarea {
+    color-scheme: inherit;
+    caret-color: rgb(var(--accent-teal));
+  }
+
+  a {
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(var(--text-subtle));
+    opacity: 1;
+  }
+
+  select option {
+    background-color: rgb(var(--surface-primary));
+    color: rgb(var(--text-primary));
+  }
+
+  /* Autofill sem fundo amarelo/branco forçado no tema escuro */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: rgb(var(--text-primary));
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--surface-primary)) inset;
+    caret-color: rgb(var(--text-primary));
+  }
+}
+
+@layer components {
+  /* Mapa corporal: foco e confirmação única de seleção */
+  .body-map-spot {
+    outline: none;
+  }
+  .body-map-focus {
+    stroke: rgb(var(--focus-ring));
+    opacity: 0;
+  }
+  .body-map-spot:focus-visible .body-map-focus {
+    opacity: 1;
+  }
+  /* Áreas com rolagem horizontal contêm seus filhos absolutos (ex.: sr-only em tabelas).
+     Sem isso eles escapam do recorte e alargam a página em celulares pequenos. */
+  .overflow-x-auto {
+    position: relative;
+  }
+  .body-map-confirm {
+    stroke: rgb(var(--accent-teal));
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: body-map-confirm 420ms var(--ease-out-soft) 1 forwards;
+  }
+}
+
+/* ------------------------------------------------------------------------------
+   Vidro com função: forte só na navegação; discreto na moldura do gráfico.
+   Formulários, mapa, áreas de plotagem, tabelas e planos usam superfícies opacas.
+   Sem suporte a backdrop-filter: superfície opaca equivalente.
+   ------------------------------------------------------------------------------ */
+.glass-strong {
+  background-color: rgb(var(--glass-tint) / var(--glass-strong-alpha));
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+  border-bottom: 1px solid rgb(var(--glass-edge) / var(--glass-edge-alpha));
+  box-shadow: var(--glass-shadow);
+}
+.glass-soft {
+  background-color: rgb(var(--glass-tint) / var(--glass-soft-alpha));
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
+  border: 1px solid rgb(var(--glass-edge) / var(--glass-edge-alpha));
+  box-shadow: var(--glass-shadow);
+}
+/* Tratamento reutilizável para ladrilhos de ícones em vidro fosco (10-12px blur, raio 12-14px, destaque superior e sombra interna) */
+.glass-tile {
+  position: relative;
+  border-radius: var(--radius-tile, 13px);
+  -webkit-backdrop-filter: blur(11px);
+  backdrop-filter: blur(11px);
+  background-color: rgb(var(--glass-tint) / var(--glass-soft-alpha));
+  border: 1px solid rgb(var(--glass-edge) / var(--glass-edge-alpha));
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.28), inset 0 -1px 1px 0 rgb(0 0 0 / 0.08), 0 4px 12px -2px rgb(0 0 0 / 0.12);
+}
+/* Ladrilho sobre o hero (sempre escuro): não segue o tema, senão o texto branco some no Claro */
+.glass-tile.glass-tile-hero {
+  background-color: rgb(255 255 255 / var(--hero-glass-alpha));
+  border-color: rgb(255 255 255 / 0.22);
+  color: rgb(var(--hero-text));
+}
+.glass-tile.glass-tile-hero:hover {
+  background-color: rgb(255 255 255 / 0.16);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-strong,
+  .glass-soft,
+  .glass-tile {
+    background-color: rgb(var(--surface-primary));
+  }
+  .glass-tile.glass-tile-hero {
+    background-color: rgb(var(--hero-glass-solid));
+  }
+}
+
+/* Luz de fundo estática (não se move) */
+.glow-petrol {
+  background: radial-gradient(closest-side, rgb(var(--glow-a) / var(--glow-a-alpha)), transparent);
+}
+.glow-jade {
+  background: radial-gradient(closest-side, rgb(var(--glow-b) / var(--glow-b-alpha)), transparent);
+}
+
+/* Hero: azul-noite atrás do texto. No celular o texto ocupa a largura toda e passa sobre o
+   petróleo, então a camada é forte; no desktop fica no canto superior esquerdo e o jade abre à direita. */
+.hero-scrim {
+  background: linear-gradient(to right, rgb(var(--hero-bg) / 0.92), rgb(var(--hero-bg) / 0.6));
+}
+@media (min-width: 768px) {
+  .hero-scrim {
+    background: linear-gradient(to right, rgb(var(--hero-bg) / 0.92) 0%, rgb(var(--hero-bg) / 0.75) 50%, rgb(var(--hero-bg) / 0.3) 100%);
+  }
+}
+@media (min-width: 1024px) {
+  .hero-scrim {
+    background: radial-gradient(ellipse 70% 62% at 8% 4%, rgb(var(--hero-bg) / 0.9), rgb(var(--hero-bg) / 0.55) 55%, transparent 85%);
+  }
+}
+
+/* Prévia do produto: aro de vidro; a superfície de leitura dentro dela é opaca */
+.preview-rim {
+  background-color: rgb(255 255 255 / 0.08);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.22), 0 30px 60px -30px rgb(0 0 0 / 0.55);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .preview-rim {
+    background-color: rgb(var(--hero-glass-solid));
+  }
+}
+/* Única entrada da página: a prévia sobe até 6 px e aparece. Título e ações já estão prontos. */
+.js .preview-enter {
+  animation: preview-in 420ms var(--ease-out-soft) both;
+}
+@keyframes preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Troca de aba: transição curta só de opacidade; moldura e abas não se movem */
+.tab-fade {
+  animation: tab-fade 160ms ease-out both;
+}
+@keyframes tab-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Moldura da cena: as cores das bordas do pôster (azul-noite à esquerda, cinza do estúdio à direita) */
+.scene-frame {
+  background: linear-gradient(to right, #191d29 0%, #191d29 38%, #babab9 70%, #babab9 100%);
+  box-shadow: 0 24px 48px -28px rgb(2 18 38 / 0.45);
+}
+.glow-warm {
+  background: radial-gradient(closest-side, rgb(var(--glow-warm) / var(--glow-warm-alpha)), transparent);
+}
+/* Brilho decorativo jade interno com desfoque gaussiano de 18-24px restrito a esta camada */
+.hero-video-glow {
+  -webkit-filter: blur(20px);
+  filter: blur(20px);
+}
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------------------------
+   Modo leve (html.lite): PCs e celulares fracos, economia de dados ou "Efeitos visuais"
+   desligado. Mesma paleta e layout; sem desfoque de fundo (o custo maior em GPU fraca),
+   sem vídeo (tratado no componente), sem entradas e sem transição em massa na troca de tema.
+   ------------------------------------------------------------------------------ */
+/* Transparência reduzida no sistema: vidro vira superfície sólida (o resto do design continua) */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-strong,
+  .glass-soft,
+  .glass-tile,
+  .lite .glass-strong {
+    background-color: rgb(var(--surface-primary));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-tile.glass-tile-hero,
+  .preview-rim {
+    background-color: rgb(var(--hero-glass-solid));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+.lite .glass-tile.glass-tile-hero {
+  background-color: rgb(var(--hero-glass-solid));
+}
+.lite .hero-video-glow {
+  display: none;
+}
+.lite .glass-strong {
+  background-color: rgb(var(--surface-primary) / 0.97);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.lite .glass-soft,
+.lite .glass-tile {
+  background-color: rgb(var(--surface-primary));
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.lite [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.lite .preview-rim {
+  background-color: rgb(var(--hero-glass-solid));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.lite .preview-enter,
+.lite .tab-fade {
+  animation: none;
+}
+html.lite.theme-switching,
+html.lite.theme-switching *,
+html.lite.theme-switching *::before,
+html.lite.theme-switching *::after {
+  transition: none !important;
+}
+
+@keyframes body-map-confirm {
+  from {
+    opacity: 0.9;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* Movimento reduzido: sem animações decorativas nem rolagem suave */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Impressão: sem camadas decorativas, conteúdo legível em branco */
+@media print {
+  [data-decorative],
+  canvas {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #10243d !important;
+  }
+}
+
+/* Barra de rolagem discreta */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--surface-secondary));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-control) / 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--border-control) / 0.8);
+}

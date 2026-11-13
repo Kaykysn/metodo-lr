@@ -1,0 +1,255 @@
+// ==============================================================================
+// Bibliografia rastreável. Nada aqui é selo de "comprovado cientificamente".
+// verifiedOn = data em que título/autores/DOI foram conferidos em fonte primária.
+// ==============================================================================
+
+export interface EvidenceSource {
+  id: string;
+  title: string;
+  authors: string;
+  year: number;
+  type: "diretriz" | "posicionamento / revisão de revisões" | "ensaio clínico randomizado" | "recomendação de triagem" | "livro-texto de anatomia" | "estudo de hipertrofia" | "estudo de validação";
+  population: string;
+  intervention: string;
+  comparator: string;
+  outcome: string;
+  limitations: string;
+  doi?: string;
+  url: string;
+  verifiedOn: string | null;
+  verificationNote: string;
+}
+
+export const EVIDENCE: EvidenceSource[] = [
+  {
+    id: "acsm-2026-rt",
+    title:
+      "American College of Sports Medicine Position Stand. Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults: An Overview of Reviews",
+    authors: "Currier BS, D'Souza AC, Singh MAF, Lowisz CV, Rawson ES, Schoenfeld BJ, et al. (ACSM)",
+    year: 2026,
+    type: "posicionamento / revisão de revisões",
+    population: "Adultos saudáveis",
+    intervention: "Treinamento resistido progressivo (variáveis de prescrição)",
+    comparator: "Diferentes configurações de dose; ausência de treino nas revisões incluídas",
+    outcome: "Força, hipertrofia e desempenho físico",
+    limitations:
+      "Síntese de revisões em adultos saudáveis. Não é protocolo de reabilitação para dor, pós-operatório ou déficit neurológico, nem ensaio de cada exercício do catálogo.",
+    doi: "10.1249/MSS.0000000000003897",
+    url: "https://pubmed.ncbi.nlm.nih.gov/41843416/",
+    verifiedOn: "2026-11-06",
+    verificationNote: "Título, autores, periódico (Med Sci Sports Exerc, abr. 2026) e DOI conferidos no PubMed.",
+  },
+  {
+    id: "who-2023-lbp",
+    title:
+      "WHO guideline for non-surgical management of chronic primary low back pain in adults in primary and community care settings",
+    authors: "Organização Mundial da Saúde",
+    year: 2023,
+    type: "diretriz",
+    population: "Adultos com dor lombar primária crônica em atenção primária e comunitária",
+    intervention: "Intervenções não cirúrgicas, incluindo programas de exercício estruturado",
+    comparator: "Cuidado usual / outras intervenções, conforme cada recomendação",
+    outcome: "Dor, função, qualidade de vida",
+    limitations:
+      "Recomendação condicional para exercício; não estabelece modalidade superior para todos. Escolha depende de contexto e preferência. Exclui patologia grave específica.",
+    url: "https://www.who.int/publications/i/item/9789240081789",
+    verifiedOn: "2026-11-06",
+    verificationNote: "Página oficial acessível. Detalhes em https://www.ncbi.nlm.nih.gov/books/NBK599213/ (não relido integralmente nesta sessão).",
+  },
+  {
+    id: "walkback-2024",
+    title:
+      "Effectiveness and cost-effectiveness of an individualised, progressive walking and education intervention for the prevention of low back pain recurrence in Australia (WalkBack): a randomised controlled trial",
+    authors: "Pocovi NC, Lin CC, French SD, Graham PL, van Dongen JM, Latimer J, et al.",
+    year: 2024,
+    type: "ensaio clínico randomizado",
+    population: "Adultos recuperados recentemente de um episódio de lombalgia inespecífica",
+    intervention: "Caminhada individualizada e progressiva + educação, com acompanhamento",
+    comparator: "Sem intervenção (controle)",
+    outcome: "Tempo até recorrência de dor lombar que limita atividades",
+    limitations:
+      "Não extrapolar para crise aguda, dor lombar ativa, radiculopatia ou caminhada sem o componente educacional e a progressão estudados.",
+    doi: "10.1016/S0140-6736(24)00755-4",
+    url: "https://pubmed.ncbi.nlm.nih.gov/38908392/",
+    verifiedOn: "2026-11-06",
+    verificationNote: "Título, autores, periódico (Lancet, jul. 2024) e DOI conferidos no PubMed.",
+  },
+  {
+    id: "who-2020-pa",
+    title: "WHO guidelines on physical activity and sedentary behaviour",
+    authors: "Organização Mundial da Saúde",
+    year: 2020,
+    type: "diretriz",
+    population: "População geral por faixa etária e condições específicas",
+    intervention: "Atividade física aeróbia, fortalecimento muscular e atividade multicomponente",
+    comparator: "Menores níveis de atividade / comportamento sedentário",
+    outcome: "Desfechos gerais de saúde",
+    limitations: "Referência geral de atividade física. Não é estudo de um exercício específico do catálogo.",
+    url: "https://www.who.int/publications/i/item/9789240015128",
+    verifiedOn: "2026-11-06",
+    verificationNote: "Página oficial acessível.",
+  },
+  {
+    id: "acsm-2015-screening",
+    title: "Updating ACSM's Recommendations for Exercise Preparticipation Health Screening",
+    authors: "Riebe D, Franklin BA, Thompson PD, Garber CE, et al.",
+    year: 2015,
+    type: "recomendação de triagem",
+    population: "Adultos que vão iniciar ou progredir exercício",
+    intervention: "Algoritmo de triagem pré-participação baseado em atividade atual, doença conhecida e sinais/sintomas",
+    comparator: "Recomendações anteriores de triagem",
+    outcome: "Decisão sobre liberação médica antes do exercício",
+    limitations:
+      "Triagem para início/progressão de exercício; não diagnostica. Base das perguntas cardiovasculares/metabólicas da triagem. Recomenda-se conferir atualizações posteriores do ACSM.",
+    doi: "10.1249/MSS.0000000000000664",
+    url: "https://pubmed.ncbi.nlm.nih.gov/26473759/",
+    verifiedOn: "2026-11-06",
+    verificationNote: "Título, autores, periódico (Med Sci Sports Exerc, nov. 2015) e DOI conferidos no PubMed.",
+  },
+  {
+    id: "nice-cks-lbp",
+    title: "NICE Clinical Knowledge Summaries — Back pain, low (without radiculopathy) / Sciatica",
+    authors: "National Institute for Health and Care Excellence",
+    year: 0,
+    type: "diretriz",
+    population: "Adultos com dor lombar / ciatalgia",
+    intervention: "Avaliação de sinais de alerta e encaminhamento",
+    comparator: "—",
+    outcome: "Identificação de condições que exigem avaliação médica",
+    limitations: "NÃO VERIFICADO nesta sessão: o site bloqueou acesso automatizado. Revisar manualmente antes de usar como fonte.",
+    url: "https://cks.nice.org.uk/topics/back-pain-low-without-radiculopathy/",
+    verifiedOn: null,
+    verificationNote: "Acesso retornou 403 em 06/11/2026. Mantido como ponto de partida a conferir.",
+  },
+  // ---------------- Catálogo de exercícios e avaliação por fotos (adicionadas em 10/11/2026)
+  // Metadados (título, autores, ano, periódico, DOI) conferidos na Crossref em 10/11/2026.
+  // Resumo e texto completo NÃO foram revisados: as afirmações ligadas ficam pendentes.
+  {
+    id: "openstax-ap2e-11-5",
+    title: "Anatomy and Physiology 2e — 11.5 Muscles of the Pectoral Girdle and Upper Limbs",
+    authors: "Betts JG, Young KA, Wise JA, et al. (OpenStax)",
+    year: 2022,
+    type: "livro-texto de anatomia",
+    population: "—",
+    intervention: "—",
+    comparator: "—",
+    outcome: "Nomes, inserções e ações dos músculos da cintura escapular e do membro superior",
+    limitations: "Descreve ações anatômicas gerais. Não informa carga, ativação ou hipertrofia em exercícios específicos.",
+    url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/11-5-muscles-of-the-pectoral-girdle-and-upper-limbs",
+    verifiedOn: null,
+    verificationNote: "URL indicada no briefing do catálogo. Capítulo não conferido nesta sessão.",
+  },
+  {
+    id: "openstax-ap2e-11-6",
+    title: "Anatomy and Physiology 2e — 11.6 Appendicular Muscles of the Pelvic Girdle and Lower Limbs",
+    authors: "Betts JG, Young KA, Wise JA, et al. (OpenStax)",
+    year: 2022,
+    type: "livro-texto de anatomia",
+    population: "—",
+    intervention: "—",
+    comparator: "—",
+    outcome: "Nomes, inserções e ações dos músculos da cintura pélvica e do membro inferior",
+    limitations: "Descreve ações anatômicas gerais. Não informa carga, ativação ou hipertrofia em exercícios específicos.",
+    url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/11-6-appendicular-muscles-of-the-pelvic-girdle-and-lower-limbs",
+    verifiedOn: null,
+    verificationNote: "URL indicada no briefing do catálogo. Capítulo não conferido nesta sessão.",
+  },
+  {
+    id: "plotkin-2023-hipthrust",
+    title: "Hip thrust and back squat training elicit similar gluteus muscle hypertrophy and transfer similarly to the deadlift",
+    authors: "Plotkin DL, Rodas MA, Vigotsky AD, McIntosh MC, Breeze E, Ubrik R, et al.",
+    year: 2023,
+    type: "estudo de hipertrofia",
+    population: "Conferir no texto completo",
+    intervention: "Treino de hip thrust",
+    comparator: "Treino de agachamento livre",
+    outcome: "Hipertrofia dos glúteos e transferência para o levantamento terra",
+    limitations: "Compara os dois exercícios estudados na população e no protocolo do estudo. Diferenças agudas de EMG não foram tratadas como previsão de crescimento muscular.",
+    doi: "10.3389/fphys.2023.1279170",
+    url: "https://doi.org/10.3389/fphys.2023.1279170",
+    verifiedOn: "2026-11-10",
+    verificationNote: "Metadados conferidos na Crossref (Frontiers in Physiology, 2023). Resumo e texto completo não revisados.",
+  },
+  {
+    id: "maeo-2021-hamstrings",
+    title: "Greater Hamstrings Muscle Hypertrophy but Similar Damage Protection after Training at Long versus Short Muscle Lengths",
+    authors: "Maeo S, Huang M, Wu Y, Sakurai H, Kusagawa Y, Sugiyama T, et al.",
+    year: 2020,
+    type: "estudo de hipertrofia",
+    population: "Conferir no texto completo",
+    intervention: "Flexora sentada (quadril flexionado, isquiotibiais mais alongados)",
+    comparator: "Flexora deitada (quadril estendido)",
+    outcome: "Hipertrofia dos isquiotibiais e proteção contra dano muscular",
+    limitations: "Vale para a comparação entre as duas flexoras estudadas. Não generaliza para todos os exercícios de isquiotibiais.",
+    doi: "10.1249/MSS.0000000000002523",
+    url: "https://doi.org/10.1249/MSS.0000000000002523",
+    verifiedOn: "2026-11-10",
+    verificationNote: "Metadados conferidos na Crossref (Med Sci Sports Exerc; ano de emissão 2020). Resumo e texto completo não revisados.",
+  },
+  {
+    id: "maeo-2022-triceps",
+    title: "Triceps brachii hypertrophy is substantially greater after elbow extension training performed in the overhead versus neutral arm position",
+    authors: "Maeo S, Wu Y, Huang M, Sakurai H, Kusagawa Y, Sugiyama T, et al.",
+    year: 2022,
+    type: "estudo de hipertrofia",
+    population: "Conferir no texto completo",
+    intervention: "Extensão de cotovelo no cabo com o braço acima da cabeça",
+    comparator: "Extensão de cotovelo no cabo com o braço em posição neutra",
+    outcome: "Hipertrofia do tríceps braquial",
+    limitations: "Vale para as duas posições de extensão no cabo estudadas.",
+    doi: "10.1080/17461391.2022.2100279",
+    url: "https://doi.org/10.1080/17461391.2022.2100279",
+    verifiedOn: "2026-11-10",
+    verificationNote: "Metadados conferidos na Crossref (European Journal of Sport Science, 2022). Resumo e texto completo não revisados.",
+  },
+  {
+    id: "ferber-2015-pfp",
+    title: "Strengthening of the Hip and Core Versus Knee Muscles for the Treatment of Patellofemoral Pain: A Multicenter Randomized Controlled Trial",
+    authors: "Ferber R, Bolgla L, Earl-Boehm JE, Emery C, Hamstra-Wright K",
+    year: 2015,
+    type: "ensaio clínico randomizado",
+    population: "Pessoas com dor patelofemoral (critérios no texto completo)",
+    intervention: "Programa de fortalecimento de quadril e core",
+    comparator: "Programa de fortalecimento de joelho",
+    outcome: "Dor, função e força",
+    limitations: "Resultado dos programas estudados, nessa população. Não comprova um exercício isolado do programa.",
+    doi: "10.4085/1062-6050-49.3.70",
+    url: "https://doi.org/10.4085/1062-6050-49.3.70",
+    verifiedOn: "2026-11-10",
+    verificationNote: "Metadados conferidos na Crossref (Journal of Athletic Training, 2015). Resumo e texto completo não revisados.",
+  },
+  {
+    id: "hopewell-2021-grasp",
+    title: "Progressive exercise compared with best-practice advice, with or without corticosteroid injection, for rotator cuff disorders: the GRASP factorial RCT",
+    authors: "Hopewell S, Keene DJ, Heine P, Marian IR, Dritsaki M, Cureton L, et al.",
+    year: 2021,
+    type: "ensaio clínico randomizado",
+    population: "Adultos com distúrbios do manguito rotador (critérios no texto completo)",
+    intervention: "Exercício progressivo supervisionado, com ou sem infiltração de corticoide",
+    comparator: "Sessão de orientação de boas práticas, com ou sem infiltração",
+    outcome: "Dor e função do ombro",
+    limitations: "Os achados pedem decisão contextualizada e cautela ao interpretar a complexidade do programa. Não comprova um exercício isolado.",
+    doi: "10.3310/hta25480",
+    url: "https://doi.org/10.3310/hta25480",
+    verifiedOn: "2026-11-10",
+    verificationNote: "Metadados conferidos na Crossref (Health Technology Assessment, 2021). Resumo e texto completo não revisados.",
+  },
+  {
+    id: "ferreira-2010-sapo",
+    title: "Postural Assessment Software (PAS/SAPO): Validation and Reliability",
+    authors: "Ferreira EAG, Duarte M, Maldonado EP, Burke TN, Marques AP",
+    year: 2010,
+    type: "estudo de validação",
+    population: "Conferir no texto completo",
+    intervention: "Medidas posturais por fotografia no software PAS/SAPO",
+    comparator: "Medidas de referência descritas no estudo",
+    outcome: "Validade e confiabilidade por variável",
+    limitations: "Os resultados valem para o software e os procedimentos estudados. O módulo de fotos deste app não foi validado.",
+    doi: "10.1590/S1807-59322010000700005",
+    url: "https://doi.org/10.1590/S1807-59322010000700005",
+    verifiedOn: "2026-11-10",
+    verificationNote: "Metadados conferidos na Crossref (Clinics, 2010; o título está registrado lá com a grafia Reliabiliy). Resumo e texto completo não revisados.",
+  },
+];
+
+export const EVIDENCE_BY_ID = new Map(EVIDENCE.map((e) => [e.id, e]));

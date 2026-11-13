@@ -1,0 +1,201 @@
+/* ==============================================================================
+   STUDIO LEANDRO RANGEL — Tokens semânticos
+   Art Direction: "Campo de luz azul-petróleo e jade"
+   Paleta extraída da imagem da marca:
+   - Margem esquerda: Azul-noite profundo (#021226)
+   - Centro: Petróleo fluido (#04635F / #116C65)
+   - Canto superior direito: Jade suave (#3B9E90 / #76D7BE) com transição para azul
+   - Canto inferior direito: Reflexo quente (#BBA078) que harmoniza com o CTA âmbar (#FFB908)
+   ============================================================================== */
+
+:root {
+  /* Superfícies — Modo Claro: névoa pálida inspirada no arranjo da arte */
+  --bg-page: 238 244 245;          /* Névoa pálida com suave tom petróleo #EEF4F5 */
+  --surface-primary: 252 254 254;  /* Porcelana pura #FCFEFE */
+  --surface-secondary: 226 237 238;/* #E2EDEE */
+  --surface-raised: 255 255 255;
+
+  /* Texto */
+  --text-primary: 14 40 52;        /* Tinta petróleo profunda #0E2834 (14,5:1) */
+  --text-secondary: 68 94 104;     /* Ardósia-petróleo #445E68 (6,2:1) */
+  --text-subtle: 76 102 112;       /* ≥4,5:1 sobre superfícies secundárias */
+
+  /* Bordas */
+  --border-decorative: 208 222 225;
+  --border-control: 104 130 138;   /* ≥3,8:1 — limite de controles */
+
+  /* Marca */
+  --brand-navy: 2 18 38;           /* Studio midnight navy #021226 */
+
+  /* Acento interativo e seleção em gráficos (jade amostrado do canto superior direito) */
+  --accent-teal: 14 102 96;        /* Jade profundo #0E6660 (6,2:1) */
+  --accent-teal-subtle: 220 242 238;
+
+  /* Ação principal nas telas operacionais (jade) */
+  --action-bg: 14 102 96;
+  --action-text: 252 254 254;
+  --action-hover: 10 82 77;
+
+  /* CTA principal (âmbar com texto tinta preservado) */
+  --cta-bg: 255 185 8;             /* Âmbar vibrante #FFB908 */
+  --cta-text: 17 44 57;            /* Tinta escura #112C39 */
+  --cta-hover: 255 201 64;
+
+  /* Inverso (estado selecionado forte) */
+  --inverse-bg: 14 40 52;
+  --inverse-hover: 24 58 74;
+  --inverse-fg: 252 254 254;
+
+  /* Estados semânticos clínicos — independentes da marca */
+  --status-success-fg: 30 110 70;
+  --status-success-bg: 230 244 236;
+  --status-success-border: 178 218 196;
+  --status-caution-fg: 138 82 6;
+  --status-caution-bg: 252 244 225;
+  --status-caution-border: 236 210 150;
+  --status-danger-fg: 178 34 34;
+  --status-danger-bg: 252 238 236;
+  --status-danger-border: 240 190 184;
+  /* Sintoma relatado (marcação no mapa) — vermelho-coral translúcido */
+  --symptom: 196 62 62;
+
+  /* Mapa corporal */
+  --map-body-from: 226 234 236;
+  --map-body-to: 205 217 220;
+  --map-body-stroke: 124 144 150;
+  --map-muscle: 188 120 112;
+  --map-muscle-line: 150 84 78;
+  --map-dot: 14 40 52;
+  --map-dot-selected: 14 102 96;
+  --map-dot-ring: 252 254 254;
+
+  /* Gráficos — superfícies estáveis de alto contraste */
+  --chart-bar: 14 102 96;
+  --chart-bar-active: 2 18 38;
+  --chart-grid: 216 228 230;
+  --chart-zero: 104 130 138;
+  --chart-line: 178 34 34;
+  --chart-plot: 252 254 254;       /* área de plotagem sempre opaca e estável */
+
+  /* Foco acessível */
+  --focus-ring: 14 102 96;
+
+  /* Luzes amostradas da arte (petróleo centro, jade superior direito, reflexo quente inferior direito) */
+  --glow-a: 4 99 95;              /* Petróleo central */
+  --glow-b: 59 158 144;           /* Jade suave superior direito */
+  --glow-warm: 187 160 120;       /* Reflexo quente inferior direito */
+  --glow-a-alpha: 0.14;
+  --glow-b-alpha: 0.10;
+  --glow-warm-alpha: 0.08;
+
+  /* Vidro fosco (Frosted Glass) */
+  --glass-tint: 250 252 252;
+  --glass-strong-alpha: 0.78;
+  --glass-soft-alpha: 0.62;
+  --glass-edge: 255 255 255;
+  --glass-edge-alpha: 0.85;
+  --glass-shadow: 0 10px 30px -12px rgb(2 18 38 / 0.12), inset 0 1px 0 0 rgb(255 255 255 / 0.8);
+
+  /* Hero: superfície escura da marca nos dois temas (não muda com Claro/Escuro) */
+  --hero-bg: 1 18 40;             /* #011228 */
+  --hero-text: 239 247 246;       /* 17,6:1 sobre --hero-bg */
+  --hero-muted: 169 191 196;      /* 9,7:1 sobre --hero-bg */
+  --hero-jade: 118 215 190;       /* 10,9:1 sobre --hero-bg */
+  --hero-jade-pale: 168 230 212;  /* jade claro do título, 13,4:1 sobre --hero-bg */
+  --hero-glass-alpha: 0.1;        /* ladrilho de vidro sobre o hero */
+  --hero-glass-solid: 16 36 60;   /* mesmo ladrilho sem desfoque (modo leve) */
+
+  /* Seções longas de leitura: névoa pálida (claro) / petróleo profundo (escuro) */
+  --surface-reading: 230 239 240;
+
+  /* Partículas estáticas legadas */
+  --particle-1: 14 102 96;
+  --particle-2: 14 40 52;
+  --particle-3: 104 130 138;
+  --particle-opacity: 0.08;
+
+  /* Escala de raio */
+  --radius-control: 10px;
+  --radius-panel: 16px;
+  --radius-tile: 13px;            /* 12–14px para ladrilhos de vidro */
+}
+
+.dark {
+  /* Superfícies — Modo Escuro: profundidade original da arte amostrada */
+  --bg-page: 2 18 38;              /* Azul-noite profundo da margem esquerda #021226 */
+  --surface-primary: 10 26 46;     /* #0A1A2E */
+  --surface-secondary: 16 36 60;   /* #10243C */
+  --surface-raised: 22 46 72;      /* #162E48 */
+
+  --text-primary: 239 247 246;     /* Branco suave #EFF7F6 (14,8:1) */
+  --text-secondary: 169 191 196;   /* Prata-petróleo #A9BFC4 (8,4:1) */
+  --text-subtle: 136 162 169;      /* ≥5,2:1 */
+
+  --border-decorative: 28 54 80;
+  --border-control: 96 138 160;    /* 4,8:1 — limite nítido de controles */
+
+  --accent-teal: 118 215 190;      /* Jade claro vibrante #76D7BE (9,2:1) */
+  --accent-teal-subtle: 16 52 58;
+
+  --action-bg: 118 215 190;
+  --action-text: 2 18 38;
+  --action-hover: 146 228 206;
+
+  --cta-bg: 255 185 8;
+  --cta-text: 17 44 57;
+  --cta-hover: 255 201 64;
+
+  --inverse-bg: 239 247 246;
+  --inverse-hover: 214 228 230;
+  --inverse-fg: 2 18 38;
+
+  --status-success-fg: 134 214 168;
+  --status-success-bg: 20 44 32;
+  --status-success-border: 40 84 62;
+  --status-caution-fg: 236 196 112;
+  --status-caution-bg: 46 36 14;
+  --status-caution-border: 90 70 26;
+  --status-danger-fg: 255 150 140;
+  --status-danger-bg: 52 20 20;
+  --status-danger-border: 104 36 34;
+  --symptom: 240 110 100;
+
+  --map-body-from: 28 48 68;
+  --map-body-to: 18 36 52;
+  --map-body-stroke: 100 128 142;
+  --map-muscle: 150 92 86;
+  --map-muscle-line: 196 130 122;
+  --map-dot: 239 247 246;
+  --map-dot-selected: 118 215 190;
+  --map-dot-ring: 2 18 38;
+
+  --chart-bar: 118 215 190;
+  --chart-bar-active: 239 247 246;
+  --chart-grid: 28 54 80;
+  --chart-zero: 96 138 160;
+  --chart-line: 255 150 140;
+  --chart-plot: 10 26 46;          /* área de plotagem estável e opaca */
+
+  --focus-ring: 118 215 190;
+
+  --glow-a: 4 99 95;              /* Petróleo central */
+  --glow-b: 59 158 144;           /* Jade suave superior direito */
+  --glow-warm: 187 160 120;       /* Reflexo quente inferior direito */
+  --glow-a-alpha: 0.38;
+  --glow-b-alpha: 0.22;
+  --glow-warm-alpha: 0.12;
+
+  --glass-tint: 6 24 44;
+  --glass-strong-alpha: 0.72;
+  --glass-soft-alpha: 0.56;
+  --glass-edge: 118 215 190;
+  --glass-edge-alpha: 0.22;
+  --glass-shadow: 0 12px 34px -14px rgb(0 0 0 / 0.6), inset 0 1px 0 0 rgb(255 255 255 / 0.18);
+
+  --surface-reading: 4 38 46;      /* #04262E — texto 14,6:1, secundário 8,3:1 */
+
+  --particle-1: 118 215 190;
+  --particle-2: 169 191 196;
+  --particle-3: 118 215 190;
+  --particle-opacity: 0.1;
+}
