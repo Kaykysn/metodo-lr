@@ -12,6 +12,9 @@ import { Badge, Button, ButtonLink, ErrorNote, Field, inputClass, Panel } from "
 import { NumberInput } from "@/components/assessment/flow/controls";
 import { regionLabel } from "@/components/assessment/AnatomyMap";
 import { evaluateTriage } from "@/lib/domain/triage";
+import CatalogPicker from "@/components/catalog/CatalogPicker";
+import AssessmentHints from "./AssessmentHints";
+import { itemName, useCatalogHydration } from "@/lib/catalog/bridge";
 
 function move<T>(arr: T[], i: number, d: -1 | 1) {
   const j = i + d;
@@ -23,14 +26,15 @@ function move<T>(arr: T[], i: number, d: -1 | 1) {
 
 const ta = `${inputClass} min-h-[72px] py-2`;
 
-function PrescriptionEditor({ item, onChange }: { item: PrescribedExercise; onChange: (p: PrescribedExercise) => void }) {
-  const ex = EXERCISE_BY_ID.get(item.exerciseId)!;
+function PrescriptionEditor({ item, onChange, assessment }: { item: PrescribedExercise; onChange: (p: PrescribedExercise) => void; assessment: Assessment | null }) {
+  const ex = EXERCISE_BY_ID.get(item.exerciseId);
   const id = item.id;
   const setDose = (d: Partial<Dose>) => onChange({ ...item, dose: { ...item.dose, ...d } as Dose });
   const setRes = (r: Resistance) => onChange({ ...item, resistance: r });
   const setEffort = (e: Effort) => onChange({ ...item, effort: e });
   return (
     <div className="grid gap-4 pt-3 sm:grid-cols-2 lg:grid-cols-4">
+      {assessment && ex && <AssessmentHints assessment={assessment} exercise={ex} item={item} onChange={onChange} />}
       <Field label="Tipo de dose" htmlFor={`dk-${id}`}>
         <select
           id={`dk-${id}`}
@@ -152,8 +156,8 @@ function PrescriptionEditor({ item, onChange }: { item: PrescribedExercise; onCh
           <textarea id={`pn-${id}`} className={ta} value={item.privateNote} onChange={(e) => onChange({ ...item, privateNote: e.target.value })} />
         </Field>
       </div>
-      <RehabFields item={item} onChange={onChange} suggested={ex.purposes.includes("reabilitacao")} />
-      <p className="text-sm text-theme-muted sm:col-span-2 lg:col-span-4">{ex.precautions}</p>
+      <RehabFields item={item} onChange={onChange} suggested={!!ex?.purposes.includes("reabilitacao")} />
+      {ex && <p className="text-sm text-theme-muted sm:col-span-2 lg:col-span-4">{ex.precautions}</p>}
     </div>
   );
 }
@@ -267,6 +271,9 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
 
+  const [libSource, setLibSource] = useState<"curadoria" | "catalogo">("curadoria");
+  useCatalogHydration(sessions.flatMap((x) => x.items.map((i) => i.exerciseId)));
+
   const s = sessions.find((x) => x.id === active) ?? sessions[0];
   const mutate = (next: TrainingSession[]) => {
     setSessions(next);
@@ -275,7 +282,8 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
   const setSession = (patch: Partial<TrainingSession>) => mutate(sessions.map((x) => (x.id === s.id ? { ...x, ...patch } : x)));
 
   const pick = (exerciseId: string) => {
-    const ex = EXERCISE_BY_ID.get(exerciseId)!;
+    const ex = EXERCISE_BY_ID.get(exerciseId);
+    if (!ex) return;
     if (replacing) {
       setSession({ items: s.items.map((it) => (it.id === replacing ? { ...defaultPrescription(ex), id: it.id } : it)) });
       setReplacing(null);
@@ -317,7 +325,14 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
       {replacing && (
         <button type="button" className="mb-3 text-sm font-semibold underline" onClick={() => setReplacing(null)}>Cancelar substituição</button>
       )}
-      <Library onPick={pick} label={replacing ? "Usar" : "Adicionar"} />
+      <div role="tablist" aria-label="Origem dos exercícios" className="mb-3 grid grid-cols-2 gap-1 rounded-control border border-theme-border bg-theme-secondary p-1">
+        {([["curadoria", "Curadoria"], ["catalogo", "Catálogo ampliado"]] as const).map(([k, l]) => (
+          <button key={k} role="tab" type="button" aria-selected={libSource === k} onClick={() => setLibSource(k)} className={`min-h-[36px] rounded-lg px-2 text-sm font-semibold ${libSource === k ? "bg-theme-raised shadow-subtle" : "text-theme-muted"}`}>
+            {l}
+          </button>
+        ))}
+      </div>
+      {libSource === "curadoria" ? <Library onPick={pick} label={replacing ? "Usar" : "Adicionar"} /> : <CatalogPicker onPick={pick} label={replacing ? "Usar" : "Adicionar"} />}
     </Panel>
   );
 
@@ -397,7 +412,7 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
               ) : (
                 <ol className="divide-y divide-theme-border">
                   {s.items.map((it, i) => {
-                    const ex = EXERCISE_BY_ID.get(it.exerciseId);
+                    const name = itemName(it);
                     const open = openItem === it.id;
                     return (
                       <li
@@ -432,20 +447,22 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="tabular w-6 cursor-grab text-sm font-bold text-theme-muted" title="Arraste para reordenar ou use as setas">{i + 1}</span>
                           <button type="button" aria-expanded={open} onClick={() => setOpenItem(open ? null : it.id)} className="min-h-[44px] flex-1 text-left">
-                            <span className="font-semibold">{ex?.name}</span>
+                            <span className="font-semibold">{name}</span>
                             <span className="ml-2 text-sm text-theme-muted">
                               {it.dose.kind === "reps" ? `${it.dose.sets} × ${it.dose.repsMin}–${it.dose.repsMax}` : it.dose.kind === "time" ? `${it.dose.sets} × ${it.dose.seconds} s` : `${it.dose.sets} × ${it.dose.meters} m`}
                             </span>
                           </button>
                           <div className="flex gap-1">
-                            <button type="button" aria-label={`Subir ${ex?.name}`} disabled={i === 0} onClick={() => setSession({ items: move(s.items, i, -1) })} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border disabled:opacity-30"><ArrowUp className="h-4 w-4" /></button>
-                            <button type="button" aria-label={`Descer ${ex?.name}`} disabled={i === s.items.length - 1} onClick={() => setSession({ items: move(s.items, i, 1) })} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border disabled:opacity-30"><ArrowDown className="h-4 w-4" /></button>
-                            <button type="button" aria-label={`Substituir ${ex?.name}`} onClick={() => { setReplacing(it.id); setMobileTab("biblioteca"); }} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border"><Repeat2 className="h-4 w-4" /></button>
-                            <button type="button" aria-label={`Remover ${ex?.name}`} onClick={() => setSession({ items: s.items.filter((x) => x.id !== it.id) })} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border hover:text-status-danger-fg"><Trash2 className="h-4 w-4" /></button>
+                            <button type="button" aria-label={`Subir ${name}`} disabled={i === 0} onClick={() => setSession({ items: move(s.items, i, -1) })} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border disabled:opacity-30"><ArrowUp className="h-4 w-4" /></button>
+                            <button type="button" aria-label={`Descer ${name}`} disabled={i === s.items.length - 1} onClick={() => setSession({ items: move(s.items, i, 1) })} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border disabled:opacity-30"><ArrowDown className="h-4 w-4" /></button>
+                            <button type="button" aria-label={`Substituir ${name}`} onClick={() => { setReplacing(it.id); setMobileTab("biblioteca"); }} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border"><Repeat2 className="h-4 w-4" /></button>
+                            <button type="button" aria-label={`Remover ${name}`} onClick={() => {
+                              if (window.confirm(`Remover ${name} desta sessão? A remoção só vale depois de salvar o rascunho; versões aprovadas continuam no histórico.`)) setSession({ items: s.items.filter((x) => x.id !== it.id) });
+                            }} className="inline-flex h-10 w-10 items-center justify-center rounded-control border border-theme-border hover:text-status-danger-fg"><Trash2 className="h-4 w-4" /></button>
                           </div>
                         </div>
                         {replacing === it.id && <p className="ml-8 mt-1 text-sm text-theme-teal">Escolha o substituto na biblioteca.</p>}
-                        {open && <PrescriptionEditor item={it} onChange={(p) => setSession({ items: s.items.map((x) => (x.id === it.id ? p : x)) })} />}
+                        {open && <PrescriptionEditor item={it} assessment={assessment} onChange={(p) => setSession({ items: s.items.map((x) => (x.id === it.id ? p : x)) })} />}
                       </li>
                     );
                   })}

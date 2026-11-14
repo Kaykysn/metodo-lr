@@ -155,6 +155,9 @@ export type Effort =
 export interface PrescribedExercise {
   id: string;
   exerciseId: string;
+  /** Nome no momento da prescrição: o treino continua legível mesmo se o exercício sair da fonte. */
+  exerciseName?: string;
+  exerciseSource?: "lr" | "wger" | "custom";
   dose: Dose;
   resistance: Resistance;
   effort: Effort;

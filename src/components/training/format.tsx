@@ -1,6 +1,7 @@
 import React from "react";
 import type { Dose, Effort, PrescribedExercise, Resistance, TrainingSession } from "@/lib/domain/types";
 import { EXERCISE_BY_ID } from "@/lib/domain/exercise-library";
+import { itemName } from "@/lib/catalog/bridge";
 
 export function doseText(d: Dose) {
   if (d.kind === "reps") return `${d.sets} × ${d.repsMin === d.repsMax ? d.repsMin : `${d.repsMin}–${d.repsMax}`} repetições`;
@@ -45,11 +46,10 @@ export function weeklySetsByMuscle(sessions: TrainingSession[], timesPerWeek: Re
 }
 
 export function ItemSummary({ item, showPrivate = false }: { item: PrescribedExercise; showPrivate?: boolean }) {
-  const ex = EXERCISE_BY_ID.get(item.exerciseId);
   const effort = effortText(item.effort);
   return (
     <div className="space-y-1">
-      <p className="font-semibold">{ex?.name ?? item.exerciseId}</p>
+      <p className="font-semibold">{itemName(item)}</p>
       <p className="tabular text-[15px]">
         {doseText(item.dose)} · {resistanceText(item.resistance)}
         {effort && ` · ${effort}`}

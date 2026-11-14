@@ -15,6 +15,8 @@ export function defaultPrescription(ex: ExerciseCard): PrescribedExercise {
   return {
     id: newId("px"),
     exerciseId: ex.id,
+    exerciseName: ex.name,
+    exerciseSource: ex.source ?? "lr",
     dose: timed ? { kind: "time", sets: 2, seconds: 30 } : { kind: "reps", sets: 2, repsMin: 8, repsMax: 12 },
     resistance:
       ex.loadKind === "external_kg"

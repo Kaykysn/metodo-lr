@@ -89,7 +89,7 @@ const nextConfig = (phase) => ({
               "img-src 'self' data: blob: https:", // blob: = fotos posturais locais (modo demonstração)
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-              "media-src 'self'",
+              "media-src 'self' blob: https://wger.de https://*.supabase.co", // vídeos do wger (exibidos da fonte) e vídeos próprios (link assinado)
               "frame-ancestors 'self'",
               "base-uri 'self'",
               "form-action 'self'",

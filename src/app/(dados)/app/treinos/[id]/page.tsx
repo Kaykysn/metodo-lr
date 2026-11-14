@@ -13,6 +13,7 @@ import { ItemSummary, weeklySetsByMuscle } from "@/components/training/format";
 import type { PlanVersion, TrainingPlan } from "@/lib/domain/types";
 import { canPerform, hasFeature } from "@/lib/subscription/entitlements";
 import { useCreateBlock } from "@/components/subscription/PlanNotices";
+import { useCatalogHydration } from "@/lib/catalog/bridge";
 
 const STATUS: Record<PlanVersion["status"], { label: string; tone: "caution" | "accent" | "success" | "neutral" }> = {
   draft: { label: "Rascunho", tone: "caution" },
@@ -22,6 +23,7 @@ const STATUS: Record<PlanVersion["status"], { label: string; tone: "caution" | "
 };
 
 function VersionView({ v, plan, studentView }: { v: PlanVersion; plan: TrainingPlan; studentView: boolean }) {
+  useCatalogHydration(v.sessions.flatMap((s) => s.items.map((i) => i.exerciseId)));
   const perWeek = Math.max(1, Math.round(plan.frequencyPerWeek / Math.max(1, v.sessions.length)));
   const weekly = weeklySetsByMuscle(v.sessions, Object.fromEntries(v.sessions.map((s) => [s.id, perWeek])));
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { ROLE_LABEL, type Role } from "@/lib/domain/roles";
+import CatalogAdminPanel from "@/components/catalog/CatalogAdminPanel";
 
 import React, { useCallback, useEffect, useState } from "react";
 import { loadAccounts, loadAudit, runAdminAction, type AdminAction } from "@/lib/data/admin-api";
@@ -390,6 +391,8 @@ export default function AdminPage() {
             ))}
           </div>
         </div>
+
+        <CatalogAdminPanel />
       </main>
 
       <Footer />

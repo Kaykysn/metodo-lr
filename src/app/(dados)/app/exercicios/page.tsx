@@ -20,6 +20,7 @@ import { LATERALITY_LABEL, PURPOSE_LABEL, type Difficulty, type Laterality } fro
 import { InfoNote, PageHeader, Panel, inputClass } from "@/components/ui/primitives";
 import ExerciseDetailView from "@/components/exercises/ExerciseDetailView";
 import AddToPlan from "@/components/exercises/AddToPlan";
+import CatalogBrowser from "@/components/catalog/CatalogBrowser";
 
 const REGION_LABEL: Record<string, string> = {
   neck: "Pescoço",
@@ -50,7 +51,46 @@ function readFicha(): string | null {
   return id && EXERCISE_BY_ID.has(id) ? id : null;
 }
 
+type Fonte = "curadoria" | "catalogo";
+const readFonte = (): Fonte => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("fonte") === "catalogo" ? "catalogo" : "curadoria");
+
 export default function ExerciciosPage() {
+  const [fonte, setFonte] = useState<Fonte>("curadoria");
+  useEffect(() => {
+    setFonte(readFonte());
+    const onPop = () => setFonte(readFonte());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const choose = (f: Fonte) => {
+    setFonte(f);
+    const url = new URL(window.location.href);
+    url.search = f === "catalogo" ? "?fonte=catalogo" : "";
+    window.history.pushState(null, "", url);
+  };
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Biblioteca de exercícios" description="Repertório para seleção profissional. Estar cadastrado não é indicação para todos." />
+      <div role="tablist" aria-label="Biblioteca" className="flex flex-wrap gap-2 border-b border-theme-border">
+        {([["curadoria", "Curadoria do método"], ["catalogo", "Catálogo ampliado"]] as const).map(([id, label]) => (
+          <button
+            key={id}
+            role="tab"
+            type="button"
+            aria-selected={fonte === id}
+            onClick={() => choose(id)}
+            className={`-mb-px min-h-[44px] border-b-2 px-3 text-[15px] font-semibold transition-colors ${fonte === id ? "border-theme-teal text-theme-text" : "border-transparent text-theme-muted hover:text-theme-text"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {fonte === "catalogo" ? <CatalogBrowser /> : <CuratedLibrary />}
+    </div>
+  );
+}
+
+function CuratedLibrary() {
   const [q, setQ] = useState<Required<ExerciseQuery>>(EMPTY);
   const [selected, setSelected] = useState<string | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
@@ -80,7 +120,6 @@ export default function ExerciciosPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Biblioteca de exercícios" description="Repertório para seleção profissional. Estar cadastrado não é indicação para todos." />
       <InfoNote>
         O propósito de um exercício depende da pessoa, da progressão, da carga, da amplitude e do contexto clínico. As fichas descrevem contribuições musculares típicas e aguardam revisão editorial.
       </InfoNote>

@@ -8,6 +8,7 @@ import { DemoBadge, EmptyState, ErrorNote, Field, InfoNote, Loading, PageHeader,
 import { Bars, Ratio, TimeLine, type Point } from "@/components/charts/Charts";
 import { aggregateMonthlyVolume, formatKgPtBR, type ExerciseSetRecord } from "@/lib/volume";
 import { EXERCISE_BY_ID } from "@/lib/domain/exercise-library";
+import { itemName } from "@/lib/catalog/bridge";
 import { published } from "@/lib/domain/plans";
 import { regionLabel } from "@/components/assessment/AnatomyMap";
 import { FeatureGate } from "@/components/subscription/PlanNotices";
@@ -84,7 +85,10 @@ function Evolucao() {
   // ---- Carga por exercício (só exercícios com kg)
   const kgExercises = Array.from(new Set((d?.logs ?? []).filter((l) => l.loadKg !== null).map((l) => l.prescribedId)));
   const pv = plan ? published(plan) : undefined;
-  const exName = (pid: string) => EXERCISE_BY_ID.get(pv?.sessions.flatMap((s) => s.items).find((i) => i.id === pid)?.exerciseId ?? "")?.name ?? pid;
+  const exName = (pid: string) => {
+    const item = pv?.sessions.flatMap((s) => s.items).find((i) => i.id === pid);
+    return item ? itemName(item) : pid;
+  };
   const ex = exercise || kgExercises[0] || "";
   const loadPoints: Point[] = [];
   if (ex) {

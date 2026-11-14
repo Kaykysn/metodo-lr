@@ -17,7 +17,8 @@ export type MovementPattern =
   | "equilíbrio e marcha"
   | "aeróbio"
   | "potência"
-  | "pilates";
+  | "pilates"
+  | "não classificado";
 
 export type Modality = "musculação" | "peso corporal" | "elástico" | "pilates" | "aeróbio" | "funcional";
 
@@ -56,6 +57,8 @@ export interface ExerciseCard {
   regions: string[];
   /** Ficha detalhada do catálogo v2; null nos itens ainda não detalhados. */
   detail: ExerciseDetail | null;
+  /** Origem: curadoria do método (padrão), wger ou cadastro do professor. */
+  source?: "lr" | "wger" | "custom";
 }
 
 const RT_NOTE =

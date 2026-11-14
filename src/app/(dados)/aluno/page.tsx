@@ -9,7 +9,7 @@ import SessionGate from "@/components/providers/SessionGate";
 import { Button, DemoBadge, EmptyState, ErrorNote, InfoNote, Loading, Panel } from "@/components/ui/primitives";
 import { NumberInput } from "@/components/assessment/flow/controls";
 import { practitionerView } from "@/lib/domain/plans";
-import { EXERCISE_BY_ID } from "@/lib/domain/exercise-library";
+import { itemName } from "@/lib/catalog/bridge";
 import { doseText, resistanceText, effortText } from "@/components/training/format";
 import type { ExecutionLog, PrescribedExercise } from "@/lib/domain/types";
 import { newId } from "@/lib/domain/plans";
@@ -104,16 +104,15 @@ export default function AlunoPage() {
               </div>
             )}
             {session?.items.map((it, idx) => {
-              const ex = EXERCISE_BY_ID.get(it.exerciseId);
               const effort = effortText(it.effort);
               return (
                 <Panel key={it.id} className="p-4">
                   <p className="text-sm text-theme-muted">{idx + 1} de {session.items.length}</p>
-                  <h2 className="text-lg font-semibold">{ex?.name}</h2>
+                  <h2 className="text-lg font-semibold">{itemName(it)}</h2>
                   <p className="tabular text-[15px]">{doseText(it.dose)} · {resistanceText(it.resistance)}{effort && ` · ${effort}`}{it.restSeconds !== null && ` · descanso ${it.restSeconds} s`}</p>
                   {it.cues && <p className="mt-1 text-[15px] text-theme-muted">{it.cues}</p>}
                   <table className="mt-3 w-full text-left text-[15px]">
-                    <caption className="sr-only">Registro das séries de {ex?.name}</caption>
+                    <caption className="sr-only">Registro das séries de {itemName(it)}</caption>
                     <thead className="text-sm text-theme-muted"><tr><th scope="col">Série</th><th scope="col">{it.dose.kind === "time" ? "Segundos" : "Repetições"}</th>{it.resistance.kind === "external_kg" && <th scope="col">Carga (kg)</th>}<th scope="col">Feita</th></tr></thead>
                     <tbody>
                       {rowsFor(it).map((r, i) => (
