@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import ProductPreview from "./ProductPreview";
+import HeroShowcase from "./HeroShowcase";
 import { buildDemoCase } from "@/lib/landing/demo-case";
 
 /**
@@ -23,12 +23,32 @@ export default function Hero() {
 
       <div className="mx-auto max-w-[1180px] px-4 pb-14 pt-9 sm:px-6 sm:pt-12 lg:px-8 lg:pb-20 lg:pt-12">
         <h1 id="hero-titulo" className="text-[clamp(2.4rem,4.2vw+0.6rem,4.125rem)] font-extrabold leading-[1.04] tracking-[-0.03em]">
-          <span className="block text-[rgb(var(--hero-text))]">Avalie com clareza.</span>
-          <span className="block text-[rgb(var(--hero-jade-pale))]">Planeje com critério.</span>
+          <span className="block text-[rgb(var(--hero-text))]">Entenda o corpo.</span>
+          <span className="block text-[rgb(var(--hero-jade-pale))]">Evolua com precisão.</span>
         </h1>
         <p className="mt-5 max-w-[36rem] text-lg leading-relaxed text-[rgb(var(--hero-muted))]">
-          Organize avaliações, monte treinos individualizados e acompanhe a evolução dos seus alunos.
+          Avalie, planeje e acompanhe cada etapa do desenvolvimento físico dos seus alunos.
         </p>
+
+        {/* Elementos complementares do Método LR */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm font-medium text-[rgb(var(--hero-muted))]">
+          <span className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--hero-jade))]" aria-hidden="true" />
+            Avaliação física individualizada
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--hero-jade))]" aria-hidden="true" />
+            Identificação anatômica
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--hero-jade))]" aria-hidden="true" />
+            Planejamento de treinamento
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--hero-jade))]" aria-hidden="true" />
+            Acompanhamento da evolução
+          </span>
+        </div>
 
         <div className="mt-7 flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-8">
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -52,7 +72,22 @@ export default function Hero() {
         </div>
 
         <div className="mt-10 lg:mt-12">
-          <ProductPreview demo={buildDemoCase()} />
+          {/* Texto de apoio interativo da anatomia */}
+          <div className="mb-3 flex items-center justify-between text-xs sm:text-sm text-[rgb(var(--hero-muted))]">
+            <p className="inline-flex items-center gap-2 font-medium">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[rgb(var(--hero-jade))] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[rgb(var(--hero-jade))]" />
+              </span>
+              Explore a anatomia. Mova o cursor para revelar.
+            </p>
+          </div>
+
+          {/*
+            HeroShowcase: Preserva a demonstração atual do produto por padrão
+            e prepara a integração do Novo Hero com Raio-X Anatômico (HeroXRay).
+          */}
+          <HeroShowcase demo={buildDemoCase()} />
         </div>
       </div>
     </section>

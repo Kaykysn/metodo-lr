@@ -41,24 +41,42 @@ interface BodyMapProps {
 
 type MapSpot = { id: string; x: number; y: number; r: number };
 
-// Pontos clicáveis por vista (coordenadas do viewBox 200×360)
+// Pontos clicáveis anatômicos por vista adaptados à nova ilustração muscular (viewBox 560×1024)
 const MAP_SPOTS: Record<"posterior" | "anterior", MapSpot[]> = {
-  posterior: [
-    { id: "cervical", x: 100, y: 54, r: 7 },
-    { id: "thoracic", x: 100, y: 95, r: 7 },
-    { id: "lumbar", x: 100, y: 135, r: 8 },
-    { id: "right_glute", x: 112, y: 165, r: 7 },
-    { id: "left_glute", x: 88, y: 165, r: 7 },
-    { id: "right_posterior_thigh", x: 114, y: 210, r: 6 },
-    { id: "left_posterior_thigh", x: 86, y: 210, r: 6 },
-  ],
   anterior: [
-    { id: "right_shoulder", x: 130, y: 72, r: 7 },
-    { id: "left_shoulder", x: 70, y: 72, r: 7 },
-    { id: "right_anterior_thigh", x: 114, y: 210, r: 6 },
-    { id: "left_anterior_thigh", x: 86, y: 210, r: 6 },
-    { id: "right_knee", x: 116, y: 254, r: 6 },
-    { id: "left_knee", x: 84, y: 254, r: 6 },
+    { id: "cervical", x: 280, y: 154, r: 16 },
+    { id: "right_shoulder", x: 176, y: 210, r: 18 },
+    { id: "left_shoulder", x: 384, y: 210, r: 18 },
+    { id: "right_elbow", x: 123, y: 363, r: 16 },
+    { id: "left_elbow", x: 437, y: 363, r: 16 },
+    { id: "right_wrist", x: 67, y: 527, r: 16 },
+    { id: "left_wrist", x: 493, y: 527, r: 16 },
+    { id: "right_anterior_thigh", x: 232, y: 604, r: 20 },
+    { id: "left_anterior_thigh", x: 328, y: 604, r: 20 },
+    { id: "right_knee", x: 230, y: 722, r: 16 },
+    { id: "left_knee", x: 330, y: 722, r: 16 },
+    { id: "right_ankle", x: 235, y: 952, r: 16 },
+    { id: "left_ankle", x: 325, y: 952, r: 16 },
+  ],
+  posterior: [
+    { id: "cervical", x: 280, y: 154, r: 16 },
+    { id: "thoracic", x: 280, y: 276, r: 18 },
+    { id: "lumbar", x: 280, y: 410, r: 18 },
+    { id: "sacroiliac", x: 280, y: 466, r: 16 },
+    { id: "left_shoulder", x: 176, y: 210, r: 18 },
+    { id: "right_shoulder", x: 384, y: 210, r: 18 },
+    { id: "left_elbow", x: 123, y: 363, r: 16 },
+    { id: "right_elbow", x: 437, y: 363, r: 16 },
+    { id: "left_wrist", x: 67, y: 527, r: 16 },
+    { id: "right_wrist", x: 493, y: 527, r: 16 },
+    { id: "left_glute", x: 235, y: 497, r: 20 },
+    { id: "right_glute", x: 325, y: 497, r: 20 },
+    { id: "left_posterior_thigh", x: 232, y: 614, r: 20 },
+    { id: "right_posterior_thigh", x: 328, y: 614, r: 20 },
+    { id: "left_knee", x: 230, y: 722, r: 16 },
+    { id: "right_knee", x: 330, y: 722, r: 16 },
+    { id: "left_ankle", x: 235, y: 952, r: 16 },
+    { id: "right_ankle", x: 325, y: 952, r: 16 },
   ],
 };
 
@@ -117,31 +135,29 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 items-center">
-        {/* Silhueta Anatômica Editorial Vetorial */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-center p-4 bg-theme-secondary/70 rounded-xl border border-theme-border">
-          <div className="relative w-56 h-[340px] flex items-center justify-center">
-            {/* SVG Silhueta Anatômica Interativa com pontos clicáveis */}
+        {/* Silhueta Anatômica Muscular Detalhada */}
+        <div className="lg:col-span-5 flex flex-col items-center justify-center p-4 bg-[#021226] rounded-xl border border-theme-border shadow-inner">
+          <div className="relative w-64 h-[390px] flex items-center justify-center">
+            {/* SVG Silhueta Anatômica Interativa com pontos clicáveis sobrepostos */}
             <svg
-              viewBox="0 0 200 360"
-              className="w-full h-full max-h-[340px] select-none"
-              aria-label={`Silhueta humana anatômica - ${activeView === "posterior" ? "Vista Posterior" : "Vista Anterior"}`}
+              viewBox="0 0 560 1024"
+              className="w-full h-full max-h-[390px] select-none"
+              aria-label={`Ilustração anatômica muscular - ${activeView === "posterior" ? "Vista Posterior" : "Vista Anterior"}`}
             >
-              {/* Contorno do corpo estilizado — cores por token, ID único por instância */}
-              <defs>
-                <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: "rgb(var(--map-body-from))" }} />
-                  <stop offset="100%" style={{ stopColor: "rgb(var(--map-body-to))" }} />
-                </linearGradient>
-              </defs>
+              {/* Ilustração anatômica muscular realista com transparência */}
+              <image
+                href={activeView === "anterior" ? "/images/anatomia-anterior.png" : "/images/anatomia-posterior.png"}
+                x={0}
+                y={0}
+                width={560}
+                height={1024}
+                preserveAspectRatio="xMidYMid meet"
+              />
 
-              <g fill={`url(#${gradientId})`} style={{ stroke: "rgb(var(--map-body-stroke))" }} strokeWidth="1.5">
-                <circle cx="100" cy="30" r="18" />
-                <rect x="94" y="48" width="12" height="14" rx="2" />
-                <path d="M 68 62 L 132 62 L 126 145 L 118 165 L 82 165 L 74 145 Z" />
-                <path d="M 68 64 L 50 120 L 44 180 L 52 182 L 60 125 L 74 74 Z" />
-                <path d="M 132 64 L 150 120 L 156 180 L 148 182 L 140 125 L 126 74 Z" />
-                <path d="M 83 165 L 76 250 L 73 330 L 87 330 L 93 250 L 98 165 Z" />
-                <path d="M 102 165 L 107 250 L 113 330 L 127 330 L 124 250 L 117 165 Z" />
+              {/* Indicadores de lateralidade da pessoa avaliada */}
+              <g aria-hidden="true" style={{ fill: "#76D7BE", opacity: 0.85 }} fontSize={28} fontWeight={800}>
+                <text x={26} y={52}>{activeView === "anterior" ? "D" : "E"}</text>
+                <text x={560 - 46} y={52}>{activeView === "anterior" ? "E" : "D"}</text>
               </g>
 
               {/* Regiões interativas: clique, toque, Enter ou Espaço */}
@@ -149,7 +165,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                 const region = BODY_REGIONS.find((r) => r.id === spot.id);
                 const name = region?.name ?? spot.id;
                 const selected = isSelected(spot.id);
-                const r = selected ? spot.r + 2.5 : spot.r;
+                const r = selected ? spot.r + 3 : spot.r;
                 return (
                   <g
                     key={spot.id}
@@ -168,14 +184,15 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                     className={`body-map-spot ${isReadOnly ? "" : "cursor-pointer"}`}
                   >
                     {/* Área de toque ampliada e invisível */}
-                    <circle cx={spot.x} cy={spot.y} r={Math.max(14, r + 6)} fill="transparent" />
+                    <circle cx={spot.x} cy={spot.y} r={Math.max(26, r + 8)} fill="transparent" />
                     <circle
                       className="body-map-focus"
                       cx={spot.x}
                       cy={spot.y}
-                      r={r + 5}
+                      r={r + 8}
                       fill="none"
-                      strokeWidth="2"
+                      stroke="#76D7BE"
+                      strokeWidth="3"
                     />
                     {selected && (
                       <circle
@@ -183,28 +200,38 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                         className="body-map-confirm"
                         cx={spot.x}
                         cy={spot.y}
-                        r={r + 3}
+                        r={r + 6}
                         fill="none"
-                        strokeWidth="2"
+                        stroke="#76D7BE"
+                        strokeWidth="3"
                       />
                     )}
-                    <circle
-                      cx={spot.x}
-                      cy={spot.y}
-                      r={r}
-                      strokeWidth="2"
-                      style={{
-                        fill: selected ? "rgb(var(--map-dot-selected))" : "rgb(var(--map-dot))",
-                        stroke: "rgb(var(--map-dot-ring))",
-                        transition: "r 160ms ease, fill 160ms ease",
-                      }}
-                    />
+                    {/* Ponto indicador de alta visibilidade */}
+                    {selected ? (
+                      <g>
+                        <circle
+                          cx={spot.x}
+                          cy={spot.y}
+                          r={r}
+                          fill="rgba(118, 215, 190, 0.35)"
+                          stroke="#76D7BE"
+                          strokeWidth="3"
+                          strokeDasharray="6 4"
+                        />
+                        <circle cx={spot.x} cy={spot.y} r={9} fill="#76D7BE" stroke="#021226" strokeWidth="2.5" />
+                      </g>
+                    ) : (
+                      <g>
+                        <circle cx={spot.x} cy={spot.y} r={r} fill="rgba(255, 255, 255, 0.45)" stroke="#021226" strokeWidth="2" />
+                        <circle cx={spot.x} cy={spot.y} r={4} fill="#021226" />
+                      </g>
+                    )}
                   </g>
                 );
               })}
             </svg>
           </div>
-          <span className="text-[11px] text-theme-muted mt-2 text-center">
+          <span className="text-[11px] text-[#76D7BE] mt-2 text-center font-medium">
             {activeView === "posterior" ? "Visualizando face posterior (costas)" : "Visualizando face anterior (frente)"}
           </span>
         </div>

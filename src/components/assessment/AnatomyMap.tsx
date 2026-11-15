@@ -116,7 +116,7 @@ function MapCanvas({ view, zoom, props, markMode, onMark }: { view: View; zoom: 
   };
 
   return (
-    <div className="relative overflow-auto rounded-panel border border-theme-border bg-theme-secondary/50" style={{ maxHeight: 560 }}>
+    <div className="relative overflow-auto rounded-panel border border-theme-border bg-[#021226] shadow-inner" style={{ maxHeight: 560 }}>
       {/* Espaço reservado: a proporção é a do viewBox, sem salto de layout */}
       <div style={{ width: `${zoom * 100}%`, minWidth: "100%" }}>
         <svg
@@ -129,9 +129,9 @@ function MapCanvas({ view, zoom, props, markMode, onMark }: { view: View; zoom: 
         >
           <Figure view={view} idPrefix={`${idp}-${view}`} />
           {/* Orientação D/E com o significado da pessoa avaliada */}
-          <g aria-hidden="true" style={{ fill: "rgb(var(--text-secondary))" }} fontSize={22} fontWeight={700}>
-            <text x={18} y={40}>{view === "anterior" ? "D" : "E"}</text>
-            <text x={W - 34} y={40}>{view === "anterior" ? "E" : "D"}</text>
+          <g aria-hidden="true" style={{ fill: "#76D7BE", opacity: 0.85 }} fontSize={24} fontWeight={800}>
+            <text x={24} y={48}>{view === "anterior" ? "D" : "E"}</text>
+            <text x={W - 42} y={48}>{view === "anterior" ? "E" : "D"}</text>
           </g>
           {regions.map((r) => {
             const at = r.at[view]!;
@@ -175,15 +175,23 @@ function MapCanvas({ view, zoom, props, markMode, onMark }: { view: View; zoom: 
                 <title>{label}</title>
                 <circle cx={cx} cy={cy} r={Math.max(rad, 22)} fill="transparent" />
                 <circle className="body-map-focus" cx={cx} cy={cy} r={rad + 7} fill="none" strokeWidth={3} />
-                {st.kind === "none" && <circle cx={cx} cy={cy} r={7} style={{ fill: "rgb(var(--map-dot) / 0.55)", stroke: "rgb(var(--map-dot-ring))" }} strokeWidth={2} />}
+                {st.kind === "none" && (
+                  <g>
+                    <circle cx={cx} cy={cy} r={8} style={{ fill: "rgba(255, 255, 255, 0.45)", stroke: "#021226" }} strokeWidth={2} />
+                    <circle cx={cx} cy={cy} r={3} style={{ fill: "#021226" }} />
+                  </g>
+                )}
                 {st.kind === "selected" && (
-                  <circle cx={cx} cy={cy} r={rad} style={{ fill: "rgb(var(--accent-teal) / 0.16)", stroke: "rgb(var(--accent-teal))" }} strokeWidth={2.5} strokeDasharray="6 5" />
+                  <g>
+                    <circle cx={cx} cy={cy} r={rad} style={{ fill: "rgba(118, 215, 190, 0.32)", stroke: "#76D7BE" }} strokeWidth={2.5} strokeDasharray="6 4" />
+                    <circle cx={cx} cy={cy} r={8.5} style={{ fill: "#76D7BE", stroke: "#021226" }} strokeWidth={2} />
+                  </g>
                 )}
                 {st.kind === "symptom" && (
                   <g>
-                    <circle cx={cx} cy={cy} r={rad} style={{ fill: "rgb(var(--symptom) / 0.22)", stroke: "rgb(var(--symptom))" }} strokeWidth={2.5} />
-                    <circle cx={cx} cy={cy} r={13} style={{ fill: "rgb(var(--surface-raised))", stroke: "rgb(var(--symptom))" }} strokeWidth={2} />
-                    <text x={cx} y={cy + 5} textAnchor="middle" fontSize={15} fontWeight={800} style={{ fill: "rgb(var(--text-primary))" }}>
+                    <circle cx={cx} cy={cy} r={rad} style={{ fill: "rgba(240, 110, 100, 0.35)", stroke: "rgb(var(--symptom))" }} strokeWidth={2.5} />
+                    <circle cx={cx} cy={cy} r={14} style={{ fill: "#ffffff", stroke: "rgb(var(--symptom))" }} strokeWidth={2.5} />
+                    <text x={cx} y={cy + 5} textAnchor="middle" fontSize={15} fontWeight={800} style={{ fill: "#021226" }}>
                       {st.intensity}
                     </text>
                   </g>
