@@ -230,15 +230,15 @@
     pointer-events: none;
   }
 
-  /* Aura integrada ao fundo: a figura parece iluminada pelo próprio ambiente,
-     sem moldura de painel. */
+  /* Aura radial atrás do modelo: cria a zona onde a máscara da arte dissolve,
+     de modo que não exista "borda" visível. A cor é o petróleo do fundo. */
   .hero-xray-aura {
     background:
-      radial-gradient(ellipse 56% 38% at 54% 20%, rgb(var(--hero-jade) / 0.16), transparent 72%),
-      radial-gradient(ellipse 40% 28% at 62% 52%, rgb(var(--hero-ember) / 0.11), transparent 76%),
-      radial-gradient(ellipse 54% 42% at 50% 96%, rgb(2 18 38 / 0.38), transparent 74%);
-    filter: blur(26px);
-    opacity: 0.92;
+      radial-gradient(ellipse 58% 44% at 58% 22%, rgb(var(--hero-jade) / 0.15), transparent 72%),
+      radial-gradient(ellipse 42% 30% at 66% 50%, rgb(var(--hero-ember) / 0.1), transparent 76%),
+      radial-gradient(ellipse 66% 52% at 52% 58%, rgb(9 44 66 / 0.55), transparent 78%);
+    filter: blur(28px);
+    opacity: 0.95;
     pointer-events: none;
   }
 
@@ -249,6 +249,108 @@
       drop-shadow(22px 26px 38px rgb(0 0 0 / 0.5))
       drop-shadow(6px 0 18px rgb(0 0 0 / 0.34))
       drop-shadow(-2px 0 16px rgb(var(--hero-jade) / 0.1));
+  }
+
+  /* Glow âmbar atrás do braço: valoriza o raio-X e evita que o anel "termine"
+     numa borda. Puro screen, portanto não escurece nada. */
+  .hero-xray-ember {
+    background:
+      radial-gradient(ellipse 34% 26% at 66% 47%, rgb(var(--hero-ember) / var(--hero-ring-glow)), transparent 72%),
+      radial-gradient(ellipse 22% 16% at 70% 62%, rgb(255 153 51 / 0.1), transparent 76%);
+    mix-blend-mode: screen;
+    filter: blur(18px);
+    pointer-events: none;
+  }
+
+  /* Ember layer for mobile – placed outside the opacity‑masked visual container */
+  .hero-xray-ember-mobile {
+    background:
+      radial-gradient(ellipse 34% 26% at 66% 47%, rgb(var(--hero-ember) / var(--hero-ring-glow)), transparent 72%),
+      radial-gradient(ellipse 22% 16% at 70% 62%, rgb(255 153 51 / 0.2), transparent 76%);
+    mix-blend-mode: screen;
+    filter: blur(18px);
+    pointer-events: none;
+    inset: 0;
+    position: absolute;
+    z-index: 1;
+    animation: hero-ember-pulse 4s ease-in-out infinite;
+  }
+  @media (min-width: 1024px) {
+    .hero-xray-ember-mobile { display: none; }
+  }
+  @media (max-width: 1023px) {
+    .hero-xray-ember-mobile { display: block; }
+  }
+
+  /* Dissolução da base da arte.
+     O PNG termina em corte reto na linha da cintura; aqui a arte é mascarada
+     por um gradiente e coberta por camadas de desfoque crescente, de modo que
+     o corte deixa de ser identificável. Tudo controlado por variáveis. */
+  .hero-xray-figure-clip {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    -webkit-mask-image:
+      radial-gradient(ellipse 116% 102% at 52% 42%, #000 62%, rgb(0 0 0 / 0.85) 84%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 var(--hero-fade-start), transparent 100%);
+    mask-image:
+      radial-gradient(ellipse 116% 102% at 52% 42%, #000 62%, rgb(0 0 0 / 0.85) 84%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 var(--hero-fade-start), transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  /* Faixa de desfoque progressivo: 5 camadas empilhadas na base da arte,
+     cada uma com blur maior e janela de máscara deslocada. Evita a faixa
+     única com início definido e o banding. */
+  .hero-xray-dissolve {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: var(--hero-dissolve-height);
+    pointer-events: none;
+    z-index: 12;
+  }
+  .hero-xray-dissolve > span {
+    position: absolute;
+    inset: 0;
+    display: block;
+    -webkit-backdrop-filter: blur(var(--b));
+    backdrop-filter: blur(var(--b));
+    -webkit-mask-image: var(--m);
+    mask-image: var(--m);
+  }
+  .hero-xray-dissolve > span:nth-child(1) {
+    --b: calc(var(--hero-blur-max) * 0.0625);
+    --m: linear-gradient(to bottom, transparent 0%, #000 20%, #000 40%, transparent 60%);
+  }
+  .hero-xray-dissolve > span:nth-child(2) {
+    --b: calc(var(--hero-blur-max) * 0.125);
+    --m: linear-gradient(to bottom, transparent 20%, #000 40%, #000 60%, transparent 80%);
+  }
+  .hero-xray-dissolve > span:nth-child(3) {
+    --b: calc(var(--hero-blur-max) * 0.25);
+    --m: linear-gradient(to bottom, transparent 40%, #000 60%, #000 80%, transparent 100%);
+  }
+  .hero-xray-dissolve > span:nth-child(4) {
+    --b: calc(var(--hero-blur-max) * 0.5);
+    --m: linear-gradient(to bottom, transparent 60%, #000 80%, #000 100%);
+  }
+  .hero-xray-dissolve > span:nth-child(5) {
+    --b: var(--hero-blur-max);
+    --m: linear-gradient(to bottom, transparent 80%, #000 100%);
+  }
+
+  /* Gradiente final: garante que a base da arte termine na cor exata do fundo. */
+  .hero-xray-dissolve::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 70%, rgb(var(--hero-bg)) 100%);
   }
 
   /* Linha de varredura do celular: acompanha a posição da máscara. */
@@ -280,15 +382,15 @@
     -webkit-mask-image: linear-gradient(
       to bottom,
       #000 0%,
-      #000 calc(var(--xray-scan, 0%) - 15%),
-      transparent var(--xray-scan, 0%),
+      #000 max(0%, calc(var(--xray-scan, 0%) - 15%)),
+      transparent max(0%, var(--xray-scan, 0%)),
       transparent 100%
     );
     mask-image: linear-gradient(
       to bottom,
       #000 0%,
-      #000 calc(var(--xray-scan, 0%) - 15%),
-      transparent var(--xray-scan, 0%),
+      #000 max(0%, calc(var(--xray-scan, 0%) - 15%)),
+      transparent max(0%, var(--xray-scan, 0%)),
       transparent 100%
     );
     opacity: var(--xray-scan-opacity, 1);
@@ -621,6 +723,122 @@
    petróleo, então a camada é forte; no desktop fica no canto superior esquerdo e o jade abre à direita. */
 .hero-scrim {
   background: linear-gradient(to right, rgb(var(--hero-bg) / 0.92), rgb(var(--hero-bg) / 0.6));
+}
+
+/* ------------------------------------------------------------------------------
+   Hero: camada visual
+   - Desktop: ocupa a metade direita e sangra até a borda da viewport.
+   - Celular: vira fundo atrás do texto, com opacidade reduzida e véu de contraste.
+   ------------------------------------------------------------------------------ */
+.hero-visual-layer::before {
+  content: none;
+}
+@media (min-width: 1024px) {
+  /* Fade horizontal à esquerda: separa a arte do texto sem cortar o corpo. */
+  .hero-visual-layer::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 15;
+    width: 24%;
+    background: linear-gradient(
+      to right,
+      rgb(var(--hero-bg)) 0%,
+      rgb(var(--hero-bg) / 0.72) 38%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+}
+
+/* O componente interativo precisa preencher a camada inteira (não a proporção nativa). */
+.hero-visual-inner,
+.hero-visual-inner > div,
+.hero-visual-inner .hero-xray-canvas {
+  height: 100%;
+}
+.hero-visual-inner .hero-xray-canvas {
+  aspect-ratio: auto !important;
+  width: 100%;
+}
+
+@media (max-width: 1023px) {
+  /* Arte como fundo: preenche a caixa, com foco em tórax/braço. */
+  .hero-visual-inner {
+    opacity: var(--hero-visual-opacity);
+    -webkit-mask-image:
+      radial-gradient(ellipse 82% 72% at 52% 38%, #000 40%, rgb(0 0 0 / 0.55) 68%, transparent 90%),
+      linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
+    mask-image:
+      radial-gradient(ellipse 82% 72% at 52% 38%, #000 40%, rgb(0 0 0 / 0.55) 68%, transparent 90%),
+      linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .hero-visual-inner .hero-xray-canvas img {
+    object-fit: cover;
+    object-position: 52% 20%;
+  }
+  /* Véu: mantém o texto ≥ 4.5:1 sobre qualquer quadro da arte. */
+  .hero-visual-scrim {
+    background:
+      linear-gradient(to bottom, rgb(var(--hero-bg) / 0.5) 0%, rgb(var(--hero-bg) / 0.68) 46%, rgb(var(--hero-bg) / 0.94) 100%);
+  }
+}
+
+/* CTA principal (amarelo da marca) e secundário (vidro). */
+.hero-cta-primary {
+  background: rgb(var(--cta-bg));
+  color: rgb(var(--cta-text));
+  box-shadow: 0 8px 24px -14px rgb(var(--cta-bg) / 0.7);
+}
+.hero-cta-primary:hover {
+  background: rgb(var(--cta-hover));
+  box-shadow: 0 14px 34px -14px rgb(var(--cta-bg) / 0.6);
+}
+.hero-cta-ghost {
+  border: 1px solid rgb(var(--hero-jade) / 0.28);
+  background: rgb(255 255 255 / var(--hero-glass-alpha));
+  color: rgb(var(--hero-text));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.hero-cta-ghost:hover {
+  border-color: rgb(var(--hero-jade) / 0.52);
+  background: rgb(255 255 255 / 0.16);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .hero-cta-ghost {
+    background: rgb(var(--hero-glass-solid));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Pulso lento do brilho do anel — decorativo, desligado com movimento reduzido. */
+@keyframes hero-ember-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+.hero-xray-ember-pulse {
+  animation: hero-ember-pulse 4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-xray-ember-pulse {
+    animation: none;
+  }
+}
+.lite .hero-xray-ember-pulse {
+  animation: none;
+}
+/* Modo leve: sem 5 camadas de backdrop-filter; dissolve por máscara simples. */
+.lite .hero-xray-dissolve > span {
+  display: none;
+}
+.lite .hero-xray-figure-clip {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 var(--hero-fade-start), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 var(--hero-fade-start), transparent 100%);
 }
 @media (min-width: 768px) {
   .hero-scrim {

@@ -106,6 +106,14 @@
   --hero-glass-alpha: 0.1;        /* ladrilho de vidro sobre o hero */
   --hero-glass-solid: 16 36 60;   /* mesmo ladrilho sem desfoque (modo leve) */
 
+  /* Hero: geometria e dissolução da arte */
+  --header-h: 4rem;               /* altura real do header (h-16) */
+  --hero-blur-max: 32px;          /* blur da camada 5; as outras são frações desta */
+  --hero-fade-start: 88%;         /* onde a máscara inferior começa a dissolver a arte */
+  --hero-dissolve-height: 36%;    /* altura da faixa de desfoque progressivo na base */
+  --hero-ring-glow: 0.18;         /* glow âmbar atrás do braço em raio-X */
+  --hero-visual-opacity: 0.42;    /* opacidade da arte como fundo no celular */
+
   /* Seções longas de leitura: névoa pálida (claro) / petróleo profundo (escuro) */
   --surface-reading: 230 239 240;
 

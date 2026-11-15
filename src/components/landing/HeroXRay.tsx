@@ -589,13 +589,22 @@ export default function HeroXRay({
         {/* Aura suave atrás da figura: profundidade sem criar uma caixa visível */}
         <div className="hero-xray-aura pointer-events-none absolute inset-0 z-0" aria-hidden="true" data-decorative />
 
+        {/* Glow âmbar atrás do braço: valoriza o raio-X e integra o anel ao fundo */}
+        <div
+          className="hero-xray-ember hero-xray-ember-pulse pointer-events-none absolute inset-0 z-[1]"
+          aria-hidden="true"
+          data-decorative
+        />
+
         {/*
           CONTÊINER COMPARTILHADO (respiração):
           as duas camadas são filhas diretas deste elemento, portanto escalam
           juntas — a lanterna acompanha o corpo sem desalinhamento.
         */}
         <div className={clsx("hero-xray-stage absolute inset-0 z-10", isBreathingActive && "hero-xray-breathing")}>
-          <div className="hero-xray-figure absolute inset-0">
+          {/* Máscara da arte: a base é dissolvida e nenhuma borda reta fica visível */}
+          <div className="hero-xray-figure-clip">
+            <div className="hero-xray-figure absolute inset-0">
             {/* CAMADA 1 — corpo (superfície) */}
             <picture className="absolute inset-0 z-10 block">
               {baseWebp && <source type="image/webp" srcSet={baseWebp} />}
@@ -628,6 +637,16 @@ export default function HeroXRay({
                 />
               </picture>
             </div>
+            </div>
+          </div>
+
+          {/* Dissolução da base: 5 camadas de blur progressivo + gradiente final */}
+          <div className="hero-xray-dissolve" aria-hidden="true" data-decorative>
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
           </div>
 
           {/* Lanterna: halo jade + aro óptico + borda quente discreta */}
