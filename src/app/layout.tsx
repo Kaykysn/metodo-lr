@@ -4,6 +4,8 @@ import "@/styles/globals.css";
 import { AppearanceProvider } from "@/components/providers/AppearanceProvider";
 import { PERF_BOOT_SCRIPT } from "@/lib/perf";
 import AmbientBackground from "@/components/effects/AmbientBackground";
+import ParticleField from "@/components/effects/ParticleField";
+import ScrollEffects from "@/components/motion/ScrollEffects";
 
 // Manrope (OFL) hospedada localmente: src/fonts/OFL.txt
 const manrope = localFont({
@@ -42,6 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col bg-theme-page text-theme-text antialiased selection:bg-brand-200 selection:text-ink-950">
         <AppearanceProvider>
           <AmbientBackground />
+          <ParticleField />
+          <ScrollEffects />
           <div className="relative z-10 flex flex-col min-h-screen">{children}</div>
         </AppearanceProvider>
       </body>

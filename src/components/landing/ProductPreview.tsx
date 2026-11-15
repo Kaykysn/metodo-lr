@@ -48,7 +48,7 @@ export default function ProductPreview({ demo }: { demo: DemoCase }) {
             <h2 id="caso-demonstrativo" className="text-base font-bold">Caso demonstrativo</h2>
             <span className="text-sm text-theme-muted">Dados fictícios de demonstração</span>
           </div>
-          <div role="tablist" aria-labelledby="caso-demonstrativo" className="grid grid-cols-3 gap-1 rounded-control border border-theme-border bg-theme-secondary p-1 sm:inline-grid">
+          <div role="tablist" aria-labelledby="caso-demonstrativo" className="glass-soft grid grid-cols-3 gap-1 rounded-control border border-theme-border bg-theme-secondary p-1 sm:inline-grid">
             {TABS.map((t, i) => (
               <button
                 key={t.id}

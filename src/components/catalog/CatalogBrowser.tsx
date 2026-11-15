@@ -133,7 +133,7 @@ export default function CatalogBrowser() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label="Origem dos exercícios" className="grid w-full grid-cols-3 rounded-control border border-theme-border bg-theme-secondary p-1 sm:inline-flex sm:w-auto">
+        <div role="tablist" aria-label="Origem dos exercícios" className="glass-soft grid w-full grid-cols-3 rounded-control border border-theme-border bg-theme-secondary p-1 sm:inline-flex sm:w-auto">
           {SCOPES.map((s) => (
             <button
               key={s.id}

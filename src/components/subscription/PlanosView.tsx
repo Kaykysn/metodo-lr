@@ -20,7 +20,7 @@ export default function PlanosView({ prioritySupportReady, contactEmail }: Plano
 
   return (
     <div className="mx-auto w-full max-w-[1240px] px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pt-14">
-      <header className="max-w-2xl">
+      <header data-scroll-reveal="up" data-scroll-distance="18" className="max-w-2xl">
         <h1 className="text-3xl font-bold tracking-tight sm:text-[2.6rem] sm:leading-[1.1]">Escolha o plano para sua rotina</h1>
         <p className="mt-3 text-lg text-theme-muted">Comece com 30 dias grátis. Depois, escolha como continuar.</p>
         <p className="mt-2 text-[15px] text-theme-muted">
@@ -28,9 +28,9 @@ export default function PlanosView({ prioritySupportReady, contactEmail }: Plano
         </p>
       </header>
 
-      <ol className="mt-10 grid gap-5 md:grid-cols-3" aria-label="Planos mensais">
+      <ol data-scroll-stagger="0.1" data-scroll-distance="22" className="mt-10 grid gap-5 md:grid-cols-3" aria-label="Planos mensais">
         {PLANS.map((p) => (
-          <li key={p.id} className="flex">
+          <li key={p.id} data-scroll-item className="flex">
             <PlanCard plan={p} supportReady={prioritySupportReady} onSelect={() => setSelected(p.id)} selected={selected === p.id} />
           </li>
         ))}
@@ -176,11 +176,11 @@ function Recommender() {
   const rec = n === null || Number.isNaN(n) ? null : recommendPlan({ activeTrainees: n, wantsReuse: reuse, wantsAdvanced: advanced });
   return (
     <section aria-labelledby="ajuda-escolha" className="mt-14 grid gap-6 border-t border-theme-border pt-10 lg:grid-cols-[0.8fr_1.2fr]">
-      <div>
+      <div data-scroll-reveal="left" data-scroll-distance="22">
         <h2 id="ajuda-escolha" className="text-2xl font-bold tracking-tight">Na dúvida, responda duas perguntas</h2>
         <p className="mt-2 text-[15px] text-theme-muted">A sugestão segue só estes critérios. Você pode escolher qualquer plano que comporte seus alunos.</p>
       </div>
-      <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
+      <form data-scroll-reveal="right" data-scroll-distance="22" className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
         <div className="space-y-1.5">
           <label htmlFor="rec-alunos" className="block text-[15px] font-semibold">Quantos alunos você acompanha hoje?</label>
           <input id="rec-alunos" type="number" inputMode="numeric" min={0} value={count} onChange={(e) => setCount(e.target.value)} className="w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-none focus:ring-2 focus:ring-theme-teal/25" />
@@ -215,9 +215,9 @@ function Recommender() {
 function Comparison({ supportReady }: { supportReady: boolean }) {
   return (
     <section aria-labelledby="comparativo" className="mt-14 border-t border-theme-border pt-10">
-      <h2 id="comparativo" className="text-2xl font-bold tracking-tight">Comparar recursos</h2>
-      <p className="mt-2 text-[15px] text-theme-muted">As diferenças vêm primeiro. Triagem, segurança e acesso ao próprio histórico estão em todos os planos.</p>
-      <div className="mt-6 overflow-x-auto rounded-panel border border-theme-border bg-theme-primary">
+      <h2 data-scroll-reveal="up" data-scroll-distance="18" id="comparativo" className="text-2xl font-bold tracking-tight">Comparar recursos</h2>
+      <p data-scroll-reveal="fade" className="mt-2 text-[15px] text-theme-muted">As diferenças vêm primeiro. Triagem, segurança e acesso ao próprio histórico estão em todos os planos.</p>
+      <div data-scroll-reveal="up" data-scroll-distance="20" data-scroll-delay="60" className="mt-6 overflow-x-auto rounded-panel border border-theme-border bg-theme-primary">
         <table className="w-full min-w-[620px] text-left text-[15px]">
           <caption className="sr-only">Comparativo dos planos Essencial, Evolução e Completo</caption>
           <thead className="border-b border-theme-border">
@@ -276,10 +276,10 @@ function PlanFaq({ contactEmail, supportReady }: { contactEmail: string | null; 
   ];
   return (
     <section aria-labelledby="duvidas-planos" className="mt-14 grid gap-8 border-t border-theme-border pt-10 lg:grid-cols-[0.7fr_1.3fr]">
-      <h2 id="duvidas-planos" className="text-2xl font-bold tracking-tight">Dúvidas sobre os planos</h2>
-      <dl className="divide-y divide-theme-border border-y border-theme-border">
+      <h2 data-scroll-reveal="up" data-scroll-distance="18" id="duvidas-planos" className="text-2xl font-bold tracking-tight">Dúvidas sobre os planos</h2>
+      <dl data-scroll-stagger="0.07" data-scroll-distance="16" className="divide-y divide-theme-border border-y border-theme-border">
         {faqs.map((f) => (
-          <div key={f.q} className="py-5">
+          <div key={f.q} data-scroll-item className="py-5">
             <dt className="text-[17px] font-semibold">{f.q}</dt>
             <dd className="mt-1.5 text-[16px] leading-relaxed text-theme-muted">{f.a}</dd>
           </div>

@@ -18,13 +18,13 @@ export default function Faq() {
   return (
     <section id="duvidas" className="scroll-mt-20 border-t border-theme-border">
       <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:px-8 lg:py-24">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Perguntas frequentes</h2>
-        <div className="divide-y divide-theme-border border-y border-theme-border">
+        <h2 data-scroll-reveal="up" data-scroll-distance="20" className="text-3xl font-bold tracking-tight sm:text-4xl">Perguntas frequentes</h2>
+        <div data-scroll-stagger="0.08" data-scroll-distance="18" className="divide-y divide-theme-border border-y border-theme-border">
           {FAQS.map((f, i) => {
             const isOpen = open === i;
             const pid = `${base}-p${i}`;
             return (
-              <div key={f.q}>
+              <div key={f.q} data-scroll-item>
                 <h3>
                   <button type="button" aria-expanded={isOpen} aria-controls={pid} id={`${pid}-b`} onClick={() => setOpen(isOpen ? null : i)} className="flex min-h-[60px] w-full items-center justify-between gap-4 py-4 text-left text-[17px] font-semibold">
                     {f.q}

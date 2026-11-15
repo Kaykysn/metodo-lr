@@ -1,14 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import { PLANS, formatPrice } from "@/lib/subscription/catalog";
-import Reveal from "@/components/motion/Reveal";
 
 /** Resumo dos planos na landing. Detalhes e comparação ficam em /planos. */
 export default function PlansSummary() {
   return (
     <section id="planos" className="scroll-mt-20 border-t border-theme-border">
       <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:px-8 lg:py-24">
-        <div>
+        <div data-scroll-reveal="up" data-scroll-distance="22">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Planos</h2>
           <p className="mt-3 max-w-sm text-[16px] leading-relaxed text-theme-muted">
             30 dias grátis para experimentar. Depois, uma mensalidade por profissional, sem cobrança por aluno.
@@ -17,9 +16,9 @@ export default function PlansSummary() {
             Comparar planos
           </Link>
         </div>
-        <Reveal as="ul" className="divide-y divide-theme-border border-y border-theme-border">
+        <ul data-scroll-stagger="0.1" data-scroll-distance="20" className="glass-panel divide-y divide-theme-border px-5 sm:px-7">
           {PLANS.map((p) => (
-            <li key={p.id} className="grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-5">
+            <li key={p.id} data-scroll-item className="grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-5">
               <p className="text-lg font-semibold">{p.name}</p>
               <p className="tabular text-lg font-semibold">
                 {formatPrice(p.priceCents)}
@@ -30,7 +29,7 @@ export default function PlansSummary() {
               </p>
             </li>
           ))}
-        </Reveal>
+        </ul>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { BODY_REGIONS } from "../src/components/assessment/BodyMap";
 import { BODY_REGIONS_V2, REGION_BY_ID } from "../src/lib/domain/body-regions";
-import { ANATOMY_ASSETS, ANATOMY_VIEWBOX } from "../src/lib/domain/anatomy-assets";
+import { ANATOMY_ASSETS, ANATOMY_SHEET, ANATOMY_VIEWBOX } from "../src/lib/domain/anatomy-assets";
 
 console.log("=== INICIANDO VERIFICAÇÃO DO MAPA CORPORAL DA ANAMNESE E HERO ===");
 
@@ -27,8 +27,11 @@ console.log("✓ Arquivos de imagem anatomia-anterior.png e anatomia-posterior.p
 // 2. Verificação de ANATOMY_ASSETS e ANATOMY_VIEWBOX
 assert.ok(ANATOMY_ASSETS.anterior !== null, "ANATOMY_ASSETS.anterior deve estar preenchido");
 assert.ok(ANATOMY_ASSETS.posterior !== null, "ANATOMY_ASSETS.posterior deve estar preenchido");
-assert.equal(ANATOMY_ASSETS.anterior?.src, "/images/anatomia-anterior.png");
-assert.equal(ANATOMY_ASSETS.posterior?.src, "/images/anatomia-posterior.png");
+assert.equal(ANATOMY_SHEET.src, "/images/anatomia-corpo.png");
+assert.equal(ANATOMY_ASSETS.anterior?.src, ANATOMY_SHEET.src);
+assert.equal(ANATOMY_ASSETS.posterior?.src, ANATOMY_SHEET.src);
+assert.ok(ANATOMY_ASSETS.anterior?.sheet && ANATOMY_ASSETS.posterior?.sheet, "Cada vista deve recortar uma região da arte única");
+assert.ok(ANATOMY_ASSETS.anterior!.sheet.x < ANATOMY_ASSETS.posterior!.sheet.x, "Vista anterior à esquerda, posterior à direita");
 assert.equal(ANATOMY_VIEWBOX.w, 560);
 assert.equal(ANATOMY_VIEWBOX.h, 1024);
 console.log("✓ ANATOMY_ASSETS e ANATOMY_VIEWBOX perfeitamente configurados.");
@@ -51,8 +54,8 @@ console.log("✓ Coordenadas normalizadas de todas as regiões de BODY_REGIONS_V
 
 // 4. Verificação do BodyMap.tsx
 const bodyMapSrc = fs.readFileSync(path.join(root, "src", "components", "assessment", "BodyMap.tsx"), "utf-8");
-assert.ok(bodyMapSrc.includes("/images/anatomia-anterior.png"), "BodyMap deve referenciar a nova imagem anterior");
-assert.ok(bodyMapSrc.includes("/images/anatomia-posterior.png"), "BodyMap deve referenciar a nova imagem posterior");
+assert.ok(bodyMapSrc.includes("anatomia-corpo.png"), "BodyMap deve referenciar a arte oficial anatomia-corpo.png");
+assert.ok(bodyMapSrc.includes("anatomyFigureProps"), "BodyMap deve recortar a vista a partir da arte única");
 assert.ok(bodyMapSrc.includes("bg-[#021226]"), "BodyMap deve possuir o fundo azul-marinho de alto contraste");
 assert.ok(BODY_REGIONS.length === 20, "BODY_REGIONS deve preservar as 20 regiões corporais da anamnese");
 console.log("✓ BodyMap.tsx integrado à nova ilustração com fundo azul-marinho e regiões preservadas.");

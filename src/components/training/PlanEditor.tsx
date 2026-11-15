@@ -325,7 +325,7 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
       {replacing && (
         <button type="button" className="mb-3 text-sm font-semibold underline" onClick={() => setReplacing(null)}>Cancelar substituição</button>
       )}
-      <div role="tablist" aria-label="Origem dos exercícios" className="mb-3 grid grid-cols-2 gap-1 rounded-control border border-theme-border bg-theme-secondary p-1">
+      <div role="tablist" aria-label="Origem dos exercícios" className="glass-soft mb-3 grid grid-cols-2 gap-1 rounded-control border border-theme-border bg-theme-secondary p-1">
         {([["curadoria", "Curadoria"], ["catalogo", "Catálogo ampliado"]] as const).map(([k, l]) => (
           <button key={k} role="tab" type="button" aria-selected={libSource === k} onClick={() => setLibSource(k)} className={`min-h-[36px] rounded-lg px-2 text-sm font-semibold ${libSource === k ? "bg-theme-raised shadow-subtle" : "text-theme-muted"}`}>
             {l}
@@ -355,7 +355,7 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
       </div>
 
       {/* Mobile: alterna entre sessão e biblioteca */}
-      <div role="tablist" aria-label="Área de edição" className="inline-flex rounded-control border border-theme-border bg-theme-secondary p-1 md:hidden">
+      <div role="tablist" aria-label="Área de edição" className="glass-soft inline-flex rounded-control border border-theme-border bg-theme-secondary p-1 md:hidden">
         {(["sessao", "biblioteca"] as const).map((t) => (
           <button key={t} role="tab" type="button" aria-selected={mobileTab === t} onClick={() => setMobileTab(t)} className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold ${mobileTab === t ? "bg-theme-raised shadow-subtle" : "text-theme-muted"}`}>
             {t === "sessao" ? "Sessão" : "Biblioteca"}

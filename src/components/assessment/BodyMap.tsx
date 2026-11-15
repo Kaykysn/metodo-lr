@@ -2,6 +2,7 @@
 
 import React, { useState, useId } from "react";
 import { Check } from "lucide-react";
+import { anatomyFigureProps } from "@/lib/domain/anatomy-assets";
 
 export interface BodyRegion {
   id: string;
@@ -83,6 +84,7 @@ const MAP_SPOTS: Record<"posterior" | "anterior", MapSpot[]> = {
 export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = false }: BodyMapProps) {
   const [activeView, setActiveView] = useState<"posterior" | "anterior">("posterior");
   const gradientId = `body-gradient-${useId().replace(/:/g, "")}`;
+  const art = anatomyFigureProps(activeView);
 
   const toggleRegion = (regionId: string) => {
     if (isReadOnly || !onChange) return;
@@ -104,7 +106,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
             Clique nas regiões anatômicas para registrar as queixas relatadas pelo aluno.
           </p>
         </div>
-        <div className="flex items-center gap-1 bg-theme-secondary p-1 rounded-xl self-start sm:self-auto" role="tablist" aria-label="Visualização anatômica">
+        <div className="glass-soft flex items-center gap-1 bg-theme-secondary p-1 rounded-xl self-start sm:self-auto" role="tablist" aria-label="Visualização anatômica">
           <button
             type="button"
             role="tab"
@@ -136,23 +138,28 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 items-center">
         {/* Silhueta Anatômica Muscular Detalhada */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-center p-4 bg-[#021226] rounded-xl border border-theme-border shadow-inner">
-          <div className="relative w-64 h-[390px] flex items-center justify-center">
-            {/* SVG Silhueta Anatômica Interativa com pontos clicáveis sobrepostos */}
+        <div className="lg:col-span-5 flex flex-col items-center justify-center p-3 sm:p-4 bg-[#021226] rounded-xl border border-theme-border shadow-inner">
+          <div className="relative w-full max-w-[300px] aspect-[560/1024]">
+            {/* SVG Silhueta Anatômica Interativa com pontos clicáveis sobrepostos.
+                A arte oficial é public/images/anatomia-corpo.png (vista anterior à
+                esquerda, posterior à direita); cada aba recorta a metade correta
+                via viewBox, sem distorcer a proporção do corpo. */}
             <svg
               viewBox="0 0 560 1024"
-              className="w-full h-full max-h-[390px] select-none"
+              className="block h-full w-full select-none"
               aria-label={`Ilustração anatômica muscular - ${activeView === "posterior" ? "Vista Posterior" : "Vista Anterior"}`}
             >
-              {/* Ilustração anatômica muscular realista com transparência */}
-              <image
-                href={activeView === "anterior" ? "/images/anatomia-anterior.png" : "/images/anatomia-posterior.png"}
-                x={0}
-                y={0}
-                width={560}
-                height={1024}
+              <svg
+                x={art.x}
+                y={art.y}
+                width={art.width}
+                height={art.height}
+                viewBox={art.viewBox}
                 preserveAspectRatio="xMidYMid meet"
-              />
+                aria-hidden="true"
+              >
+                <image href={art.src} x={0} y={0} width={art.sheetWidth} height={art.sheetHeight} />
+              </svg>
 
               {/* Indicadores de lateralidade da pessoa avaliada */}
               <g aria-hidden="true" style={{ fill: "#76D7BE", opacity: 0.85 }} fontSize={28} fontWeight={800}>

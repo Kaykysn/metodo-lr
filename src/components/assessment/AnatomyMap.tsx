@@ -3,7 +3,7 @@
 import React, { useId, useMemo, useRef, useState } from "react";
 import { Minus, Plus, Crosshair } from "lucide-react";
 import { BODY_REGIONS_V2, REGION_BY_ID, sideTag, type RegionDef, type View } from "@/lib/domain/body-regions";
-import { ANATOMY_ASSETS, ANATOMY_VIEWBOX } from "@/lib/domain/anatomy-assets";
+import { anatomyFigureProps, ANATOMY_ASSETS, ANATOMY_VIEWBOX } from "@/lib/domain/anatomy-assets";
 import type { FreeMark, SymptomEntry } from "@/lib/domain/types";
 
 const W = ANATOMY_VIEWBOX.w;
@@ -45,10 +45,27 @@ const MUSCLES: Record<View, { d: string; tendon?: boolean }[]> = {
 };
 
 function Figure({ view, idPrefix }: { view: View; idPrefix: string }) {
-  const asset = ANATOMY_ASSETS[view];
-  if (asset) {
-    return <image href={asset.src} x={0} y={0} width={W} height={H} preserveAspectRatio="xMidYMid meet" />;
+  const art = anatomyFigureProps(view);
+
+  // Arte oficial única (anatomia-corpo.png): a vista é recortada pelo viewBox do
+  // <svg> aninhado. O esquema vetorial continua disponível como fallback caso a
+  // arte seja removida de ANATOMY_ASSETS.
+  if (ANATOMY_ASSETS[view]) {
+    return (
+      <svg
+        x={art.x}
+        y={art.y}
+        width={art.width}
+        height={art.height}
+        viewBox={art.viewBox}
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
+      >
+        <image href={art.src} x={0} y={0} width={art.sheetWidth} height={art.sheetHeight} />
+      </svg>
+    );
   }
+
   const half = (
     <g>
       <path d={HALF_BODY} style={{ fill: `url(#${idPrefix}-skin)`, stroke: "rgb(var(--map-body-stroke))" }} strokeWidth={1.5} />
@@ -237,7 +254,7 @@ export default function AnatomyMap(props: AnatomyMapProps) {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label="Vista do mapa" className="inline-flex rounded-control border border-theme-border bg-theme-secondary p-1 xl:hidden">
+        <div role="tablist" aria-label="Vista do mapa" className="glass-soft inline-flex rounded-control border border-theme-border bg-theme-secondary p-1 xl:hidden">
           {(["anterior", "posterior"] as View[]).map((v) => (
             <button
               key={v}

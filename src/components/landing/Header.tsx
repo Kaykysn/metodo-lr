@@ -71,7 +71,7 @@ export default function Header() {
         </button>
       </div>
       {open && (
-        <div id="menu-site" ref={drawer} role="dialog" aria-modal="true" aria-label="Menu" className="border-t border-theme-border bg-theme-primary px-4 pb-6 pt-2 motion-safe:animate-drawerIn xl:hidden">
+        <div id="menu-site" ref={drawer} role="dialog" aria-modal="true" aria-label="Menu" className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-theme-border bg-theme-primary px-4 pb-6 pt-2 motion-safe:animate-drawerIn xl:hidden">
           <nav aria-label="Principal (menu)" className="flex flex-col">
             {NAV.map((n) => (
               <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="flex min-h-[48px] items-center border-b border-theme-border text-base font-medium">

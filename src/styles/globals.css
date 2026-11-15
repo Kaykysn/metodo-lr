@@ -109,7 +109,7 @@
      HeroXRay: Efeito interativo de Raio-X Anatômico
      - Camada 1: Imagem original da superfície corporal
      - Camada 2: Estrutura anatômica revelada por máscara radial CSS
-     - Lanterna ciano com bordas suavizadas e brilho discreto
+     - Lanterna ciano com bordas suavizadas, aro óptico e realce quente discreto
      - Animação respiratória compartilhada de 4.5s com escala máxima de 0.4%
      ------------------------------------------------------------------------------ */
   @keyframes hero-xray-respiration {
@@ -121,26 +121,66 @@
     }
   }
 
+  /* Aplicada SEMPRE no contêiner compartilhado pelas duas imagens:
+     o raio da lanterna acompanha a respiração sem desalinhar as camadas. */
+  .hero-xray-stage {
+    transform-origin: center center;
+    will-change: transform;
+  }
+
   .hero-xray-breathing {
     animation: hero-xray-respiration 4.5s ease-in-out infinite;
     transform-origin: center center;
     will-change: transform;
   }
 
-  /* Camada 2 com Máscara Radial CSS perfeitamente sobreposta */
+  /* Esqueleto de carregamento: some sozinho mesmo se o JS atrasar. */
+  @keyframes hero-xray-skeleton-out {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+  .hero-xray-skeleton {
+    animation: hero-xray-skeleton-out 420ms ease-out 2.4s forwards;
+  }
+
+  /* Área interativa: rolagem vertical continua liberada no celular;
+     o arraste horizontal (que revela a anatomia) é travado pelo componente. */
+  .hero-xray-canvas {
+    --xray-r-scale: 0.76;
+    touch-action: pan-y;
+    isolation: isolate;
+  }
+  @media (min-width: 640px) {
+    .hero-xray-canvas {
+      --xray-r-scale: 0.9;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero-xray-canvas {
+      --xray-r-scale: 1;
+    }
+  }
+
+  /* Camada 2 com Máscara Radial CSS perfeitamente sobreposta.
+     O raio efetivo escala por breakpoint (lanterna proporcional ao painel). */
   .hero-xray-layer {
+    --xray-r-effective: calc(var(--xray-r, 160px) * var(--xray-r-scale, 1));
     -webkit-mask-image: radial-gradient(
-      circle var(--xray-r, 160px) at var(--xray-x, -9999px) var(--xray-y, -9999px),
+      circle var(--xray-r-effective) at var(--xray-x, -9999px) var(--xray-y, -9999px),
       rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 0.96) 45%,
-      rgba(0, 0, 0, 0.45) 75%,
+      rgba(0, 0, 0, 0.98) 34%,
+      rgba(0, 0, 0, 0.72) 62%,
+      rgba(0, 0, 0, 0.3) 84%,
       rgba(0, 0, 0, 0) 100%
     );
     mask-image: radial-gradient(
-      circle var(--xray-r, 160px) at var(--xray-x, -9999px) var(--xray-y, -9999px),
+      circle var(--xray-r-effective) at var(--xray-x, -9999px) var(--xray-y, -9999px),
       rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 0.96) 45%,
-      rgba(0, 0, 0, 0.45) 75%,
+      rgba(0, 0, 0, 0.98) 34%,
+      rgba(0, 0, 0, 0.72) 62%,
+      rgba(0, 0, 0, 0.3) 84%,
       rgba(0, 0, 0, 0) 100%
     );
     -webkit-mask-repeat: no-repeat;
@@ -148,30 +188,138 @@
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
     opacity: var(--xray-opacity, 0);
-    transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: -webkit-mask-image, mask-image, opacity;
+    transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity;
   }
 
-  /* Lanterna com Brilho Ciano Discreto (Optical Grade Cyan / Jade Glow) */
+  /* Lanterna: jade frio no núcleo, halo quente discreto na borda do feixe
+     e aro óptico fino para dar leitura de "vidro de exame". */
   .hero-xray-glow {
+    --xray-r-effective: calc(var(--xray-r, 160px) * var(--xray-r-scale, 1));
     background:
       radial-gradient(
-        circle var(--xray-r, 160px) at var(--xray-x, -9999px) var(--xray-y, -9999px),
-        rgba(118, 215, 190, 0.28) 0%,
-        rgba(59, 158, 144, 0.16) 48%,
-        rgba(14, 102, 96, 0.05) 78%,
+        circle var(--xray-r-effective) at var(--xray-x, -9999px) var(--xray-y, -9999px),
+        rgba(214, 255, 244, 0.1) 0%,
+        rgba(118, 215, 190, 0.26) 26%,
+        rgba(59, 158, 144, 0.16) 52%,
+        rgba(226, 148, 92, 0.12) 74%,
+        rgba(14, 102, 96, 0.05) 88%,
         transparent 100%
       ),
       radial-gradient(
-        circle var(--xray-r, 160px) at var(--xray-x, -9999px) var(--xray-y, -9999px),
-        transparent calc(var(--xray-r, 160px) * 0.86),
-        rgba(118, 215, 190, 0.38) calc(var(--xray-r, 160px) * 0.95),
-        transparent var(--xray-r, 160px)
+        circle var(--xray-r-effective) at var(--xray-x, -9999px) var(--xray-y, -9999px),
+        transparent calc(var(--xray-r-effective) * 0.88),
+        rgba(168, 230, 212, 0.36) calc(var(--xray-r-effective) * 0.945),
+        rgba(226, 148, 92, 0.16) calc(var(--xray-r-effective) * 0.985),
+        transparent var(--xray-r-effective)
       );
     mix-blend-mode: screen;
     opacity: var(--xray-opacity, 0);
-    transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
+  }
+
+  /* Luz ambiente estática do painel: jade no alto, calor sutil na altura do tórax. */
+  .hero-xray-ambient {
+    background:
+      radial-gradient(58% 42% at 50% 6%, rgb(var(--hero-jade) / 0.14), transparent 72%),
+      radial-gradient(46% 38% at 58% 46%, rgb(var(--hero-ember) / 0.07), transparent 76%),
+      radial-gradient(70% 55% at 50% 100%, rgb(2 18 38 / 0.9), transparent 70%);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  /* Aura integrada ao fundo: a figura parece iluminada pelo próprio ambiente,
+     sem moldura de painel. */
+  .hero-xray-aura {
+    background:
+      radial-gradient(ellipse 56% 38% at 54% 20%, rgb(var(--hero-jade) / 0.16), transparent 72%),
+      radial-gradient(ellipse 40% 28% at 62% 52%, rgb(var(--hero-ember) / 0.11), transparent 76%),
+      radial-gradient(ellipse 54% 42% at 50% 96%, rgb(2 18 38 / 0.38), transparent 74%);
+    filter: blur(26px);
+    opacity: 0.92;
+    pointer-events: none;
+  }
+
+  /* Sombra de contato à direita: a arte transparente ganha peso e profundidade
+     sem desenhar uma caixa em volta. */
+  .hero-xray-figure {
+    filter:
+      drop-shadow(22px 26px 38px rgb(0 0 0 / 0.5))
+      drop-shadow(6px 0 18px rgb(0 0 0 / 0.34))
+      drop-shadow(-2px 0 16px rgb(var(--hero-jade) / 0.1));
+  }
+
+  /* Linha de varredura do celular: acompanha a posição da máscara. */
+  .hero-xray-scanline {
+    top: var(--xray-scan, 0%);
+    height: 2px;
+    transform: translateY(-50%);
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(var(--hero-jade) / 0.65) 24%,
+      rgb(214 255 244 / 0.92) 50%,
+      rgb(var(--hero-jade) / 0.65) 76%,
+      transparent
+    );
+    box-shadow: 0 0 22px 3px rgb(var(--hero-jade) / 0.32);
+    opacity: var(--xray-scan-line, 0);
+    transition: opacity 220ms ease-out;
+    pointer-events: none;
+  }
+
+  /* No celular o efeito é automático: a máscara radial (cursor) dá lugar a uma
+     revelação vertical conduzida pelo scroll, em ambos os sentidos. */
+  .hero-xray-canvas.hero-xray-scan {
+    cursor: default;
+  }
+
+  .hero-xray-canvas.hero-xray-scan .hero-xray-layer {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 calc(var(--xray-scan, 0%) - 15%),
+      transparent var(--xray-scan, 0%),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 calc(var(--xray-scan, 0%) - 15%),
+      transparent var(--xray-scan, 0%),
+      transparent 100%
+    );
+    opacity: var(--xray-scan-opacity, 1);
+    transition: opacity 180ms linear;
+  }
+
+  .hero-xray-canvas.hero-xray-scan .hero-xray-glow {
+    opacity: 0 !important;
+  }
+
+  /* Entrada única do conjunto visual do hero (não atrasa a leitura). */
+  @keyframes hero-visual-enter {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.992);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  .hero-visual-enter {
+    animation: hero-visual-enter 820ms var(--ease-out-soft) 90ms both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-visual-enter {
+      animation: none;
+    }
+  }
+  .lite .hero-visual-enter {
+    animation: none;
   }
 }
 
@@ -232,6 +380,243 @@
   background: radial-gradient(closest-side, rgb(var(--glow-b) / var(--glow-b-alpha)), transparent);
 }
 
+/* ------------------------------------------------------------------------------
+   Atmosfera global: malha técnica + orbes com deriva lenta.
+   Fica atrás de todo o conteúdo (AmbientBackground, z-0). As animações usam
+   apenas transform/opacity e são neutralizadas em modo leve/movimento reduzido.
+   ------------------------------------------------------------------------------ */
+.atmos-grid {
+  background-image:
+    linear-gradient(to right, rgb(var(--accent-teal) / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--accent-teal) / 0.055) 1px, transparent 1px);
+  background-size: 78px 78px;
+  -webkit-mask-image: radial-gradient(ellipse 72% 62% at 52% 28%, #000 0%, transparent 74%);
+  mask-image: radial-gradient(ellipse 72% 62% at 52% 28%, #000 0%, transparent 74%);
+  opacity: 0.55;
+  animation: atmos-grid-drift 90s linear infinite;
+  will-change: transform;
+}
+.dark .atmos-grid {
+  background-image:
+    linear-gradient(to right, rgb(var(--hero-jade) / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--hero-jade) / 0.07) 1px, transparent 1px);
+  opacity: 0.65;
+}
+@keyframes atmos-grid-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(78px, 78px, 0);
+  }
+}
+
+.atmos-orb {
+  will-change: transform, opacity;
+}
+.atmos-orb-a {
+  animation: atmos-drift-a 46s ease-in-out infinite alternate;
+}
+.atmos-orb-b {
+  animation: atmos-drift-b 58s ease-in-out infinite alternate;
+}
+.atmos-orb-c {
+  animation: atmos-drift-c 52s ease-in-out infinite alternate;
+}
+.atmos-orb-d {
+  animation: atmos-drift-d 64s ease-in-out infinite alternate;
+}
+@keyframes atmos-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.82; }
+  to { transform: translate3d(-3.5%, 4%, 0) scale(1.08); opacity: 1; }
+}
+@keyframes atmos-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.72; }
+  to { transform: translate3d(4%, -3%, 0) scale(1); opacity: 0.94; }
+}
+@keyframes atmos-drift-c {
+  from { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.68; }
+  to { transform: translate3d(3%, 2.5%, 0) scale(1.06); opacity: 0.9; }
+}
+@keyframes atmos-drift-d {
+  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.6; }
+  to { transform: translate3d(-2.5%, -3.5%, 0) scale(1.1); opacity: 0.86; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atmos-grid,
+  .atmos-orb {
+    animation: none !important;
+  }
+}
+.lite .atmos-grid,
+.lite .atmos-orb {
+  animation: none !important;
+}
+@media (max-width: 639px) {
+  /* Celular: malha estática (as partículas seguem animando) e menos orbes. */
+  .atmos-grid {
+    animation: none;
+  }
+  .atmos-orb {
+    filter: blur(42px);
+  }
+  .atmos-orb-c,
+  .atmos-orb-d {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------------------
+   Vidro com função (cards, abas e painéis de leitura).
+   O blur é real, mas contido; a superfície mantém contraste alto.
+   Fallback: superfície sólida onde backdrop-filter não existe.
+   ------------------------------------------------------------------------------ */
+.glass-card {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--radius-panel);
+  background:
+    linear-gradient(150deg, rgb(var(--glass-tint) / 0.58), rgb(var(--glass-tint) / 0.34));
+  border: 1px solid rgb(var(--glass-edge) / 0.42);
+  box-shadow:
+    0 24px 60px -40px rgb(2 18 38 / 0.55),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.24);
+  -webkit-backdrop-filter: blur(16px) saturate(1.22);
+  backdrop-filter: blur(16px) saturate(1.22);
+}
+.dark .glass-card {
+  background:
+    linear-gradient(150deg, rgb(var(--glass-tint) / 0.64), rgb(var(--glass-tint) / 0.4));
+  border-color: rgb(var(--glass-edge) / 0.26);
+  box-shadow:
+    0 26px 70px -44px rgb(0 0 0 / 0.8),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.14);
+}
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgb(255 255 255 / 0.14), transparent 38%, transparent 72%, rgb(var(--accent-teal) / 0.05));
+  pointer-events: none;
+}
+
+.glass-panel {
+  position: relative;
+  isolation: isolate;
+  border-radius: 24px;
+  background:
+    linear-gradient(160deg, rgb(var(--glass-tint) / 0.5), rgb(var(--glass-tint) / 0.24));
+  border: 1px solid rgb(var(--glass-edge) / 0.34);
+  box-shadow:
+    0 36px 90px -56px rgb(2 18 38 / 0.6),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.18);
+  backdrop-filter: blur(18px) saturate(1.18);
+}
+.dark .glass-panel {
+  background:
+    linear-gradient(160deg, rgb(var(--glass-tint) / 0.56), rgb(var(--glass-tint) / 0.32));
+  border-color: rgb(var(--glass-edge) / 0.22);
+  box-shadow:
+    0 40px 100px -60px rgb(0 0 0 / 0.85),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.12);
+}
+
+.glass-section {
+  background:
+    linear-gradient(to bottom, rgb(var(--surface-reading) / 0.72), rgb(var(--surface-reading) / 0.5));
+  border-top: 1px solid rgb(var(--glass-edge) / 0.3);
+  border-bottom: 1px solid rgb(var(--glass-edge) / 0.22);
+  -webkit-backdrop-filter: blur(6px) saturate(1.08);
+  backdrop-filter: blur(6px) saturate(1.08);
+}
+
+/* Bloco de chamada final (sempre escuro, como o CTA): vidro sobre a atmosfera,
+   com brilho jade no topo e sombra de profundidade. */
+.glass-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    radial-gradient(120% 90% at 12% -10%, rgb(118 215 190 / 0.16), transparent 62%),
+    linear-gradient(150deg, rgb(3 24 46 / 0.92), rgb(2 18 38 / 0.96));
+  border: 1px solid rgb(118 215 190 / 0.18);
+  box-shadow:
+    0 40px 100px -60px rgb(2 18 38 / 0.9),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.12);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+}
+.glass-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60% 50% at 92% 112%, rgb(226 148 92 / 0.14), transparent 70%),
+    linear-gradient(115deg, rgb(255 255 255 / 0.06), transparent 46%);
+  pointer-events: none;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-cta {
+    background: rgb(3 24 46);
+  }
+}
+
+@media (max-width: 639px) {
+  /* Menos área de desfoque no celular: mantém o vidro, preserva o framerate. */
+  .glass-card {
+    -webkit-backdrop-filter: blur(10px) saturate(1.14);
+    backdrop-filter: blur(10px) saturate(1.14);
+  }
+  .glass-panel,
+  .glass-cta {
+    -webkit-backdrop-filter: blur(11px) saturate(1.12);
+    backdrop-filter: blur(11px) saturate(1.12);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-card,
+  .glass-panel,
+  .glass-section {
+    background: rgb(var(--surface-primary));
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-card,
+  .glass-panel,
+  .glass-section {
+    background: rgb(var(--surface-primary));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glass-cta {
+    background: rgb(3 24 46);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+.lite .glass-card,
+.lite .glass-panel,
+.lite .glass-section {
+  background: rgb(var(--surface-primary));
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.lite .glass-cta {
+  background: rgb(3 24 46);
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.lite .glass-card::after,
+.lite .glass-cta::before {
+  display: none;
+}
+
 /* Hero: azul-noite atrás do texto. No celular o texto ocupa a largura toda e passa sobre o
    petróleo, então a camada é forte; no desktop fica no canto superior esquerdo e o jade abre à direita. */
 .hero-scrim {
@@ -246,6 +631,42 @@
   .hero-scrim {
     background: radial-gradient(ellipse 70% 62% at 8% 4%, rgb(var(--hero-bg) / 0.9), rgb(var(--hero-bg) / 0.55) 55%, transparent 85%);
   }
+}
+
+/* ------------------------------------------------------------------------------
+   Hero: vídeo de fundo (Camada 3).
+   O mesh estático permanece sempre no DOM como pôster/fallback: se o vídeo não
+   carregar, for bloqueado ou o usuário preferir menos movimento, a cena continua
+   íntegra e legível. O vídeo só aparece depois do primeiro quadro decodificado.
+   ------------------------------------------------------------------------------ */
+.hero-video-media {
+  opacity: 0;
+  transition: opacity 900ms var(--ease-out-soft);
+}
+.hero-video-media.is-ready {
+  opacity: 1;
+}
+/* Véu de contraste: petróleo à esquerda (texto), mais aberto à direita (corpo),
+   com base escura para fundir na página. */
+.hero-video-scrim {
+  background:
+    linear-gradient(to right, rgb(var(--hero-bg) / 0.94) 0%, rgb(var(--hero-bg) / 0.76) 40%, rgb(var(--hero-bg) / 0.44) 74%, rgb(var(--hero-bg) / 0.7) 100%),
+    linear-gradient(to top, rgb(var(--hero-bg) / 0.94) 0%, rgb(var(--hero-bg) / 0.24) 46%, rgb(var(--hero-bg) / 0.58) 100%);
+}
+@media (min-width: 1024px) {
+  .hero-video-scrim {
+    background:
+      radial-gradient(ellipse 62% 78% at 6% 34%, rgb(var(--hero-bg) / 0.94), rgb(var(--hero-bg) / 0.6) 58%, transparent 88%),
+      linear-gradient(to top, rgb(var(--hero-bg) / 0.95) 0%, rgb(var(--hero-bg) / 0.35) 42%, rgb(var(--hero-bg) / 0.5) 100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-video-media {
+    transition: none;
+  }
+}
+.lite .hero-video-media {
+  transition: none;
 }
 
 /* Prévia do produto: aro de vidro; a superfície de leitura dentro dela é opaca */

@@ -86,7 +86,7 @@ export default function ExerciseDetailView({ exercise, onSelect, actions }: { ex
         <LegacyBody exercise={exercise} onSelect={onSelect} />
       ) : (
         <>
-          <div role="tablist" aria-label={`Ficha de ${exercise.name}`} className="flex gap-1 overflow-x-auto rounded-control border border-theme-border bg-theme-secondary p-1">
+          <div role="tablist" aria-label={`Ficha de ${exercise.name}`} className="glass-soft flex gap-1 overflow-x-auto rounded-control border border-theme-border bg-theme-secondary p-1">
             {TABS.map((t, i) => (
               <button
                 key={t.id}

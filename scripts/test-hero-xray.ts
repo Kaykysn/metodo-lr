@@ -80,7 +80,9 @@ assert.ok(heroXRaySrc.includes("onPointerDown"), "HeroXRay deve capturar onPoint
 assert.ok(heroXRaySrc.includes("onPointerMove"), "HeroXRay deve capturar onPointerMove");
 assert.ok(heroXRaySrc.includes("onPointerUp"), "HeroXRay deve capturar onPointerUp");
 assert.ok(heroXRaySrc.includes("setPointerCapture"), "HeroXRay deve usar setPointerCapture para arraste contínuo no toque móvel");
-assert.ok(heroXRaySrc.includes("touch-none"), "HeroXRay deve aplicar touch-none estritamente ao canvas anatômico interativo");
+assert.ok(heroXRaySrc.includes("hero-xray-canvas"), "HeroXRay deve usar a classe .hero-xray-canvas no quadro interativo");
+assert.ok(globalsCss.includes("touch-action: pan-y"), "A rolagem vertical deve continuar liberada no celular (pan-y)");
+assert.ok(heroXRaySrc.includes("object-contain"), "As duas imagens devem usar object-contain, sem distorção");
 
 // Anti-CLS e Carregamento Eager
 assert.ok(heroXRaySrc.includes('aspectRatio: aspectRatio'), "HeroXRay deve reservar aspect ratio para evitar CLS");
@@ -94,13 +96,60 @@ const heroShowcasePath = path.join(root, "src", "components", "landing", "HeroSh
 assert.ok(fs.existsSync(heroShowcasePath), "HeroShowcase.tsx deve existir");
 
 const heroShowcaseSrc = fs.readFileSync(heroShowcasePath, "utf-8");
-assert.ok(heroShowcaseSrc.includes("ProductPreview"), "HeroShowcase deve incluir ProductPreview");
 assert.ok(heroShowcaseSrc.includes("HeroXRay"), "HeroShowcase deve incluir HeroXRay");
-assert.ok(heroShowcaseSrc.includes('initialMode = "app"'), "HeroShowcase deve manter o Hero atual (app) como padrão");
+assert.ok(!heroShowcaseSrc.includes("ProductPreview"), "HeroShowcase não deve voltar a exibir o preview de produto no lugar do raio-X");
+
+// A imagem precisa ser a versão transparente (PNG/WebP com alpha), nunca a arte com fundo sólido.
+assert.ok(
+  heroXRaySrc.includes('DEFAULT_BASE_IMAGE = "/media/hero-body-base.png"'),
+  "A camada base deve usar o PNG transparente"
+);
+assert.ok(
+  heroXRaySrc.includes('DEFAULT_XRAY_IMAGE = "/media/hero-body-xray.png"'),
+  "A camada de raio-X deve usar o PNG transparente"
+);
+assert.ok(heroXRaySrc.includes("mobileScrollReveal"), "HeroXRay deve expor a revelação automática do celular");
+assert.ok(heroXRaySrc.includes("hero-xray-scan"), "HeroXRay deve ativar a varredura automática por classe");
+assert.ok(heroXRaySrc.includes("scrollTrigger"), "HeroXRay deve sincronizar a varredura móvel com o ScrollTrigger");
+assert.ok(heroXRaySrc.includes("scrub: 0.55"), "A revelação móvel deve acompanhar o scroll nos dois sentidos (scrub)");
+assert.ok(globalsCss.includes(".hero-xray-canvas.hero-xray-scan .hero-xray-layer"), "A máscara móvel deve ser controlada por CSS");
+assert.ok(globalsCss.includes("linear-gradient"), "A revelação móvel deve ser uma transição gradual, não uma troca brusca");
+assert.ok(globalsCss.includes(".hero-xray-figure"), "A figura deve ter sombra de contato própria (arte transparente)");
+assert.ok(globalsCss.includes(".hero-xray-aura"), "A figura deve ter aura integrada ao fundo do Hero");
+
+// Camada 3: vídeo de fundo do Hero + fallback estático
+const videoPath = path.join(root, "public", "videos", "hero-background.mp4");
+assert.ok(fs.existsSync(videoPath), "Vídeo de fundo deve existir em public/videos/hero-background.mp4");
+assert.ok(fs.statSync(videoPath).size > 100000, "Vídeo de fundo deve ter conteúdo válido");
+
+const backdropPath = path.join(root, "src", "components", "landing", "HeroBackdrop.tsx");
+assert.ok(fs.existsSync(backdropPath), "HeroBackdrop.tsx deve existir");
+const backdropSrc = fs.readFileSync(backdropPath, "utf-8");
+assert.ok(backdropSrc.includes("autoPlay") && backdropSrc.includes("muted"), "Vídeo deve tocar mudo e automaticamente");
+assert.ok(backdropSrc.includes("playsInline"), "Vídeo deve declarar playsInline");
+assert.ok(backdropSrc.includes("loop"), "Vídeo deve estar em loop");
+assert.ok(backdropSrc.includes("object-cover"), "Vídeo deve usar object-fit: cover");
+assert.ok(backdropSrc.includes("onError"), "Vídeo deve tratar falha de carregamento (fallback estático)");
+assert.ok(backdropSrc.includes("visibilitychange"), "Vídeo deve pausar com a aba oculta");
+assert.ok(backdropSrc.includes("videoAllowed"), "Vídeo deve respeitar as preferências de efeitos/movimento");
+
+// Camada 1/2: arte oficial otimizada (PNG transparente + WebP com alpha + JPEG legado)
+for (const asset of [
+  "hero-body-base.png",
+  "hero-body-base.webp",
+  "hero-body-base.jpg",
+  "hero-body-xray.png",
+  "hero-body-xray.webp",
+  "hero-body-xray.jpg",
+]) {
+  assert.ok(fs.existsSync(path.join(root, "public", "media", asset)), `Arte do Hero ausente: public/media/${asset}`);
+}
+assert.ok(heroXRaySrc.includes("hero-xray-stage"), "Respiração deve rodar no contêiner compartilhado (.hero-xray-stage)");
 
 const heroPath = path.join(root, "src", "components", "landing", "Hero.tsx");
 const heroSrc = fs.readFileSync(heroPath, "utf-8");
 assert.ok(heroSrc.includes("HeroShowcase"), "Hero.tsx deve integrar o HeroShowcase");
+assert.ok(heroSrc.includes("HeroBackdrop"), "Hero.tsx deve integrar a camada de vídeo (HeroBackdrop)");
 assert.ok(heroSrc.includes('id="demonstracao"'), "Hero.tsx deve preservar o identificador da seção");
 assert.ok(heroSrc.includes('id="hero-titulo"'), "Hero.tsx deve preservar o título original");
 assert.ok(heroSrc.includes('href="/solicitar-acesso"'), "Hero.tsx deve preservar os botões de ação e links");

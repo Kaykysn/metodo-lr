@@ -102,6 +102,7 @@
   --hero-muted: 169 191 196;      /* 9,7:1 sobre --hero-bg */
   --hero-jade: 118 215 190;       /* 10,9:1 sobre --hero-bg */
   --hero-jade-pale: 168 230 212;  /* jade claro do título, 13,4:1 sobre --hero-bg */
+  --hero-ember: 226 148 92;       /* realce anatômico quente (uso decorativo no Raio-X) */
   --hero-glass-alpha: 0.1;        /* ladrilho de vidro sobre o hero */
   --hero-glass-solid: 16 36 60;   /* mesmo ladrilho sem desfoque (modo leve) */
 
