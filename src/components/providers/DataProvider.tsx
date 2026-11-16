@@ -8,7 +8,7 @@ import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/c
 import { SupabaseRepository } from "@/lib/data/supabase-repository";
 import { loadSession, type SessionState } from "@/lib/data/session";
 import { DemoSubscriptionStore, SupabaseSubscriptionStore, type SubscriptionSnapshot, type SubscriptionStore } from "@/lib/subscription/store";
-import { resolveCommercialAccess, type AdminStatus, type CommercialAccess, type PlanIntent, type TrialWindow } from "@/lib/subscription/entitlements";
+import { resolveCommercialAccess, type AdminStatus, type CommercialAccess, type PlanIntent, type SubscriptionRecord, type TrialWindow } from "@/lib/subscription/entitlements";
 import { commercialInputsFor, isDemoScenario, type DemoScenario } from "@/lib/subscription/simulation";
 import type { PlanId } from "@/lib/subscription/catalog";
 
@@ -16,6 +16,8 @@ export interface CommercialState {
   /** null enquanto carrega ou quando não há sessão. */
   access: CommercialAccess | null;
   intent: PlanIntent | null;
+  /** Assinatura lida do banco (ou simulada na demonstração). Só leitura. */
+  subscription: SubscriptionRecord | null;
   /** Situação comercial simulada (só demonstração). */
   simulated: boolean;
   scenario: DemoScenario | null;
@@ -43,6 +45,8 @@ interface DataContextValue {
   /** Incrementa a cada mudança de identidade/reset para as telas recarregarem. */
   revision: number;
   bump: () => void;
+  /** Relê sessão e assinatura do banco (ex.: depois de voltar do checkout). */
+  reloadSession: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -147,6 +151,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const bump = useCallback(() => setRevision((r) => r + 1), []);
 
+  const reloadSession = useCallback(async () => {
+    if (!db) return;
+    try {
+      setSession(await loadSession(db));
+    } catch (e) {
+      setSession({ status: "error", message: (e as Error).message });
+    }
+    setRevision((r) => r + 1);
+  }, [db]);
+
   const actor: Actor = db
     ? session.status === "active"
       ? session.actor
@@ -167,17 +181,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const account = session.status === "active" || session.status === "blocked" ? session.account ?? null : null;
   const commercial = useMemo<CommercialState>(() => {
-    const empty: CommercialState = { access: null, intent: null, simulated: false, scenario: db ? null : scenario, unavailable: snapshot.unavailable, account };
+    const empty: CommercialState = { access: null, intent: null, subscription: null, simulated: false, scenario: db ? null : scenario, unavailable: snapshot.unavailable, account };
     if (!mounted) return empty;
     const now = Date.now();
     if (!db) {
       const inp = commercialInputsFor({ mode: "demo", scenario, real: { trial: { startedAt: null, expiresAt: null }, subscription: null }, nowMs: now });
       const access = resolveCommercialAccess({ role: actor.role, adminStatus: "active", trial: inp.trial, subscription: inp.subscription, nowMs: now });
-      return { ...empty, access, intent: snapshot.intent, simulated: true };
+      return { ...empty, access, intent: snapshot.intent, subscription: inp.subscription, simulated: true };
     }
     if (!account || !sessionActor) return empty;
     const access = resolveCommercialAccess({ role: sessionActor.role, adminStatus: account.adminStatus, trial: account.trial, subscription: snapshot.subscription, nowMs: now });
-    return { ...empty, access, intent: snapshot.intent };
+    return { ...empty, access, intent: snapshot.intent, subscription: snapshot.subscription };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db, mounted, scenario, actor.role, account, sessionActor, snapshot, revision]);
 
@@ -219,8 +233,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       recordPlanIntent,
       revision,
       bump,
+      reloadSession,
     }),
-    [repo, actor, session, setDemoActor, resetDemo, signOut, commercial, setDemoScenario, recordPlanIntent, revision, bump, mounted]
+    [repo, actor, session, setDemoActor, resetDemo, signOut, commercial, setDemoScenario, recordPlanIntent, revision, bump, reloadSession, mounted]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

@@ -6,7 +6,7 @@ import { BASE_FEATURES, CATALOG_VERSION, COMPARE_ROWS, PLANS, TRIAL_FEATURES, fo
 import { canPerform, hasFeature, resolveCommercialAccess, trialNotice, type SubscriptionRecord } from "../src/lib/subscription/entitlements";
 import { checkActivation, planDowngrade, traineeUsage, usageMessage } from "../src/lib/subscription/limits";
 import { commercialInputsFor, scenarioInputs } from "../src/lib/subscription/simulation";
-import { BILLING_ENABLED, BILLING_UNAVAILABLE_MESSAGE, readSupportConfig, requestCheckout } from "../src/lib/subscription/billing";
+import { BILLING_ENABLED, BILLING_UNAVAILABLE_MESSAGE, firstChargeDate, isAsaasCheckoutUrl, readSupportConfig } from "../src/lib/subscription/billing";
 import { DemoSubscriptionStore } from "../src/lib/subscription/store";
 import { DemoRepository } from "../src/lib/data/repository";
 import { DEMO_ACTORS } from "../src/lib/data/seed";
@@ -112,18 +112,22 @@ const practitioner = DEMO_ACTORS.find((a) => a.id === "aluno_142")!;
   assert.equal(unpaidRecord.phase, "expired", "registro sem pagamento confirmado não concede acesso");
   ok("Assinatura sem status de pagamento não concede acesso");
 
-  // ---------------------------------------------------------------- cobrança desativada
-  const realFetch = globalThis.fetch;
-  let called = false;
-  globalThis.fetch = (async () => { called = true; throw new Error("rede proibida"); }) as typeof fetch;
-  const r = await requestCheckout("evolucao");
-  globalThis.fetch = realFetch;
-  assert.equal(BILLING_ENABLED, false);
-  assert.equal(r.status, "unavailable");
-  assert.equal(r.message, BILLING_UNAVAILABLE_MESSAGE);
-  assert.equal(called, false);
+  // ---------------------------------------------------------------- contratação
+  assert.equal(BILLING_ENABLED, process.env.NEXT_PUBLIC_BILLING_ENABLED === "true", "só liga com a variável explícita");
   assert.equal(BILLING_UNAVAILABLE_MESSAGE, "As assinaturas estarão disponíveis em breve. Nenhuma cobrança foi feita.");
-  ok("Pagamento desativado: nenhuma chamada de rede, nenhum cartão, mensagem honesta");
+  ok("Contratação desligada por padrão, com mensagem honesta");
+
+  assert.equal(firstChargeDate(iso(NOW + 10 * DAY), NOW).getTime(), NOW + 10 * DAY, "teste em andamento: cobra no fim");
+  assert.equal(firstChargeDate(iso(NOW - DAY), NOW).getTime(), NOW, "teste vencido: cobra hoje");
+  assert.equal(firstChargeDate(null, NOW).getTime(), NOW);
+  ok("Primeira cobrança não consome dias do teste");
+
+  assert.ok(isAsaasCheckoutUrl("https://sandbox.asaas.com/checkoutSession/show?id=x"));
+  assert.ok(isAsaasCheckoutUrl("https://asaas.com/c/x"));
+  assert.ok(!isAsaasCheckoutUrl("http://asaas.com/c/x"));
+  assert.ok(!isAsaasCheckoutUrl("https://asaas.com.exemplo.invalid/c/x"));
+  assert.ok(!isAsaasCheckoutUrl("javascript:alert(1)"));
+  ok("Redirecionamento só para página https do Asaas");
 
   // ---------------------------------------------------------------- fixtures fora da demo
   const realInputs = { trial: trialOver, subscription: null };

@@ -41,6 +41,13 @@ function toAccessProfile(r: any): UserAccessProfile {
   } as UserAccessProfile;
 }
 
+async function hasPaidPeriod(db: SupabaseClient, userId: string): Promise<boolean> {
+  const { data } = await db.from("subscriptions").select("billing_status, paid_through").eq("user_id", userId).maybeSingle();
+  if (!data || data.billing_status === "none" || !data.paid_through) return false;
+  const end = Date.parse(data.paid_through);
+  return Number.isFinite(end) && end > Date.now();
+}
+
 export async function loadSession(db: SupabaseClient): Promise<SessionState> {
   const { data: auth, error: authErr } = await db.auth.getUser();
   if (authErr || !auth.user) return { status: "signed_out" };
@@ -76,10 +83,11 @@ export async function loadSession(db: SupabaseClient): Promise<SessionState> {
   // Administração não depende do teste de 30 dias
   if (role === "admin") return profile.status === "active" ? { status: "active", actor, entitlement: null, account } : { status: "blocked", reason: profile.status, actor, account };
 
-  // Controle de acesso vigente preservado: teste vencido continua bloqueando a área
-  // interna até a cobrança e as regras de servidor existirem (INTEGRACAO_PAGAMENTOS_LOGIN.md).
   const entitlement = evaluateAccessEntitlement(toAccessProfile(profile));
   if (entitlement.isActive) return { status: "active", actor, entitlement, account };
   const reason = entitlement.isPending ? "pending" : entitlement.isPaused ? "paused" : entitlement.isRevoked ? "revoked" : "expired";
+  // Teste vencido com período pago válido entra (mesma regra de has_active_access no banco).
+  // paid_through só é gravado pelo webhook do Asaas depois do pagamento confirmado.
+  if (reason === "expired" && (await hasPaidPeriod(db, profile.id))) return { status: "active", actor, entitlement, account };
   return { status: "blocked", reason, actor, entitlement, account };
 }

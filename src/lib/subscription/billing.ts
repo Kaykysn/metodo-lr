@@ -1,21 +1,33 @@
 // ==============================================================================
-// Contratação: DESATIVADA nesta etapa. Nada aqui chama o Asaas, cria cobrança
-// ou recebe dados de cartão. A próxima rodada substitui requestCheckout por uma
-// chamada a uma rota de servidor (ver INTEGRACAO_PAGAMENTOS_LOGIN.md).
+// Contratação: regras puras usadas pelas telas (sem rede). A chamada ao servidor
+// fica em checkout.ts; a cobrança acontece no checkout hospedado do Asaas e o
+// acesso só muda quando o webhook confirma o pagamento (INTEGRACAO_PAGAMENTOS_LOGIN.md).
 // ==============================================================================
-import { getPlan, type PlanId } from "./catalog";
 
-/** Cobrança real ligada? Só muda junto com a integração no servidor. */
-export const BILLING_ENABLED = false as const;
+/**
+ * Contratação aberta neste ambiente? Liga com NEXT_PUBLIC_BILLING_ENABLED=true depois que
+ * a chave do Asaas e o webhook estiverem configurados no Supabase. Desligada, as telas
+ * mostram BILLING_UNAVAILABLE_MESSAGE e nada chama o servidor de cobrança.
+ */
+export const BILLING_ENABLED: boolean = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true";
 
 export const BILLING_UNAVAILABLE_MESSAGE = "As assinaturas estarão disponíveis em breve. Nenhuma cobrança foi feita.";
 
-export type CheckoutResult = { status: "unavailable"; message: string; planId: PlanId };
+/** Mesma regra do servidor: com teste em andamento, a primeira cobrança fica para o fim dele. */
+export function firstChargeDate(trialEndsAt: string | null, nowMs: number): Date {
+  const end = trialEndsAt ? Date.parse(trialEndsAt) : NaN;
+  return Number.isFinite(end) && end > nowMs ? new Date(end) : new Date(nowMs);
+}
 
-/** Placeholder seguro: não faz rede, não aceita cartão, não ativa plano. */
-export async function requestCheckout(planId: PlanId): Promise<CheckoutResult> {
-  getPlan(planId); // valida o ID; preço definitivo será resolvido no servidor
-  return { status: "unavailable", message: BILLING_UNAVAILABLE_MESSAGE, planId };
+/** Só segue para páginas https do Asaas (o servidor já confere; aqui é a segunda trava). */
+export function isAsaasCheckoutUrl(v: unknown): v is string {
+  if (typeof v !== "string") return false;
+  try {
+    const u = new URL(v);
+    return u.protocol === "https:" && (u.hostname === "asaas.com" || u.hostname.endsWith(".asaas.com"));
+  } catch {
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------

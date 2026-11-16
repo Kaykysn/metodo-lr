@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { useData } from "@/components/providers/DataProvider";
 import { COMPARE_ROWS, FEATURE_LABEL, PLANS, formatPrice, getPlan, priceDifference, recommendPlan, type CatalogPlan, type PlanId } from "@/lib/subscription/catalog";
-import { BILLING_UNAVAILABLE_MESSAGE } from "@/lib/subscription/billing";
+import { BILLING_ENABLED, BILLING_UNAVAILABLE_MESSAGE, firstChargeDate } from "@/lib/subscription/billing";
+import { startCheckout } from "@/lib/subscription/checkout";
+import { formatSaoPauloDate } from "@/lib/access-policy";
 import { isProfessionalRole } from "@/lib/subscription/entitlements";
 
 export interface PlanosViewProps {
@@ -17,6 +19,15 @@ const COMPLETO_SUPPORT = FEATURE_LABEL.priority_support;
 
 export default function PlanosView({ prioritySupportReady, contactEmail }: PlanosViewProps) {
   const [selected, setSelected] = useState<PlanId | null>(null);
+  const [returned, setReturned] = useState<"cancelada" | "expirada" | null>(null);
+  useEffect(() => {
+    // Volta do checkout sem pagar: avisa e limpa o endereço
+    const v = new URLSearchParams(window.location.search).get("assinatura");
+    if (v === "cancelada" || v === "expirada") {
+      setReturned(v);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
 
   return (
     <div className="mx-auto w-full max-w-container px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pt-14">
@@ -27,6 +38,12 @@ export default function PlanosView({ prioritySupportReady, contactEmail }: Plano
           Preço mensal total por profissional, sem fidelidade, taxa de implantação ou cobrança por aluno. O aluno acompanhado não paga nada para ver o treino que você disponibilizou.
         </p>
       </header>
+
+      {returned && (
+        <p role="status" className="mt-6 max-w-2xl rounded-control border border-status-caution-border bg-status-caution-bg p-3 text-[15px] text-status-caution-fg">
+          {returned === "cancelada" ? "Pagamento não concluído. Nenhuma cobrança foi feita; você pode tentar de novo quando quiser." : "A página de pagamento expirou antes da conclusão. Nenhuma cobrança foi feita; escolha o plano para abrir uma nova."}
+        </p>
+      )}
 
       <ol data-scroll-stagger="0.1" data-scroll-distance="22" className="mt-10 grid gap-5 md:grid-cols-3" aria-label="Planos mensais">
         {PLANS.map((p) => (
@@ -113,6 +130,24 @@ function Confirmation({ planId, onClose }: { planId: PlanId; onClose: () => void
   const role = mode === "demo" ? actor.role : session.status === "active" || session.status === "blocked" ? session.actor?.role : undefined;
   const professional = !!role && isProfessionalRole(role);
   const current = commercial.intent?.planId;
+  const live = BILLING_ENABLED && mode === "supabase";
+  // Pendente, pausado ou encerrado pela administração não contrata (o servidor também recusa)
+  const canSubscribe = session.status === "active" || (session.status === "blocked" && session.reason === "expired");
+  const access = commercial.access;
+  const sub = commercial.subscription;
+  // Mesma regra do servidor: assinatura viva (paga, em atraso ou agendada) não abre outra
+  const subscribed = !!sub?.providerSubscriptionId && !sub.cancelAtPeriodEnd && sub.billingStatus !== "canceled";
+  const [pay, setPay] = useState<{ status: "idle" | "opening" | "error"; message?: string }>({ status: "idle" });
+  useEffect(() => setPay({ status: "idle" }), [planId]);
+
+  const goToPayment = async () => {
+    setPay({ status: "opening" });
+    try {
+      window.location.assign(await startCheckout(planId));
+    } catch (e) {
+      setPay({ status: "error", message: (e as Error).message });
+    }
+  };
 
   const save = async () => {
     setState({ status: "saving" });
@@ -133,36 +168,73 @@ function Confirmation({ planId, onClose }: { planId: PlanId; onClose: () => void
         <dt className="text-theme-muted">Alunos ativos</dt>
         <dd className="tabular font-semibold">até {plan.activeTraineeLimit}</dd>
       </dl>
-      <p role="status" className="mt-4 rounded-control border border-status-caution-border bg-status-caution-bg p-3 text-[15px] font-semibold text-status-caution-fg">
-        {BILLING_UNAVAILABLE_MESSAGE}
-      </p>
-
-      {signedIn && professional ? (
-        <div className="mt-4 space-y-3 text-[15px]">
-          <p className="text-theme-muted">
-            Você pode guardar esta escolha para depois do teste. Ela não ativa plano, não cria assinatura e não autoriza cobrança; quando a contratação abrir, o preço e o início da cobrança serão mostrados antes de qualquer confirmação.
+      {live && signedIn && professional ? (
+        !canSubscribe ? (
+          <p className="mt-4 text-[15px] text-theme-muted">A contratação fica disponível quando o seu cadastro estiver aprovado e ativo. Veja a situação em <Link href="/conta/acesso" className="font-semibold underline">Plano e acesso</Link>.</p>
+        ) : subscribed ? (
+          <p className="mt-4 text-[15px]">
+            {access?.paidPlanId ? `Você já tem o plano ${getPlan(access.paidPlanId).name}${access.paidThrough ? `, pago até ${formatSaoPauloDate(access.paidThrough)}` : ""}.` : "Você já tem uma assinatura agendada."} Para trocar de plano, fale com o suporte. Detalhes em{" "}
+            <Link href="/conta/acesso" className="font-semibold underline">Plano e acesso</Link>.
           </p>
-          {state.status === "saved" ? (
-            <p role="status" className="font-semibold">Escolha guardada: {plan.name}. Nenhuma cobrança foi feita.</p>
-          ) : (
+        ) : (
+          <div className="mt-4 space-y-3 text-[15px]">
+            <dl className="grid max-w-md grid-cols-[auto_1fr] gap-x-6 gap-y-1.5">
+              <dt className="text-theme-muted">Primeira cobrança</dt>
+              <dd className="tabular font-semibold">
+                {formatSaoPauloDate(firstChargeDate(access?.trialEndsAt ?? null, Date.now()).toISOString())}
+                {access?.phase === "trial" ? " (fim do teste)" : " (hoje)"}
+              </dd>
+              <dt className="text-theme-muted">Pagamento</dt>
+              <dd className="font-semibold">Cartão de crédito, renovação mensal</dd>
+            </dl>
+            <p className="text-theme-muted">
+              Você vai para a página de pagamento do Asaas para informar o cartão; esta plataforma não vê nem guarda os dados dele. O plano passa a valer quando o Asaas confirmar o pagamento. Dá para cancelar a renovação a qualquer momento em Plano e acesso, e o período já pago continua valendo.
+            </p>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={save} disabled={state.status === "saving" || current === planId} className="inline-flex min-h-[44px] items-center rounded-control bg-action px-4 text-sm font-semibold text-action-text hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60">
-                {current === planId ? "Este já é o plano escolhido" : "Guardar como plano escolhido"}
+              <button type="button" onClick={goToPayment} disabled={pay.status === "opening"} className="inline-flex min-h-[44px] items-center rounded-control bg-cta px-4 text-sm font-semibold text-cta-text hover:bg-cta-hover disabled:cursor-wait disabled:opacity-60">
+                {pay.status === "opening" ? "Abrindo o pagamento…" : `Assinar o ${plan.name} por ${formatPrice(plan.priceCents)}/mês`}
               </button>
               <button type="button" onClick={onClose} className="inline-flex min-h-[44px] items-center rounded-control px-4 text-sm font-semibold hover:bg-theme-secondary">Fechar</button>
             </div>
-          )}
-          {state.status === "error" && <p role="alert" className="text-status-danger-fg">Não foi possível guardar a escolha: {state.message}</p>}
-          {mode === "demo" && <p className="text-sm text-theme-muted">Demonstração: a escolha fica só neste navegador.</p>}
-        </div>
-      ) : signedIn ? (
-        <p className="mt-4 text-[15px] text-theme-muted">Este perfil não contrata estes planos. O aluno praticante acessa o treino pelo professor, sem pagar assinatura própria.</p>
+            {pay.status === "error" && <p role="alert" className="text-status-danger-fg">{pay.message}</p>}
+          </div>
+        )
       ) : (
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Link href="/solicitar-acesso" className="inline-flex min-h-[44px] items-center rounded-control bg-cta px-4 text-sm font-semibold text-cta-text hover:bg-cta-hover">Solicitar acesso e usar 30 dias</Link>
-          <Link href="/login" className="inline-flex min-h-[44px] items-center rounded-control border border-theme-boundary/60 px-4 text-sm font-semibold hover:bg-theme-secondary">Entrar</Link>
-          <button type="button" onClick={onClose} className="inline-flex min-h-[44px] items-center rounded-control px-4 text-sm font-semibold hover:bg-theme-secondary">Fechar</button>
-        </div>
+        <>
+          {!live && (
+            <p role="status" className="mt-4 rounded-control border border-status-caution-border bg-status-caution-bg p-3 text-[15px] font-semibold text-status-caution-fg">
+              {BILLING_UNAVAILABLE_MESSAGE}
+            </p>
+          )}
+
+          {signedIn && professional ? (
+            <div className="mt-4 space-y-3 text-[15px]">
+              <p className="text-theme-muted">
+                Você pode guardar esta escolha para depois do teste. Ela não ativa plano, não cria assinatura e não autoriza cobrança; quando a contratação abrir, o preço e o início da cobrança serão mostrados antes de qualquer confirmação.
+              </p>
+              {state.status === "saved" ? (
+                <p role="status" className="font-semibold">Escolha guardada: {plan.name}. Nenhuma cobrança foi feita.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={save} disabled={state.status === "saving" || current === planId} className="inline-flex min-h-[44px] items-center rounded-control bg-action px-4 text-sm font-semibold text-action-text hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60">
+                    {current === planId ? "Este já é o plano escolhido" : "Guardar como plano escolhido"}
+                  </button>
+                  <button type="button" onClick={onClose} className="inline-flex min-h-[44px] items-center rounded-control px-4 text-sm font-semibold hover:bg-theme-secondary">Fechar</button>
+                </div>
+              )}
+              {state.status === "error" && <p role="alert" className="text-status-danger-fg">Não foi possível guardar a escolha: {state.message}</p>}
+              {mode === "demo" && <p className="text-sm text-theme-muted">Demonstração: a escolha fica só neste navegador.</p>}
+            </div>
+          ) : signedIn ? (
+            <p className="mt-4 text-[15px] text-theme-muted">Este perfil não contrata estes planos. O aluno praticante acessa o treino pelo professor, sem pagar assinatura própria.</p>
+          ) : (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/solicitar-acesso" className="inline-flex min-h-[44px] items-center rounded-control bg-cta px-4 text-sm font-semibold text-cta-text hover:bg-cta-hover">Solicitar acesso e usar 30 dias</Link>
+              <Link href="/login" className="inline-flex min-h-[44px] items-center rounded-control border border-theme-boundary/60 px-4 text-sm font-semibold hover:bg-theme-secondary">Entrar</Link>
+              <button type="button" onClick={onClose} className="inline-flex min-h-[44px] items-center rounded-control px-4 text-sm font-semibold hover:bg-theme-secondary">Fechar</button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
@@ -272,7 +344,9 @@ function PlanFaq({ contactEmail, supportReady }: { contactEmail: string | null; 
     { q: "O que acontece com meu histórico se eu mudar de plano ou o teste acabar?", a: "Nada é apagado. Registros feitos no teste ou num plano maior continuam disponíveis para consulta; o que muda são as ações novas. O treino já disponibilizado continua visível para o aluno." },
     { q: "Preciso de mais de 100 alunos ativos.", a: contactEmail ? <>Nenhum plano atual atende esse volume. Escreva para <a className="font-semibold underline" href={`mailto:${contactEmail}`}>{contactEmail}</a> para conversar.</> : "Nenhum plano atual atende esse volume, e o canal comercial para esse caso ainda está sendo definido." },
     { q: "Como é o suporte?", a: supportReady ? "Todos os planos têm ajuda de uso e canal para problemas de acesso e cobrança. No Completo, o atendimento de uso do sistema é prioritário, por canal escrito, em dias úteis." : "Todos os planos têm ajuda de uso e canal para problemas de acesso e cobrança. O suporte prioritário do Completo ainda está em preparação e só será oferecido quando o canal estiver funcionando." },
-    { q: "Já posso contratar?", a: "Ainda não. A contratação será aberta em breve; nenhuma cobrança é feita nesta página. Quando abrir, o valor, a recorrência e a data da primeira cobrança aparecerão antes de qualquer confirmação." },
+    BILLING_ENABLED
+      ? { q: "Como funciona a contratação?", a: "Escolha o plano e confirme na página de pagamento do Asaas, com cartão de crédito. A mensalidade renova todo mês até você cancelar. Se ainda estiver no teste, a primeira cobrança fica para o fim dele. Cancelar interrompe a renovação e mantém o período já pago." }
+      : { q: "Já posso contratar?", a: "Ainda não. A contratação será aberta em breve; nenhuma cobrança é feita nesta página. Quando abrir, o valor, a recorrência e a data da primeira cobrança aparecerão antes de qualquer confirmação." },
   ];
   return (
     <section aria-labelledby="duvidas-planos" className="mt-14 grid gap-8 border-t border-theme-border pt-10 lg:grid-cols-[0.7fr_1.3fr]">
