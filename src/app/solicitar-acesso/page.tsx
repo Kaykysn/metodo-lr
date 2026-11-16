@@ -62,7 +62,7 @@ export default function SolicitarAcessoPage() {
       <AppearanceBar />
       <div className="sm:mx-auto sm:w-full sm:max-w-xl text-center">
         <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-lg shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-lg shadow-xs">
             LR
           </div>
           <span className="text-xl font-bold tracking-tight text-theme-text">
@@ -103,7 +103,7 @@ export default function SolicitarAcessoPage() {
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 placeholder="Seu nome"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
               />
             </div>
 
@@ -117,7 +117,7 @@ export default function SolicitarAcessoPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="seu.email@instituicao.edu.br"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
               />
             </div>
 
@@ -129,7 +129,7 @@ export default function SolicitarAcessoPage() {
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25 bg-theme-primary"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25 bg-theme-primary"
                 >
                   <option value="teacher">Professor(a) de Educação Física</option>
                   <option value="pe_student">Estudante de Educação Física</option>
@@ -146,7 +146,7 @@ export default function SolicitarAcessoPage() {
                   value={formData.institution}
                   onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
                   placeholder="Nome da universidade/clínica"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function SolicitarAcessoPage() {
                 value={formData.motivation}
                 onChange={(e) => setFormData({ ...formData, motivation: e.target.value })}
                 placeholder="Ex: Aprofundar o raciocínio na avaliação de dor lombar crônica e acompanhamento de sobrecarga de treino..."
-                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
               />
             </div>
 
@@ -172,7 +172,7 @@ export default function SolicitarAcessoPage() {
                   required
                   checked={formData.acceptedTerms}
                   onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
-                  className="mt-1 w-4 h-4 rounded text-theme-text border-theme-boundary/50"
+                  className="mt-1 w-4 h-4 rounded-sm text-theme-text border-theme-boundary/50"
                 />
                 <span className="text-xs text-theme-muted leading-relaxed">
                   Declaro que compreendo o caráter estritamente educacional da plataforma e concordo com os{" "}

@@ -111,7 +111,7 @@ export default function AssessmentFlow({ initial, trainee }: { initial: Assessme
       <nav aria-label="Etapas da avaliação" className="min-w-0 lg:sticky lg:top-6 lg:self-start">
         <ol className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:gap-1 lg:overflow-visible">
           {STEPS.map((s, i) => (
-            <li key={s.key} className="flex-shrink-0">
+            <li key={s.key} className="shrink-0">
               <button
                 type="button"
                 onClick={() => go(i)}
@@ -121,7 +121,7 @@ export default function AssessmentFlow({ initial, trainee }: { initial: Assessme
                 }`}
               >
                 <span
-                  className={`tabular inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
+                  className={`tabular inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
                     stepDone[i] ? "border-theme-teal bg-theme-teal text-cta-text" : "border-theme-boundary"
                   }`}
                   aria-hidden="true"
@@ -144,7 +144,7 @@ export default function AssessmentFlow({ initial, trainee }: { initial: Assessme
             <p className="text-sm text-theme-muted">
               Etapa {step + 1} de {STEPS.length} · {trainee.code} — {trainee.displayName} · avaliação v{a.version}
             </p>
-            <h2 ref={headingRef} tabIndex={-1} className="scroll-mt-24 text-xl font-bold focus:outline-none">
+            <h2 ref={headingRef} tabIndex={-1} className="scroll-mt-24 text-xl font-bold focus:outline-hidden">
               {STEPS[step].title}
             </h2>
           </div>

@@ -105,7 +105,7 @@ export default function Hero() {
 
       {/* Coluna de texto: mesma margem esquerda do logo no header */}
       <div className="hero-inner relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 sm:px-6 lg:px-8">
-        <div className="hero-copy w-full py-12 sm:py-16 lg:max-w-[36rem] lg:py-20">
+        <div className="hero-copy w-full py-12 sm:py-16 lg:max-w-xl lg:py-20">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--hero-jade))] backdrop-blur-md mt-4 -mb-4">
             <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--hero-jade))]" aria-hidden="true" />
             Biomecânica aplicada
@@ -161,7 +161,7 @@ export default function Hero() {
           </div>
 
           {/* Nota: abaixo dos botões, não ao lado */}
-          <p className="mt-4 flex max-w-[60ch] items-start gap-2 text-[13px] leading-relaxed text-[rgb(var(--hero-muted))]/75 sm:text-sm">
+          <p className="mt-4 flex max-w-[60ch] items-start gap-2 text-[13px] leading-relaxed text-[rgb(var(--hero-muted))]/75 sm:text-sm sm:leading-5">
             <ShieldCheck className="mt-[2px] h-4 w-4 shrink-0" aria-hidden="true" />
             <span>
               Para profissionais e estudantes de Educação Física. Acesso após aprovação; os 30 dias
@@ -183,7 +183,7 @@ export default function Hero() {
       {/* Modal de demonstração: acessível, com focus trap, Esc e retorno de foco. */}
       {demoOpen && (
         <div
-          className="hero-demo-overlay fixed inset-0 z-[100] flex items-center justify-center p-4"
+          className="hero-demo-overlay fixed inset-0 z-100 flex items-center justify-center p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) setDemoOpen(false);
           }}

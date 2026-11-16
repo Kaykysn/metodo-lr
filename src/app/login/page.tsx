@@ -140,7 +140,7 @@ export default function LoginPage() {
       <AppearanceBar />
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-lg shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-lg shadow-xs">
             LR
           </div>
           <span className="text-xl font-bold tracking-tight text-theme-text">
@@ -160,13 +160,13 @@ export default function LoginPage() {
           {/* Mensagem de Erro ou Estado de Configuração */}
           {notice && !errorMessage && (
             <div role="status" className="p-4 rounded-xl bg-status-success-bg border border-status-success-border text-xs text-status-success-fg flex items-start gap-2.5">
-              <Check className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <Check className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{notice}</span>
             </div>
           )}
           {errorMessage && (
             <div role="alert" className="p-4 rounded-xl bg-status-danger-bg border border-status-danger-border text-xs text-status-danger-fg flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-status-danger-fg flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-4 h-4 text-status-danger-fg shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -227,7 +227,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu.nome@exemplo.com.br"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-sm font-bold shadow-sm transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-sm font-bold shadow-xs transition-all flex items-center justify-center gap-2"
             >
               <span>{isLoading ? "Validando credenciais..." : "Acessar Plataforma"}</span>
               <ArrowRight className="w-4 h-4" />
@@ -301,7 +301,7 @@ export default function LoginPage() {
 
       {/* Modal de Recuperação de Senha */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 bg-ink-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-ink-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-theme-primary rounded-2xl max-w-md w-full p-6 space-y-4 shadow-elevated border border-theme-border">
             <h3 className="text-lg font-bold text-theme-text">Recuperação de Senha</h3>
             <p className="text-xs text-theme-muted leading-relaxed">

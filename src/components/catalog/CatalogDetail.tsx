@@ -115,7 +115,7 @@ export default function CatalogDetail({ repo, actor, exercise, favorite, onToggl
             onClick={onToggleFavorite}
             aria-pressed={favorite}
             aria-label={favorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-            className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-control border border-theme-border hover:bg-theme-secondary"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-theme-border hover:bg-theme-secondary"
           >
             <Star className={`h-5 w-5 ${favorite ? "fill-current text-status-caution-fg" : "text-theme-muted"}`} aria-hidden="true" />
           </button>

@@ -111,7 +111,7 @@ export function TreinoSection() {
 export function EvolucaoSection() {
   return (
     <section id="evolucao" className="relative isolate scroll-mt-20 overflow-hidden">
-      <div aria-hidden="true" data-decorative className="glow-jade pointer-events-none absolute -right-[10%] top-0 -z-10 h-full w-[55%]" />
+      <div aria-hidden="true" data-decorative className="glow-jade pointer-events-none absolute right-[-10%] top-0 -z-10 h-full w-[55%]" />
       <div className="mx-auto max-w-[1180px] px-4 pb-20 sm:px-6 lg:px-8 lg:pb-24">
         <div data-scroll-stagger="0.12" data-scroll-distance="20" className="max-w-2xl border-t border-theme-border pt-16 lg:pt-20">
           <h2 data-scroll-item className="text-3xl font-bold tracking-tight sm:text-4xl">Dor, função, carga e adesão em gráficos separados.</h2>

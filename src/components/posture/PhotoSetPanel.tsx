@@ -272,7 +272,7 @@ function PhotoSlot({
       </header>
 
       {/* Foto contida: corpo inteiro e proporções preservados */}
-      <div className="relative aspect-[3/4] bg-[#e9eef0] dark:bg-[#0f1418]">
+      <div className="relative aspect-3/4 bg-[#e9eef0] dark:bg-[#0f1418]">
         {photo && url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={`Foto de ${VIEW_LABEL[view].toLocaleLowerCase("pt-BR")}${photo.profileSide ? ` (perfil ${photo.profileSide})` : ""}`} className="absolute inset-0 h-full w-full object-contain" style={photo.mirrorConfirmed ? { transform: "scaleX(-1)" } : undefined} />
@@ -349,7 +349,7 @@ export function PhotoViewer({ url, title, onClose, mirrored = false }: { url: st
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => ref.current?.focus(), []);
   return (
-    <div ref={ref} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} onKeyDown={(e) => e.key === "Escape" && onClose()} className="fixed inset-0 z-[60] flex flex-col bg-[#0f1418] text-white outline-none">
+    <div ref={ref} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} onKeyDown={(e) => e.key === "Escape" && onClose()} className="fixed inset-0 z-60 flex flex-col bg-[#0f1418] text-white outline-hidden">
       <div className="flex items-center justify-between gap-2 p-3">
         <p className="font-semibold">{title}</p>
         <button type="button" onClick={onClose} aria-label="Fechar" className="close-x-highlight inline-flex h-11 w-11 items-center justify-center rounded-lg border transition-colors hover:bg-[#f87171]/35"><X className="h-5 w-5" /></button>

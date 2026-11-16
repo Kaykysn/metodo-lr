@@ -46,9 +46,9 @@ export default function FrostedGlassIcon({
   const colorClass = {
     auto: active
       ? "text-theme-teal dark:text-theme-teal"
-      : "text-[#0E5B55] dark:text-[#EFF7F6]",
+      : "text-brand-600 dark:text-[#EFF7F6]",
     dark: active ? "text-brand-300" : "text-[#EFF7F6]",
-    light: active ? "text-[#0E5B55]" : "text-[#0E5B55]",
+    light: active ? "text-brand-600" : "text-brand-600",
   }[surface];
 
   return (

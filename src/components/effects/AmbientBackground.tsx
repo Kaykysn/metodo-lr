@@ -30,17 +30,17 @@ export default function AmbientBackground() {
 
       {/* Camada Modo Claro: névoa pálida com petróleo e jade diluídos na margem direita */}
       <div className="absolute inset-0 block dark:hidden">
-        <div className="atmos-orb atmos-orb-a absolute -right-[10%] top-[12%] h-[65vh] w-[45vw] min-w-[340px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,158,144,0.07)_0%,rgba(4,99,95,0.045)_45%,transparent_70%)] blur-3xl" />
-        <div className="atmos-orb atmos-orb-b absolute -right-[5%] top-[55%] h-[55vh] w-[35vw] min-w-[280px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(4,99,95,0.055)_0%,rgba(187,160,120,0.035)_50%,transparent_70%)] blur-3xl" />
-        <div className="atmos-orb atmos-orb-c absolute -left-[12%] top-[68%] h-[48vh] w-[38vw] min-w-[300px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,158,144,0.05)_0%,transparent_68%)] blur-3xl" />
+        <div className="atmos-orb atmos-orb-a absolute right-[-10%] top-[12%] h-[65vh] w-[45vw] min-w-[340px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,158,144,0.07)_0%,rgba(4,99,95,0.045)_45%,transparent_70%)] blur-3xl" />
+        <div className="atmos-orb atmos-orb-b absolute right-[-5%] top-[55%] h-[55vh] w-[35vw] min-w-[280px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(4,99,95,0.055)_0%,rgba(187,160,120,0.035)_50%,transparent_70%)] blur-3xl" />
+        <div className="atmos-orb atmos-orb-c absolute left-[-12%] top-[68%] h-[48vh] w-[38vw] min-w-[300px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,158,144,0.05)_0%,transparent_68%)] blur-3xl" />
       </div>
 
       {/* Camada Modo Escuro: profundidade original da arte amostrada */}
       <div className="absolute inset-0 hidden dark:block">
-        <div className="atmos-orb atmos-orb-a absolute -right-[12%] top-[8%] h-[70vh] w-[50vw] min-w-[400px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,158,144,0.16)_0%,rgba(4,99,95,0.12)_45%,transparent_70%)] blur-3xl" />
+        <div className="atmos-orb atmos-orb-a absolute right-[-12%] top-[8%] h-[70vh] w-[50vw] min-w-[400px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(59,158,144,0.16)_0%,rgba(4,99,95,0.12)_45%,transparent_70%)] blur-3xl" />
         <div className="atmos-orb atmos-orb-b absolute right-[15%] top-[45%] h-[60vh] w-[45vw] min-w-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(4,99,95,0.18)_0%,rgba(2,18,38,0.2)_55%,transparent_75%)] blur-3xl" />
-        <div className="atmos-orb atmos-orb-c absolute -right-[5%] bottom-[5%] h-[40vh] w-[30vw] min-w-[240px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(187,160,120,0.08)_0%,transparent_65%)] blur-3xl" />
-        <div className="atmos-orb atmos-orb-d absolute -left-[10%] bottom-[18%] h-[46vh] w-[36vw] min-w-[280px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(118,215,190,0.07)_0%,transparent_68%)] blur-3xl" />
+        <div className="atmos-orb atmos-orb-c absolute right-[-5%] bottom-[5%] h-[40vh] w-[30vw] min-w-[240px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(187,160,120,0.08)_0%,transparent_65%)] blur-3xl" />
+        <div className="atmos-orb atmos-orb-d absolute left-[-10%] bottom-[18%] h-[46vh] w-[36vw] min-w-[280px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(118,215,190,0.07)_0%,transparent_68%)] blur-3xl" />
       </div>
 
       {/* Páginas de leitura: restringe o gradiente às margens externas */}

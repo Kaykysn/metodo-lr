@@ -88,7 +88,7 @@ export function RequiredLegend() {
 }
 
 export const inputClass =
-  "w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] text-theme-text placeholder:text-theme-subtle focus:border-theme-teal focus:outline-none focus:ring-2 focus:ring-theme-teal/25";
+  "w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] text-theme-text placeholder:text-theme-subtle focus:border-theme-teal focus:outline-hidden focus:ring-2 focus:ring-theme-teal/25";
 
 export function Badge({ tone = "neutral", children }: { tone?: "neutral" | "success" | "caution" | "danger" | "accent"; children: React.ReactNode }) {
   const t = {
@@ -127,7 +127,7 @@ export function Loading({ label = "Carregando…" }: { label?: string }) {
 export function ErrorNote({ children }: { children: React.ReactNode }) {
   return (
     <div role="alert" className="flex items-start gap-2 rounded-control border border-status-danger-border bg-status-danger-bg p-3 text-[15px] text-status-danger-fg">
-      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <div>{children}</div>
     </div>
   );
@@ -137,7 +137,7 @@ export function InfoNote({ children, tone = "neutral" }: { children: React.React
   const c = tone === "caution" ? "border-status-caution-border bg-status-caution-bg text-status-caution-fg" : "border-theme-border bg-theme-secondary/70 text-theme-text";
   return (
     <div className={`flex items-start gap-2 rounded-control border p-3 text-[15px] ${c}`}>
-      <Info className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
+      <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <div>{children}</div>
     </div>
   );

@@ -98,7 +98,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
   const isSelected = (id: string) => selectedRegions.includes(id);
 
   return (
-    <div className="bg-theme-primary border border-theme-border rounded-2xl p-6 shadow-sm">
+    <div className="bg-theme-primary border border-theme-border rounded-2xl p-6 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-theme-border">
         <div>
           <h3 className="text-base font-semibold text-theme-text">Mapa Anatômico de Localização dos Sintomas</h3>
@@ -114,7 +114,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
             onClick={() => setActiveView("posterior")}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeView === "posterior"
-                ? "bg-inverse text-inverse-fg shadow-sm"
+                ? "bg-inverse text-inverse-fg shadow-xs"
                 : "text-theme-muted hover:text-theme-text"
             }`}
           >
@@ -127,7 +127,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
             onClick={() => setActiveView("anterior")}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeView === "anterior"
-                ? "bg-inverse text-inverse-fg shadow-sm"
+                ? "bg-inverse text-inverse-fg shadow-xs"
                 : "text-theme-muted hover:text-theme-text"
             }`}
           >
@@ -139,7 +139,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 items-center">
         {/* Silhueta Anatômica Muscular Detalhada */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center p-3 sm:p-4 bg-[#021226] rounded-xl border border-theme-border shadow-inner">
-          <div className="relative w-full max-w-[300px] aspect-[560/1024]">
+          <div className="relative w-full max-w-[300px] aspect-560/1024">
             {/* SVG Silhueta Anatômica Interativa com pontos clicáveis sobrepostos.
                 A arte oficial é public/images/anatomia-corpo.png (vista anterior à
                 esquerda, posterior à direita); cada aba recorta a metade correta
@@ -238,7 +238,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
               })}
             </svg>
           </div>
-          <span className="text-[11px] text-[#76D7BE] mt-2 text-center font-medium">
+          <span className="text-[11px] text-brand-300 mt-2 text-center font-medium">
             {activeView === "posterior" ? "Visualizando face posterior (costas)" : "Visualizando face anterior (frente)"}
           </span>
         </div>
@@ -271,7 +271,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                 return (
                   <span
                     key={regId}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-theme-primary border border-theme-teal/50 text-theme-text rounded-lg text-xs font-medium shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-theme-primary border border-theme-teal/50 text-theme-text rounded-lg text-xs font-medium shadow-xs"
                   >
                     <Check className="w-3.5 h-3.5 text-theme-teal" />
                     {reg ? reg.name : regId}
@@ -313,7 +313,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                     aria-pressed={checked}
                   >
                     <span className="truncate">{region.name}</span>
-                    {checked && <Check className="w-3.5 h-3.5 text-theme-teal flex-shrink-0 ml-1" aria-hidden="true" />}
+                    {checked && <Check className="w-3.5 h-3.5 text-theme-teal shrink-0 ml-1" aria-hidden="true" />}
                   </button>
                 );
               })}

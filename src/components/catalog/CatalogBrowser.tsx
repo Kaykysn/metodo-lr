@@ -230,7 +230,7 @@ export default function CatalogBrowser() {
                         {!e.is_active && " · arquivado"}
                       </span>
                     </button>
-                    <button type="button" onClick={() => toggleFav(e.id)} aria-pressed={favs.has(e.id)} aria-label={`${favs.has(e.id) ? "Remover" : "Adicionar"} ${e.name} ${favs.has(e.id) ? "dos" : "aos"} favoritos`} className="inline-flex w-12 flex-shrink-0 items-center justify-center">
+                    <button type="button" onClick={() => toggleFav(e.id)} aria-pressed={favs.has(e.id)} aria-label={`${favs.has(e.id) ? "Remover" : "Adicionar"} ${e.name} ${favs.has(e.id) ? "dos" : "aos"} favoritos`} className="inline-flex w-12 shrink-0 items-center justify-center">
                       <Star className={`h-4 w-4 ${favs.has(e.id) ? "fill-current text-status-caution-fg" : "text-theme-muted"}`} aria-hidden="true" />
                     </button>
                   </li>
@@ -245,7 +245,7 @@ export default function CatalogBrowser() {
           )}
         </section>
 
-        <div ref={detailRef} tabIndex={-1} className="min-w-0 outline-none lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto">
+        <div ref={detailRef} tabIndex={-1} className="min-w-0 outline-hidden lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto">
           {creating ? (
             <Panel className="space-y-4 p-4 sm:p-6">
               <button type="button" onClick={() => setCreating(false)} className="inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-theme-teal lg:hidden">

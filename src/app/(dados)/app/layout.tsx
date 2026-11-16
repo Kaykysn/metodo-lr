@@ -143,11 +143,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[264px_1fr] print:block">
-      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-control focus:bg-theme-raised focus:px-3 focus:py-2">
+      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-60 focus:rounded-control focus:bg-theme-raised focus:px-3 focus:py-2">
         Pular para o conteúdo
       </a>
 
-      <aside className="sticky top-0 hidden h-screen print:!hidden flex-col gap-6 overflow-y-auto border-r border-theme-border bg-theme-primary px-3 py-5 lg:flex">
+      <aside className="sticky top-0 hidden h-screen print:hidden! flex-col gap-6 overflow-y-auto border-r border-theme-border bg-theme-primary px-3 py-5 lg:flex">
         <Link href="/app" className="px-3 text-theme-text" aria-label="Leandro Rangel — visão geral">
           <Logo variant="horizontal" size={34} frame="accent" />
         </Link>
@@ -157,7 +157,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SecondaryArea />
       </aside>
 
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-theme-border bg-theme-primary/95 px-4 backdrop-blur lg:hidden print:hidden">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-theme-border bg-theme-primary/95 px-4 backdrop-blur-sm lg:hidden print:hidden">
         <Link href="/app" className="text-theme-text" aria-label="Leandro Rangel — visão geral">
           <span className="sm:hidden"><Logo variant="symbol" size={34} frame="accent" /></span>
           <span className="hidden sm:inline"><Logo variant="horizontal" size={32} frame="accent" /></span>
@@ -201,7 +201,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           Você está como <strong className="font-semibold text-theme-text">{actor.name}</strong> — {ROLE_LABEL[actor.role]}
         </div>
         <TrialBanner />
-        <main id="conteudo" className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-6 sm:px-8 sm:py-8">
+        <main id="conteudo" className="mx-auto w-full max-w-container flex-1 px-4 py-6 sm:px-8 sm:py-8">
           <SessionGate>{children}</SessionGate>
         </main>
       </div>

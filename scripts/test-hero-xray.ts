@@ -24,17 +24,19 @@ console.log("✓ Placeholders SVG de base e raio-x verificados.");
 // 2. Estilos do novo visual
 const globalsCssPath = path.join(root, "src", "styles", "globals.css");
 const globalsCss = fs.readFileSync(globalsCssPath, "utf-8");
+/** Classe definida como seletor (.nome) ou como utilitário do Tailwind 4 (@utility nome). */
+const hasClass = (name: string) => globalsCss.includes(`.${name}`) || globalsCss.includes(`@utility ${name}`);
 const tokensCss = fs.readFileSync(path.join(root, "src", "styles", "tokens.css"), "utf-8");
 
 // Fundo: vídeo azul (com poster) + ondas SVG de ponta a ponta
-assert.ok(globalsCss.includes(".hero-backdrop"), "globals.css deve conter o fundo .hero-backdrop");
-assert.ok(globalsCss.includes(".hero-video"), "O fundo deve ter a camada de vídeo (.hero-video)");
-assert.ok(globalsCss.includes(".hero-video-poster"), "O fundo deve ter o poster do primeiro quadro (.hero-video-poster)");
-assert.ok(globalsCss.includes(".hero-video-overlay"), "O vídeo deve ter véu de contraste (.hero-video-overlay)");
+assert.ok(hasClass("hero-backdrop"), "globals.css deve conter o fundo .hero-backdrop");
+assert.ok(hasClass("hero-video"), "O fundo deve ter a camada de vídeo (.hero-video)");
+assert.ok(hasClass("hero-video-poster"), "O fundo deve ter o poster do primeiro quadro (.hero-video-poster)");
+assert.ok(hasClass("hero-video-overlay"), "O vídeo deve ter véu de contraste (.hero-video-overlay)");
 assert.ok(globalsCss.includes("var(--hero-video-overlay)"), "A opacidade do véu deve vir de --hero-video-overlay");
-assert.ok(globalsCss.includes(".hero-wave"), "Ondas SVG (.hero-wave) devem existir");
-assert.ok(globalsCss.includes(".hero-waves-back"), "Deve existir a camada de ondas de trás (.hero-waves-back)");
-assert.ok(globalsCss.includes(".hero-waves-front"), "Deve existir a camada de ondas da frente (.hero-waves-front)");
+assert.ok(hasClass("hero-wave"), "Ondas SVG (.hero-wave) devem existir");
+assert.ok(hasClass("hero-waves-back"), "Deve existir a camada de ondas de trás (.hero-waves-back)");
+assert.ok(hasClass("hero-waves-front"), "Deve existir a camada de ondas da frente (.hero-waves-front)");
 assert.ok(globalsCss.includes("mix-blend-mode: screen"), "Ondas/brilho devem usar mix-blend-mode: screen");
 assert.ok(globalsCss.includes("radial-gradient"), "O fundo deve usar radial-gradient de petróleo");
 
@@ -44,12 +46,12 @@ assert.ok(globalsCss.includes("var(--hero-wave-opacity-front"), "A camada da fre
 assert.ok(globalsCss.includes("@keyframes hero-wave-drift"), "A deriva das ondas deve ter @keyframes próprio");
 assert.ok(tokensCss.includes("--hero-wave-duration: 34s"), "A deriva das ondas deve levar 30–40s (--hero-wave-duration)");
 assert.ok(
-  globalsCss.includes(".hero-waves") && globalsCss.includes("animation: none"),
+  hasClass("hero-waves") && globalsCss.includes("animation: none"),
   "Reduced-motion/modo leve deve desligar a deriva das ondas"
 );
 
 // Transição hero → próxima seção e indicador de rolagem
-assert.ok(globalsCss.includes(".hero-section-fade"), "Deve existir a faixa de transição (.hero-section-fade)");
+assert.ok(hasClass("hero-section-fade"), "Deve existir a faixa de transição (.hero-section-fade)");
 assert.ok(globalsCss.includes("var(--hero-next-bg)"), "A faixa deve usar a cor da próxima seção (--hero-next-bg)");
 assert.ok(tokensCss.includes("--hero-next-bg"), "O token --hero-next-bg deve existir");
 {
@@ -59,11 +61,11 @@ assert.ok(tokensCss.includes("--hero-next-bg"), "O token --hero-next-bg deve exi
     "O fade não deve seguir a ilha escura do hero, e sim o tema global da página"
   );
 }
-assert.ok(globalsCss.includes(".hero-scroll-cue"), "Deve existir o indicador de rolagem (.hero-scroll-cue)");
+assert.ok(hasClass("hero-scroll-cue"), "Deve existir o indicador de rolagem (.hero-scroll-cue)");
 assert.ok(globalsCss.includes("var(--hero-scroll-cue-opacity"), "A discrição do indicador vem de --hero-scroll-cue-opacity");
 
 // Um único wrapper de modelo, container de tamanho para os cqw da lente
-assert.ok(globalsCss.includes(".hero-model"), "Deve existir um único wrapper .hero-model");
+assert.ok(hasClass("hero-model"), "Deve existir um único wrapper .hero-model");
 assert.ok(!globalsCss.includes("right: -8vw"), "O wrapper não deve usar right: -8vw");
 assert.ok(
   globalsCss.indexOf(".hero-model .hero-xray-base") > globalsCss.indexOf("@media (max-width: 1023px)"),
@@ -73,10 +75,10 @@ assert.ok(globalsCss.includes("aspect-ratio: 896 / 1114"), "O wrapper deve reser
 assert.ok(globalsCss.includes("clamp(24px, 6vw, 120px)"), "O wrapper deve respeitar a folga lateral mínima");
 
 // Camadas: cópia borrada, base, raio-X, anel, glow
-assert.ok(globalsCss.includes(".hero-xray-blur"), "Cópia borrada (.hero-xray-blur) deve existir");
+assert.ok(hasClass("hero-xray-blur"), "Cópia borrada (.hero-xray-blur) deve existir");
 assert.ok(globalsCss.includes("blur(var(--hero-blur"), "A cópia borrada deve usar --hero-blur");
-assert.ok(globalsCss.includes(".hero-xray-base"), "Base nítida (.hero-xray-base) deve existir");
-assert.ok(globalsCss.includes(".hero-xray-layer"), "Camada de raio-X (.hero-xray-layer) deve existir");
+assert.ok(hasClass("hero-xray-base"), "Base nítida (.hero-xray-base) deve existir");
+assert.ok(hasClass("hero-xray-layer"), "Camada de raio-X (.hero-xray-layer) deve existir");
 assert.ok(globalsCss.includes("var(--lens-r"), "A lente deve usar --lens-r");
 assert.ok(globalsCss.includes("var(--x)") && globalsCss.includes("var(--y)"), "A lente deve usar --x/--y");
 assert.ok(globalsCss.includes("-webkit-mask-image: radial-gradient"), "A lente deve ter máscara radial (webkit)");
@@ -84,25 +86,28 @@ assert.ok(globalsCss.includes("mask-image: radial-gradient"), "A lente deve ter 
 assert.ok(globalsCss.includes("mask-composite: intersect"), "Lente ∩ fade deve usar mask-composite: intersect");
 assert.ok(globalsCss.includes("source-in"), "Fallback -webkit-mask-composite: source-in obrigatório");
 assert.ok(globalsCss.includes("--hero-fade-start"), "O fade inferior deve ser controlado por --hero-fade-start");
-assert.ok(globalsCss.includes(".hero-xray-ring"), "Anel luminoso (.hero-xray-ring) deve existir");
+assert.ok(hasClass("hero-xray-ring"), "Anel luminoso (.hero-xray-ring) deve existir");
 assert.ok(globalsCss.includes("rgb(255 170 80"), "O anel deve usar a borda âmbar especificada");
 assert.ok(globalsCss.includes("box-shadow"), "O anel deve ter glow via box-shadow");
-assert.ok(globalsCss.includes(".hero-xray-ember"), "Glow âmbar (.hero-xray-ember) deve existir");
+assert.ok(hasClass("hero-xray-ember"), "Glow âmbar (.hero-xray-ember) deve existir");
 assert.ok(globalsCss.includes("rgb(255 150 50"), "O glow âmbar deve usar rgb(255 150 50)");
 
 // Sinal de interatividade: cursor de lente + ponto pulsante que some após a 1ª interação
 assert.ok(globalsCss.includes("cursor: crosshair"), "O modelo deve trocar o cursor para lente (crosshair)");
-assert.ok(globalsCss.includes(".hero-xray-ping"), "Deve existir o ponto pulsante (.hero-xray-ping)");
+assert.ok(hasClass("hero-xray-ping"), "Deve existir o ponto pulsante (.hero-xray-ping)");
 assert.ok(globalsCss.includes("@keyframes hero-xray-ping"), "O ponto pulsante deve ter anel que expande (@keyframes hero-xray-ping)");
-assert.ok(globalsCss.includes(".hero-xray-ping.is-hidden"), "O ponto pulsante deve sumir após a interação");
-assert.ok(globalsCss.includes(".hero-hint-touch"), "A dica deve ter variante de toque (.hero-hint-touch)");
+assert.ok(
+  globalsCss.includes(".hero-xray-ping.is-hidden") || /@utility hero-xray-ping \{[\s\S]*?&\.is-hidden \{\s*display: none;/.test(globalsCss),
+  "O ponto pulsante deve sumir após a interação"
+);
+assert.ok(hasClass("hero-hint-touch"), "A dica deve ter variante de toque (.hero-hint-touch)");
 assert.ok(globalsCss.includes("(pointer: coarse)"), "A troca de dica no toque deve usar (pointer: coarse)");
 
 // Respiração e acessibilidade (mantidas)
 assert.ok(globalsCss.includes("@keyframes hero-xray-respiration"), "globals.css deve conter @keyframes hero-xray-respiration");
 assert.ok(globalsCss.includes("scale(1.004)"), "Respiração deve ter amplitude máxima ~0,4%");
 assert.ok(globalsCss.includes("4.5s"), "Ciclo da respiração deve ser 4.5s");
-assert.ok(globalsCss.includes(".hero-xray-breathing"), "Classe .hero-xray-breathing deve existir");
+assert.ok(hasClass("hero-xray-breathing"), "Classe .hero-xray-breathing deve existir");
 assert.ok(globalsCss.includes("will-change: transform"), "Respiração deve declarar will-change: transform");
 assert.ok(globalsCss.includes(".lite .hero-xray-breathing"), "Modo leve deve neutralizar a respiração");
 assert.ok(globalsCss.includes("@media (prefers-reduced-motion: reduce)"), "Deve tratar movimento reduzido");
@@ -266,7 +271,7 @@ assert.ok(socialSrc.includes("HERO_SOCIAL_PROOF"), "A prova de confiança deve v
 // Header: variante escura sobre o hero, trocada por IntersectionObserver
 const headerPath = path.join(root, "src", "components", "landing", "Header.tsx");
 const headerSrc = fs.readFileSync(headerPath, "utf-8");
-assert.ok(globalsCss.includes(".site-header-over-hero"), "O header deve ter a variante escura .site-header-over-hero");
+assert.ok(hasClass("site-header-over-hero"), "O header deve ter a variante escura .site-header-over-hero");
 assert.ok(headerSrc.includes("IntersectionObserver"), "A troca do header deve usar IntersectionObserver (não scroll)");
 assert.ok(headerSrc.includes("rootMargin"), "O observador do header deve recuar o topo pela altura do header");
 assert.ok(headerSrc.includes("ThemeSelector"), "O header deve manter o seletor de tema");

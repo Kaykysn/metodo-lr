@@ -21,7 +21,7 @@ export function FeatureLock({ feature, compact = false }: { feature: Feature; co
   const from = plan.id === "completo" ? "no plano Completo" : `a partir do plano ${plan.name}`;
   return (
     <div className={`flex items-start gap-3 rounded-panel border border-dashed border-theme-boundary/60 ${compact ? "p-3" : "p-5"}`}>
-      <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-theme-muted" aria-hidden="true" />
+      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-theme-muted" aria-hidden="true" />
       <div className="text-[15px]">
         <p className="font-semibold text-theme-text">{FEATURE_LABEL[feature]}: disponível {from}.</p>
         <p className="mt-0.5 text-theme-muted">

@@ -80,7 +80,7 @@ export default function ProductPreview({ demo }: { demo: DemoCase }) {
           role="tabpanel"
           aria-labelledby={`demo-tab-${tab}`}
           tabIndex={0}
-          className="tab-fade min-h-[570px] p-4 focus-visible:outline-offset-[-4px] sm:min-h-[470px] sm:p-5"
+          className="tab-fade min-h-[570px] p-4 focus-visible:-outline-offset-4 sm:min-h-[470px] sm:p-5"
         >
           {tab === "avaliacao" && <AvaliacaoPanel data={demo.avaliacao} />}
           {tab === "treino" && <TreinoPanel data={demo.treino} />}
@@ -179,7 +179,7 @@ function EvolucaoPanel({ data }: { data: DemoCase["evolucao"] }) {
             id="lp-mes"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
-            className="min-h-[44px] w-full rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-none focus:ring-2 focus:ring-theme-teal/25"
+            className="min-h-[44px] w-full rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-hidden focus:ring-2 focus:ring-theme-teal/25"
           >
             {data.months.map((m) => (
               <option key={m} value={m}>{MONTH_LABEL(m)}</option>

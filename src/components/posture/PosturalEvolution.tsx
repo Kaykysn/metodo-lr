@@ -337,7 +337,7 @@ function Compare({ base, cur, view, trainee }: { base: PhotoSet; cur: PhotoSet; 
           <label className="flex items-center gap-2 text-sm">Transparência da foto de acompanhamento
             <input type="range" min={0} max={1} step={0.05} value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} />
           </label>
-          <div className="relative mx-auto aspect-[3/4] max-w-md overflow-hidden rounded-panel bg-[#0f1418]">
+          <div className="relative mx-auto aspect-3/4 max-w-md overflow-hidden rounded-panel bg-[#0f1418]">
             <PhotoWithOverlay side={a!} view={view} overlay={overlay} zoom={zoom} center={center} />
             <div className="absolute inset-0" style={{ opacity }}>
               <PhotoWithOverlay side={b!} view={view} overlay={overlay} zoom={zoom} center={center} transparent />
@@ -348,7 +348,7 @@ function Compare({ base, cur, view, trainee }: { base: PhotoSet; cur: PhotoSet; 
         <div className="grid gap-3 sm:grid-cols-2">
           {[a!, b!].map((s, i) => (
             <figure key={s.set.id} className="space-y-1">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-panel bg-[#0f1418]">
+              <div className="relative aspect-3/4 overflow-hidden rounded-panel bg-[#0f1418]">
                 <PhotoWithOverlay side={s} view={view} overlay={overlay} zoom={zoom} center={center} />
               </div>
               <figcaption className="text-sm">

@@ -91,14 +91,14 @@ export default function ResetPasswordPage() {
   };
 
   const inputClass =
-    "w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25";
+    "w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25";
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <AppearanceBar />
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-lg shadow-sm">LR</div>
+          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-lg shadow-xs">LR</div>
           <span className="text-xl font-bold tracking-tight text-theme-text">Leandro Rangel</span>
         </Link>
         <h1 className="text-2xl font-bold tracking-tight text-theme-text">Criar nova senha</h1>
@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
           {(stage === "invalid" || stage === "unavailable") && (
             <div className="space-y-4">
               <div role="alert" className="p-4 rounded-xl bg-status-danger-bg border border-status-danger-border text-xs text-status-danger-fg flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
                   {stage === "invalid"
                     ? "Este link expirou, já foi usado ou foi aberto em outro navegador. Peça um novo na tela de login, no mesmo navegador em que vai abrir o e-mail."
@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               {error && (
                 <div role="alert" className="p-4 rounded-xl bg-status-danger-bg border border-status-danger-border text-xs text-status-danger-fg flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
               )}
@@ -178,7 +178,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full py-3 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-sm font-bold shadow-sm transition-all disabled:opacity-60"
+                className="w-full py-3 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-sm font-bold shadow-xs transition-all disabled:opacity-60"
               >
                 {saving ? "Salvando…" : "Salvar nova senha"}
               </button>

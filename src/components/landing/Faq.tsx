@@ -28,10 +28,10 @@ export default function Faq() {
                 <h3>
                   <button type="button" aria-expanded={isOpen} aria-controls={pid} id={`${pid}-b`} onClick={() => setOpen(isOpen ? null : i)} className="flex min-h-[60px] w-full items-center justify-between gap-4 py-4 text-left text-[17px] font-semibold">
                     {f.q}
-                    <ChevronDown aria-hidden="true" className={`h-5 w-5 flex-shrink-0 text-theme-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown aria-hidden="true" className={`h-5 w-5 shrink-0 text-theme-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                   </button>
                 </h3>
-                <div id={pid} role="region" aria-labelledby={`${pid}-b`} className={`grid transition-[grid-template-rows,opacity,visibility] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0"}`}>
+                <div id={pid} role="region" aria-labelledby={`${pid}-b`} className={`grid transition-[grid-template-rows,opacity,visibility] duration-240 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0"}`}>
                   <div className="overflow-hidden">
                     <p className="pb-5 text-[16px] leading-relaxed text-theme-muted">{f.a}</p>
                   </div>

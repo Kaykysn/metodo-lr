@@ -101,7 +101,7 @@ export default function ExerciseDetailView({ exercise, onSelect, actions }: { ex
                 tabIndex={tab === t.id ? 0 : -1}
                 onClick={() => setTab(t.id)}
                 onKeyDown={(e) => onKey(e, i)}
-                className={`min-h-[44px] flex-shrink-0 whitespace-nowrap rounded-lg px-3 text-sm font-semibold ${tab === t.id ? "bg-theme-raised text-theme-text shadow-subtle" : "text-theme-muted hover:text-theme-text"}`}
+                className={`min-h-[44px] shrink-0 whitespace-nowrap rounded-lg px-3 text-sm font-semibold ${tab === t.id ? "bg-theme-raised text-theme-text shadow-subtle" : "text-theme-muted hover:text-theme-text"}`}
               >
                 {t.label}
               </button>

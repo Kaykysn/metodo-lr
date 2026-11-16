@@ -245,7 +245,7 @@ function Library({ onPick, label }: { onPick: (id: string) => void; label: strin
               <p className="truncate text-[15px] font-medium">{e.name}</p>
               <p className="truncate text-[13px] text-theme-muted">{e.pattern} · {e.primaryMuscles.join(", ")}</p>
             </div>
-            <button type="button" onClick={() => onPick(e.id)} aria-label={`${label} ${e.name}`} className="inline-flex h-10 min-w-10 flex-shrink-0 items-center justify-center gap-1 rounded-control border border-theme-boundary/60 px-2 text-sm font-semibold hover:bg-theme-secondary">
+            <button type="button" onClick={() => onPick(e.id)} aria-label={`${label} ${e.name}`} className="inline-flex h-10 min-w-10 shrink-0 items-center justify-center gap-1 rounded-control border border-theme-boundary/60 px-2 text-sm font-semibold hover:bg-theme-secondary">
               <Plus className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">{label}</span>
             </button>

@@ -28,8 +28,8 @@ export default function AccessSection() {
             ))}
           </ol>
           <div data-scroll-stagger="0.12" data-scroll-distance="14" className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <Link data-scroll-item href="/solicitar-acesso" className="inline-flex min-h-[50px] items-center justify-center rounded-control bg-brand-300 px-6 font-semibold text-ink-950 transition-colors hover:bg-brand-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-200">Solicitar acesso</Link>
-            <Link data-scroll-item href="/app" className="inline-flex min-h-[50px] items-center justify-center rounded-control border border-white/25 px-6 font-semibold text-ink-50 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Ver demonstração</Link>
+            <Link data-scroll-item href="/solicitar-acesso" className="inline-flex min-h-[50px] items-center justify-center rounded-control bg-brand-300 px-6 font-semibold text-ink-950 transition-colors hover:bg-brand-200 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-200">Solicitar acesso</Link>
+            <Link data-scroll-item href="/app" className="inline-flex min-h-[50px] items-center justify-center rounded-control border border-white/25 px-6 font-semibold text-ink-50 transition-colors hover:bg-white/10 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Ver demonstração</Link>
           </div>
         </div>
       </div>

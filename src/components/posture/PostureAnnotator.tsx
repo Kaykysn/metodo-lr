@@ -399,7 +399,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
       aria-label={`Análise postural: ${VIEW_LABEL[view]}${photo.profileSide ? ` ${photo.profileSide}` : ""}`}
       tabIndex={-1}
       onKeyDown={onKeyDown}
-      className="fixed inset-0 z-[60] flex flex-col bg-[#0f1418] text-[#eef2f3] outline-none lg:flex-row"
+      className="fixed inset-0 z-60 flex flex-col bg-[#0f1418] text-[#eef2f3] outline-hidden lg:flex-row"
     >
       {/* Área da foto: superfície neutra, sem vidro nem movimento */}
       <div className="relative min-h-[48vh] flex-1">
@@ -411,7 +411,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
           <IconBtn label="Desfazer" onClick={undo} disabled={!past.length}><Undo2 className="h-4 w-4" /></IconBtn>
           <IconBtn label="Refazer" onClick={redo} disabled={!future.length}><Redo2 className="h-4 w-4" /></IconBtn>
         </div>
-        <p className="absolute bottom-2 left-2 right-2 z-10 rounded bg-black/60 px-2 py-1 text-xs">
+        <p className="absolute bottom-2 left-2 right-2 z-10 rounded-sm bg-black/60 px-2 py-1 text-xs">
           {sideHint} {Math.round(vp.zoom * 100)}%
         </p>
         <div ref={box} className="absolute inset-0" onWheel={onWheel}>
@@ -533,7 +533,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
                       {t.label} {l ? <span className="text-xs font-normal text-[#7ee2c4]">marcado</span> : <span className="text-xs font-normal text-[#b7c4c9]">sem marcação</span>}
                     </button>
                     {l && (
-                      <select aria-label={`Visibilidade de ${t.label}`} value={l.visibility} onChange={(e) => commit({ ...data, landmarks: data.landmarks.map((x) => (x.id === t.id ? { ...x, visibility: e.target.value as Visibility } : x)) })} className="min-h-[36px] rounded border border-white/15 bg-[#0f1418] px-1 text-xs">
+                      <select aria-label={`Visibilidade de ${t.label}`} value={l.visibility} onChange={(e) => commit({ ...data, landmarks: data.landmarks.map((x) => (x.id === t.id ? { ...x, visibility: e.target.value as Visibility } : x)) })} className="min-h-[36px] rounded-sm border border-white/15 bg-[#0f1418] px-1 text-xs">
                         <option value="visível">visível</option>
                         <option value="estimado">estimado (incerto)</option>
                         <option value="não visível">não visível</option>
@@ -565,7 +565,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
                     const next = { ...cur, [k]: e.target.value };
                     commit({ ...data, referenceSegment: next.from && next.to && next.from !== next.to ? next : next.from || next.to ? (next as { from: string; to: string }) : null });
                   }}
-                  className="mt-1 block min-h-[36px] w-full rounded border border-white/15 bg-[#0f1418] px-2"
+                  className="mt-1 block min-h-[36px] w-full rounded-sm border border-white/15 bg-[#0f1418] px-2"
                 >
                   <option value="">Nenhum</option>
                   {template.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
@@ -588,7 +588,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
             <input type="range" min={0.1} max={0.9} step={0.05} value={data.grid.opacity} onChange={(e) => setData({ ...data, grid: { ...data.grid, opacity: Number(e.target.value) } })} className="w-full" />
           </label>
           <label className="block text-sm">Contraste
-            <select value={data.grid.contrast} onChange={(e) => setData({ ...data, grid: { ...data.grid, contrast: e.target.value as "claro" | "escuro" } })} className="mt-1 block min-h-[36px] w-full rounded border border-white/15 bg-[#0f1418] px-2">
+            <select value={data.grid.contrast} onChange={(e) => setData({ ...data, grid: { ...data.grid, contrast: e.target.value as "claro" | "escuro" } })} className="mt-1 block min-h-[36px] w-full rounded-sm border border-white/15 bg-[#0f1418] px-2">
               <option value="claro">Linhas claras</option>
               <option value="escuro">Linhas escuras</option>
             </select>
@@ -614,20 +614,20 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
         <section className="mb-3 space-y-2">
           <h3 className="text-sm font-semibold">Qualidade e comparabilidade</h3>
           <label className="block text-sm">Enquadramento
-            <select value={data.quality.framing} onChange={(e) => commit({ ...data, quality: { ...data.quality, framing: e.target.value as AnnotationData["quality"]["framing"] } })} className="mt-1 block min-h-[36px] w-full rounded border border-white/15 bg-[#0f1418] px-2">
+            <select value={data.quality.framing} onChange={(e) => commit({ ...data, quality: { ...data.quality, framing: e.target.value as AnnotationData["quality"]["framing"] } })} className="mt-1 block min-h-[36px] w-full rounded-sm border border-white/15 bg-[#0f1418] px-2">
               <option value="corpo inteiro">Corpo inteiro</option>
               <option value="cortada">Cortada</option>
             </select>
           </label>
           <label className="block text-sm">Câmera
-            <select value={data.quality.cameraLevel} onChange={(e) => commit({ ...data, quality: { ...data.quality, cameraLevel: e.target.value as AnnotationData["quality"]["cameraLevel"] } })} className="mt-1 block min-h-[36px] w-full rounded border border-white/15 bg-[#0f1418] px-2">
+            <select value={data.quality.cameraLevel} onChange={(e) => commit({ ...data, quality: { ...data.quality, cameraLevel: e.target.value as AnnotationData["quality"]["cameraLevel"] } })} className="mt-1 block min-h-[36px] w-full rounded-sm border border-white/15 bg-[#0f1418] px-2">
               <option value="não verificado">Nivelamento não verificado</option>
               <option value="nivelada">Nivelada</option>
               <option value="inclinada">Inclinada</option>
             </select>
           </label>
           <label className="block text-sm">Observações sobre a foto
-            <textarea value={data.quality.notes} onChange={(e) => setData({ ...data, quality: { ...data.quality, notes: e.target.value } })} className="mt-1 block min-h-[60px] w-full rounded border border-white/15 bg-[#0f1418] p-2" />
+            <textarea value={data.quality.notes} onChange={(e) => setData({ ...data, quality: { ...data.quality, notes: e.target.value } })} className="mt-1 block min-h-[60px] w-full rounded-sm border border-white/15 bg-[#0f1418] p-2" />
           </label>
         </section>
 

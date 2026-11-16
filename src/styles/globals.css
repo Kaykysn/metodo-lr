@@ -1,8 +1,557 @@
-@import "./tokens.css";
+@import './tokens.css' layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Alturas de linha fixas, como no Tailwind 3. No 4 elas viram proporção do
+     tamanho da fonte, e um `text-2xl sm:text-[1.75rem]` passaria de 32 para
+     37px de altura, deslocando o layout. */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
+  --color-theme-page: rgb(var(--bg-page));
+  --color-theme-primary: rgb(var(--surface-primary));
+  --color-theme-secondary: rgb(var(--surface-secondary));
+  --color-theme-raised: rgb(var(--surface-raised));
+  --color-theme-text: rgb(var(--text-primary));
+  --color-theme-muted: rgb(var(--text-secondary));
+  --color-theme-subtle: rgb(var(--text-subtle));
+  --color-theme-border: rgb(var(--border-decorative));
+  --color-theme-boundary: rgb(var(--border-control));
+  --color-theme-teal: rgb(var(--accent-teal));
+  --color-theme-teal-subtle: rgb(var(--accent-teal-subtle));
+
+  --color-inverse: rgb(var(--inverse-bg));
+  --color-inverse-hover: rgb(var(--inverse-hover));
+  --color-inverse-fg: rgb(var(--inverse-fg));
+
+  --color-chart-bar: rgb(var(--chart-bar));
+  --color-chart-active: rgb(var(--chart-bar-active));
+  --color-chart-grid: rgb(var(--chart-grid));
+  --color-chart-zero: rgb(var(--chart-zero));
+  --color-chart-plot: rgb(var(--chart-plot));
+
+  --color-action: rgb(var(--action-bg));
+  --color-action-text: rgb(var(--action-text));
+  --color-action-hover: rgb(var(--action-hover));
+
+  --color-navy: rgb(var(--brand-navy));
+
+  --color-cta: rgb(var(--cta-bg));
+  --color-cta-text: rgb(var(--cta-text));
+  --color-cta-hover: rgb(var(--cta-hover));
+
+  --color-ink-50: #eff4f4;
+  --color-ink-100: #e3eced;
+  --color-ink-200: #cfdde0;
+  --color-ink-300: #a9bfc4;
+  --color-ink-500: #6f858c;
+  --color-ink-600: #48616a;
+  --color-ink-700: #1a3247;
+  --color-ink-800: #112638;
+  --color-ink-900: #0c2446;
+  --color-ink-950: #081626;
+
+  --color-brand-50: #eaf8f4;
+  --color-brand-100: #d3f2e9;
+  --color-brand-200: #a6e6d4;
+  --color-brand-300: #76d7be;
+  --color-brand-400: #2e8f84;
+  --color-brand-500: #116c65;
+  --color-brand-600: #0e5b55;
+  --color-brand-700: #0b4a45;
+
+  --color-symptom: rgb(var(--symptom));
+
+  --color-status-success-fg: rgb(var(--status-success-fg));
+  --color-status-success-bg: rgb(var(--status-success-bg));
+  --color-status-success-border: rgb(var(--status-success-border));
+
+  --color-status-caution-fg: rgb(var(--status-caution-fg));
+  --color-status-caution-bg: rgb(var(--status-caution-bg));
+  --color-status-caution-border: rgb(var(--status-caution-border));
+
+  --color-status-danger-fg: rgb(var(--status-danger-fg));
+  --color-status-danger-bg: rgb(var(--status-danger-bg));
+  --color-status-danger-border: rgb(var(--status-danger-border));
+
+  --font-sans:
+    var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
+
+  --container-container: 1240px;
+
+  --radius-card: 16px;
+  --radius-control: 10px;
+  --radius-panel: 16px;
+
+  --shadow-subtle:
+    0 1px 3px 0 rgba(12, 36, 70, 0.05), 0 1px 2px -1px rgba(12, 36, 70, 0.05);
+  --shadow-card:
+    0 4px 20px -2px rgba(12, 36, 70, 0.06),
+    0 2px 6px -1px rgba(12, 36, 70, 0.04);
+  --shadow-elevated:
+    0 10px 30px -5px rgba(12, 36, 70, 0.1),
+    0 4px 10px -2px rgba(12, 36, 70, 0.05);
+  --shadow-dark-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-dark-card:
+    0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+
+  --animate-fadeIn: fadeIn 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-slideUp: slideUp 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-scaleUp: scaleUp 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-heroIn: heroIn 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-drawerIn: drawerIn 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes scaleUp {
+    0% {
+      opacity: 0;
+      transform: scale(0.985);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes heroIn {
+    0% {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes drawerIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* O Tailwind 4 deixou de pôr o cursor de "mão" nos botões; o site sempre teve. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility body-map-spot {
+  /* Mapa corporal: foco e confirmação única de seleção */
+  outline: none;
+  &:focus-visible .body-map-focus {
+    opacity: 1;
+  }
+}
+
+@utility body-map-focus {
+  stroke: rgb(var(--focus-ring));
+  opacity: 0;
+  .body-map-spot:focus-visible & {
+    opacity: 1;
+  }
+}
+
+/* Áreas com rolagem horizontal contêm seus filhos absolutos (ex.: sr-only em tabelas).
+   Sem isso eles escapam do recorte e alargam a página em celulares pequenos.
+   CSS comum de propósito: no Tailwind 4 um @utility com o nome de uma classe
+   nativa é descartado. */
+@layer components {
+  .overflow-x-auto {
+    position: relative;
+  }
+}
+
+@utility body-map-confirm {
+  stroke: rgb(var(--accent-teal));
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: body-map-confirm 420ms var(--ease-out-soft) 1 forwards;
+}
+
+@utility hero-xray-stage {
+  /* ------------------------------------------------------------------------------
+  /* ------------------------------------------------------------------------------
+     HERO — modelo em raio-X com lente circular
+     Um único wrapper (.hero-model) posiciona a arte; dentro dele um único canvas
+     (.hero-xray-canvas) contém cinco camadas absolutas que dividem o MESMO canvas
+     896x1114, portanto o alinhamento entre base e anatomia é garantido.
+
+       a) .hero-xray-blur   cópia borrada da base (dissolve o corte da cintura)
+       b) .hero-xray-base   base nítida, com fade inferior
+       c) .hero-xray-layer  anatomia, mascarada pela lente ∩ fade inferior
+       d) .hero-xray-ring   anel luminoso nas mesmas coordenadas da lente
+       e) .hero-xray-ember  glow âmbar atrás do anel
+
+     Variáveis:
+       --hero-blur         raio do desfoque da cópia (18px). Aumente para uma
+                           dissolução mais macia; reduza para preservar detalhe.
+       --hero-fade-start   onde a base nítida começa a desaparecer (72%).
+                           Mais alto = mais corpo visível antes da dissolução.
+       --lens-r            raio da lente em cqw (20cqw = 20% da largura do
+                           wrapper). Cresce junto com o modelo.
+       --x / --y           centro da lente em px relativos ao wrapper, escritos
+                           pelo componente via requestAnimationFrame.
+     ------------------------------------------------------------------------------ */
+
+  /* Respiração: aplicada no palco compartilhado, nunca em uma camada isolada. */
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@utility hero-xray-breathing {
+  animation: hero-xray-respiration 4.5s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+  .lite & {
+    animation: none;
+  }
+}
+
+@utility lite {
+  & .hero-xray-breathing {
+    animation: none;
+  }
+  & .hero-xray-ring {
+    animation: none;
+  }
+  & .hero-xray-ping::after {
+    animation: none;
+  }
+
+  /* Modo leve: sem blur pesado, dissolve apenas por máscara. */
+  & .hero-xray-blur {
+    display: none;
+  }
+}
+
+@utility hero-xray-canvas {
+  /* Canvas: preenche o wrapper e define a lente proporcional (cqw). */
+  position: relative;
+  height: 100%;
+  width: 100%;
+  --lens-r: 20cqw;
+  --x: 84%;
+  --y: 74%;
+  touch-action: pan-y;
+  isolation: isolate;
+  cursor: crosshair;
+
+  /* As duas imagens (e a cópia borrada) usam exatamente o mesmo enquadramento. */
+  & img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+    user-select: none;
+    pointer-events: none;
+  }
+}
+
+@utility hero-xray-blur {
+  position: absolute;
+  inset: 0;
+
+  /* (a) Cópia borrada: cobre a faixa em que a base nítida já está desaparecendo.
+     A máscara evita aresta no topo (entrada suave) e no fim (saída total). */
+  z-index: 1;
+  filter: blur(var(--hero-blur, 18px));
+  opacity: 0.85;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 45%,
+    #000 62%,
+    #000 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 45%,
+    #000 62%,
+    #000 88%,
+    transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  /* Modo leve: sem blur pesado, dissolve apenas por máscara. */
+  .lite & {
+    display: none;
+  }
+}
+
+@utility hero-xray-base {
+  position: absolute;
+  inset: 0;
+
+  /* (b) Base nítida: total até --hero-fade-start, dissolvida antes da borda. */
+  z-index: 2;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 var(--hero-fade-start, 72%),
+    transparent 96%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 var(--hero-fade-start, 72%),
+    transparent 96%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+@utility hero-xray-layer {
+  position: absolute;
+  inset: 0;
+
+  /* (c) Raio-X: só dentro da lente e nunca abaixo do fade da base.
+     As duas máscaras são intersectadas (lente ∩ fade inferior). */
+  z-index: 3;
+  -webkit-mask-image:
+    radial-gradient(
+      circle var(--lens-r) at var(--x) var(--y),
+      #000 0%,
+      #000 55%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 var(--hero-fade-start, 72%),
+      transparent 96%
+    );
+  mask-image:
+    radial-gradient(
+      circle var(--lens-r) at var(--x) var(--y),
+      #000 0%,
+      #000 55%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 var(--hero-fade-start, 72%),
+      transparent 96%
+    );
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+
+@utility hero-xray-ring {
+  /* (d) Anel: mesmas coordenadas e mesmo diâmetro da lente. */
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: calc(var(--lens-r) * 2);
+  height: calc(var(--lens-r) * 2);
+  margin-left: calc(var(--lens-r) * -1);
+  margin-top: calc(var(--lens-r) * -1);
+  z-index: 4;
+  border-radius: 9999px;
+  border: 2px solid rgb(255 170 80 / 0.75);
+  box-shadow:
+    0 0 24px rgb(255 150 50 / 0.5),
+    inset 0 0 24px rgb(255 150 50 / 0.25);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 var(--hero-fade-start, 72%),
+    transparent 96%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 var(--hero-fade-start, 72%),
+    transparent 96%
+  );
+
+  /* Pulso discreto e opcional do anel. */
+  animation: hero-ember-pulse 4s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+  .lite & {
+    animation: none;
+  }
+}
+
+@utility hero-xray-ember {
+  /* (e) Glow âmbar atrás do anel: radial quente, screen, sem sombra dura. */
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: calc(var(--lens-r) * 2.8);
+  height: calc(var(--lens-r) * 2.8);
+  margin-left: calc(var(--lens-r) * -1.4);
+  margin-top: calc(var(--lens-r) * -1.4);
+  z-index: 2;
+  background: radial-gradient(circle, rgb(255 150 50 / 0.18), transparent 70%);
+  mix-blend-mode: screen;
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+@utility hero-xray-aura {
+  /* Aura fria atrás do recorte: integra o modelo ao fundo sem desenhar caixa. */
+  position: absolute;
+  inset: -6%;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 52% 40% at 52% 26%,
+      rgb(var(--hero-jade) / 0.14),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 40% 30% at 62% 58%,
+      rgb(var(--hero-ember) / 0.08),
+      transparent 76%
+    );
+  filter: blur(26px);
+  pointer-events: none;
+}
+
+@utility hero-xray-hint {
+  /* Dica de interação: acima do indicador de rolagem, fora da zona de fade. */
+  position: absolute;
+  left: 50%;
+  bottom: 4.5rem;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 92%;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 9999px;
+  background: rgb(var(--hero-bg) / 0.78);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: rgb(var(--hero-text));
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@utility hero-hint-touch {
+  display: none;
+  @media (pointer: coarse) {
+    display: inline;
+  }
+}
+
+@utility hero-hint-pointer {
+  @media (pointer: coarse) {
+    display: none;
+  }
+}
+
+@utility hero-xray-ping {
+  /* Ponto pulsante de convite: acompanha o centro da lente até a 1ª interação. */
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  margin-top: -4px;
+  z-index: 5;
+  border-radius: 9999px;
+  background: rgb(255 170 80 / 0.95);
+  box-shadow: 0 0 12px rgb(255 150 50 / 0.6);
+  pointer-events: none;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 9999px;
+    border: 1px solid rgb(255 170 80 / 0.7);
+    animation: hero-xray-ping 2s ease-out infinite;
+  }
+  &.is-hidden {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+    }
+  }
+  .lite &::after {
+    animation: none;
+  }
+}
+
+@utility is-hidden {
+  &.hero-xray-ping {
+    display: none;
+  }
+}
 
 @layer base {
   :root {
@@ -82,54 +631,6 @@
 }
 
 @layer components {
-  /* Mapa corporal: foco e confirmação única de seleção */
-  .body-map-spot {
-    outline: none;
-  }
-  .body-map-focus {
-    stroke: rgb(var(--focus-ring));
-    opacity: 0;
-  }
-  .body-map-spot:focus-visible .body-map-focus {
-    opacity: 1;
-  }
-  /* Áreas com rolagem horizontal contêm seus filhos absolutos (ex.: sr-only em tabelas).
-     Sem isso eles escapam do recorte e alargam a página em celulares pequenos. */
-  .overflow-x-auto {
-    position: relative;
-  }
-  .body-map-confirm {
-    stroke: rgb(var(--accent-teal));
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: body-map-confirm 420ms var(--ease-out-soft) 1 forwards;
-  }
-
-  /* ------------------------------------------------------------------------------
-  /* ------------------------------------------------------------------------------
-     HERO — modelo em raio-X com lente circular
-     Um único wrapper (.hero-model) posiciona a arte; dentro dele um único canvas
-     (.hero-xray-canvas) contém cinco camadas absolutas que dividem o MESMO canvas
-     896x1114, portanto o alinhamento entre base e anatomia é garantido.
-
-       a) .hero-xray-blur   cópia borrada da base (dissolve o corte da cintura)
-       b) .hero-xray-base   base nítida, com fade inferior
-       c) .hero-xray-layer  anatomia, mascarada pela lente ∩ fade inferior
-       d) .hero-xray-ring   anel luminoso nas mesmas coordenadas da lente
-       e) .hero-xray-ember  glow âmbar atrás do anel
-
-     Variáveis:
-       --hero-blur         raio do desfoque da cópia (18px). Aumente para uma
-                           dissolução mais macia; reduza para preservar detalhe.
-       --hero-fade-start   onde a base nítida começa a desaparecer (72%).
-                           Mais alto = mais corpo visível antes da dissolução.
-       --lens-r            raio da lente em cqw (20cqw = 20% da largura do
-                           wrapper). Cresce junto com o modelo.
-       --x / --y           centro da lente em px relativos ao wrapper, escritos
-                           pelo componente via requestAnimationFrame.
-     ------------------------------------------------------------------------------ */
-
-  /* Respiração: aplicada no palco compartilhado, nunca em uma camada isolada. */
   @keyframes hero-xray-respiration {
     0%, 100% {
       transform: scale(1);
@@ -138,267 +639,9 @@
       transform: scale(1.004);
     }
   }
-
-  .hero-xray-stage {
-    position: absolute;
-    inset: 0;
-    transform-origin: center center;
-    will-change: transform;
-  }
-
-  .hero-xray-breathing {
-    animation: hero-xray-respiration 4.5s ease-in-out infinite;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-xray-breathing {
-      animation: none;
-    }
-  }
-  .lite .hero-xray-breathing {
-    animation: none;
-  }
-
-  /* Canvas: preenche o wrapper e define a lente proporcional (cqw). */
-  .hero-xray-canvas {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    --lens-r: 20cqw;
-    --x: 84%;
-    --y: 74%;
-    touch-action: pan-y;
-    isolation: isolate;
-    cursor: crosshair;
-  }
-
-  /* As duas imagens (e a cópia borrada) usam exatamente o mesmo enquadramento. */
-  .hero-xray-canvas img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center bottom;
-    user-select: none;
-    pointer-events: none;
-  }
-
-  .hero-xray-blur,
-  .hero-xray-base,
-  .hero-xray-layer {
-    position: absolute;
-    inset: 0;
-  }
-
-  /* (a) Cópia borrada: cobre a faixa em que a base nítida já está desaparecendo.
-     A máscara evita aresta no topo (entrada suave) e no fim (saída total). */
-  .hero-xray-blur {
-    z-index: 1;
-    filter: blur(var(--hero-blur, 18px));
-    opacity: 0.85;
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      transparent 45%,
-      #000 62%,
-      #000 88%,
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 45%,
-      #000 62%,
-      #000 88%,
-      transparent 100%
-    );
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-  }
-
-  /* (b) Base nítida: total até --hero-fade-start, dissolvida antes da borda. */
-  .hero-xray-base {
-    z-index: 2;
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      #000 0%,
-      #000 var(--hero-fade-start, 72%),
-      transparent 96%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      #000 0%,
-      #000 var(--hero-fade-start, 72%),
-      transparent 96%
-    );
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-  }
-
-  /* (c) Raio-X: só dentro da lente e nunca abaixo do fade da base.
-     As duas máscaras são intersectadas (lente ∩ fade inferior). */
-  .hero-xray-layer {
-    z-index: 3;
-    -webkit-mask-image:
-      radial-gradient(
-        circle var(--lens-r) at var(--x) var(--y),
-        #000 0%,
-        #000 55%,
-        transparent 100%
-      ),
-      linear-gradient(
-        to bottom,
-        #000 0%,
-        #000 var(--hero-fade-start, 72%),
-        transparent 96%
-      );
-    mask-image:
-      radial-gradient(
-        circle var(--lens-r) at var(--x) var(--y),
-        #000 0%,
-        #000 55%,
-        transparent 100%
-      ),
-      linear-gradient(
-        to bottom,
-        #000 0%,
-        #000 var(--hero-fade-start, 72%),
-        transparent 96%
-      );
-        -webkit-mask-composite: source-in;
-    mask-composite: intersect;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    pointer-events: none;
-  }
-
-  /* (d) Anel: mesmas coordenadas e mesmo diâmetro da lente. */
-  .hero-xray-ring {
-    position: absolute;
-    left: var(--x);
-    top: var(--y);
-    width: calc(var(--lens-r) * 2);
-    height: calc(var(--lens-r) * 2);
-    margin-left: calc(var(--lens-r) * -1);
-    margin-top: calc(var(--lens-r) * -1);
-    z-index: 4;
-    border-radius: 9999px;
-    border: 2px solid rgb(255 170 80 / 0.75);
-    box-shadow:
-      0 0 24px rgb(255 150 50 / 0.5),
-      inset 0 0 24px rgb(255 150 50 / 0.25);
-    mix-blend-mode: screen;
-    pointer-events: none;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 var(--hero-fade-start, 72%), transparent 96%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 var(--hero-fade-start, 72%), transparent 96%);
-  }
-
-  /* Pulso discreto e opcional do anel. */
   @keyframes hero-ember-pulse {
     0%, 100% { opacity: 0.85; }
     50% { opacity: 1; }
-  }
-  .hero-xray-ring {
-    animation: hero-ember-pulse 4s ease-in-out infinite;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-xray-ring {
-      animation: none;
-    }
-  }
-  .lite .hero-xray-ring {
-    animation: none;
-  }
-
-  /* (e) Glow âmbar atrás do anel: radial quente, screen, sem sombra dura. */
-  .hero-xray-ember {
-    position: absolute;
-    left: var(--x);
-    top: var(--y);
-    width: calc(var(--lens-r) * 2.8);
-    height: calc(var(--lens-r) * 2.8);
-    margin-left: calc(var(--lens-r) * -1.4);
-    margin-top: calc(var(--lens-r) * -1.4);
-    z-index: 2;
-    background: radial-gradient(circle, rgb(255 150 50 / 0.18), transparent 70%);
-    mix-blend-mode: screen;
-    filter: blur(14px);
-    pointer-events: none;
-  }
-
-  /* Aura fria atrás do recorte: integra o modelo ao fundo sem desenhar caixa. */
-  .hero-xray-aura {
-    position: absolute;
-    inset: -6%;
-    z-index: 0;
-    background:
-      radial-gradient(ellipse 52% 40% at 52% 26%, rgb(var(--hero-jade) / 0.14), transparent 72%),
-      radial-gradient(ellipse 40% 30% at 62% 58%, rgb(var(--hero-ember) / 0.08), transparent 76%);
-    filter: blur(26px);
-    pointer-events: none;
-  }
-
-  /* Dica de interação: acima do indicador de rolagem, fora da zona de fade. */
-  .hero-xray-hint {
-    position: absolute;
-    left: 50%;
-    bottom: 4.5rem;
-    transform: translateX(-50%);
-    z-index: 6;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 92%;
-    padding: 0.4rem 0.85rem;
-    border: 1px solid rgb(255 255 255 / 0.16);
-    border-radius: 9999px;
-    background: rgb(var(--hero-bg) / 0.78);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    color: rgb(var(--hero-text));
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.3;
-    text-align: center;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-  .hero-hint-touch {
-    display: none;
-  }
-  @media (pointer: coarse) {
-    .hero-hint-pointer {
-      display: none;
-    }
-    .hero-hint-touch {
-      display: inline;
-    }
-  }
-
-  /* Ponto pulsante de convite: acompanha o centro da lente até a 1ª interação. */
-  .hero-xray-ping {
-    position: absolute;
-    left: var(--x);
-    top: var(--y);
-    width: 8px;
-    height: 8px;
-    margin-left: -4px;
-    margin-top: -4px;
-    z-index: 5;
-    border-radius: 9999px;
-    background: rgb(255 170 80 / 0.95);
-    box-shadow: 0 0 12px rgb(255 150 50 / 0.6);
-    pointer-events: none;
-  }
-  .hero-xray-ping::after {
-    content: "";
-    position: absolute;
-    inset: -6px;
-    border-radius: 9999px;
-    border: 1px solid rgb(255 170 80 / 0.7);
-    animation: hero-xray-ping 2s ease-out infinite;
-  }
-  .hero-xray-ping.is-hidden {
-    display: none;
   }
   @keyframes hero-xray-ping {
     0% {
@@ -409,19 +652,6 @@
       transform: scale(2.6);
       opacity: 0;
     }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-xray-ping::after {
-      animation: none;
-    }
-  }
-  .lite .hero-xray-ping::after {
-    animation: none;
-  }
-
-  /* Modo leve: sem blur pesado, dissolve apenas por máscara. */
-  .lite .hero-xray-blur {
-    display: none;
   }
 }
 

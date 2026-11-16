@@ -194,13 +194,13 @@ export default function AdminPage() {
 
         {/* Feedback de Ação */}
         {feedbackNotice && (
-          <div className="p-4 bg-status-success-bg border border-status-success-border text-status-success-fg rounded-xl text-xs font-bold shadow-sm animate-fadeIn">
+          <div className="p-4 bg-status-success-bg border border-status-success-border text-status-success-fg rounded-xl text-xs font-bold shadow-xs animate-fadeIn">
             {feedbackNotice}
           </div>
         )}
 
         {/* Painel de Filtros e Busca */}
-        <div className="bg-theme-primary rounded-2xl p-5 border border-theme-border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-theme-primary rounded-2xl p-5 border border-theme-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 text-theme-subtle absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -208,7 +208,7 @@ export default function AdminPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nome, e-mail ou instituição"
-              className="w-full pl-9 pr-3 py-2 bg-theme-primary bg-theme-primary border border-theme-boundary/80 rounded-xl text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+              className="w-full pl-9 pr-3 py-2 bg-theme-primary bg-theme-primary border border-theme-boundary/80 rounded-xl text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
             />
           </div>
 
@@ -264,7 +264,7 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td className="p-4">
-                        <span className="px-2 py-0.5 rounded bg-theme-secondary text-theme-text font-medium capitalize">
+                        <span className="px-2 py-0.5 rounded-sm bg-theme-secondary text-theme-text font-medium capitalize">
                           {ROLE_LABEL[user.role as Role] ?? user.role}
                         </span>
                       </td>
@@ -363,7 +363,7 @@ export default function AdminPage() {
         </div>
 
         {/* Trilha de Auditoria (Audit Logs) */}
-        <div className="bg-theme-primary rounded-2xl p-6 border border-theme-border shadow-sm space-y-4">
+        <div className="bg-theme-primary rounded-2xl p-6 border border-theme-border shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-theme-border">
             <h3 className="text-base font-bold text-theme-text">
               Trilha de Auditoria do Servidor (Audit Log)

@@ -19,7 +19,7 @@ export default function PlanosView({ prioritySupportReady, contactEmail }: Plano
   const [selected, setSelected] = useState<PlanId | null>(null);
 
   return (
-    <div className="mx-auto w-full max-w-[1240px] px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+    <div className="mx-auto w-full max-w-container px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pt-14">
       <header data-scroll-reveal="up" data-scroll-distance="18" className="max-w-2xl">
         <h1 className="text-3xl font-bold tracking-tight sm:text-[2.6rem] sm:leading-[1.1]">Escolha o plano para sua rotina</h1>
         <p className="mt-3 text-lg text-theme-muted">Comece com 30 dias grátis. Depois, escolha como continuar.</p>
@@ -76,7 +76,7 @@ function PlanCard({ plan, supportReady, onSelect, selected }: { plan: CatalogPla
           const pending = h.startsWith("Suporte") && !supportReady;
           return (
             <li key={h} className="flex gap-2.5">
-              <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-theme-teal" aria-hidden="true" />
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-theme-teal" aria-hidden="true" />
               <span>
                 {h}
                 {pending && <span className="text-theme-muted"> (em preparação)</span>}
@@ -125,7 +125,7 @@ function Confirmation({ planId, onClose }: { planId: PlanId; onClose: () => void
   };
 
   return (
-    <section ref={ref} tabIndex={-1} aria-labelledby="confirmacao-plano" className="mt-6 rounded-panel border border-theme-boundary/60 bg-theme-raised p-6 outline-none focus-visible:ring-2 focus-visible:ring-theme-teal/40">
+    <section ref={ref} tabIndex={-1} aria-labelledby="confirmacao-plano" className="mt-6 rounded-panel border border-theme-boundary/60 bg-theme-raised p-6 outline-hidden focus-visible:ring-2 focus-visible:ring-theme-teal/40">
       <h2 id="confirmacao-plano" className="text-lg font-bold">Plano {plan.name}</h2>
       <dl className="mt-3 grid max-w-md grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-[15px]">
         <dt className="text-theme-muted">Mensalidade</dt>
@@ -183,7 +183,7 @@ function Recommender() {
       <form data-scroll-reveal="right" data-scroll-distance="22" className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
         <div className="space-y-1.5">
           <label htmlFor="rec-alunos" className="block text-[15px] font-semibold">Quantos alunos você acompanha hoje?</label>
-          <input id="rec-alunos" type="number" inputMode="numeric" min={0} value={count} onChange={(e) => setCount(e.target.value)} className="w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-none focus:ring-2 focus:ring-theme-teal/25" />
+          <input id="rec-alunos" type="number" inputMode="numeric" min={0} value={count} onChange={(e) => setCount(e.target.value)} className="w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-hidden focus:ring-2 focus:ring-theme-teal/25" />
         </div>
         <fieldset className="space-y-2">
           <legend className="text-[15px] font-semibold">O que você usaria?</legend>

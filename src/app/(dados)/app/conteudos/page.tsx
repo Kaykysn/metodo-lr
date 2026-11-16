@@ -65,7 +65,7 @@ export default function ConteudosPage() {
           >
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-theme-text bg-theme-secondary px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-theme-text bg-theme-secondary px-2 py-0.5 rounded-sm">
                   {lesson.module}
                 </span>
                 <span className="text-xs text-theme-muted flex items-center gap-1">

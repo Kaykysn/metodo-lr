@@ -119,7 +119,7 @@ export function NumberInput({
         const n = Number(raw);
         if (Number.isFinite(n)) onChange(max !== undefined ? Math.min(max, Math.max(min ?? -Infinity, n)) : n);
       }}
-      className={`tabular w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-none focus:ring-2 focus:ring-theme-teal/25 ${className}`}
+      className={`tabular w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-hidden focus:ring-2 focus:ring-theme-teal/25 ${className}`}
       {...rest}
     />
   );

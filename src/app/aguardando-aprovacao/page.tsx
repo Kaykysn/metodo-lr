@@ -13,7 +13,7 @@ export default function AguardandoAprovacaoPage() {
       <AppearanceBar />
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-xl shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-xl shadow-xs">
             LR
           </div>
           <span className="text-xl font-bold tracking-tight text-theme-text">
@@ -24,7 +24,7 @@ export default function AguardandoAprovacaoPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg px-4 sm:px-0">
         <div className="bg-theme-primary py-10 px-6 sm:px-10 rounded-2xl border border-theme-border shadow-card text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-status-caution-bg border border-status-caution-border text-status-caution-fg flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-status-caution-bg border border-status-caution-border text-status-caution-fg flex items-center justify-center mx-auto shadow-xs">
             <Clock className="w-8 h-8 text-status-caution-fg animate-pulse" />
           </div>
 
@@ -32,7 +32,7 @@ export default function AguardandoAprovacaoPage() {
             <h1 className="text-2xl font-bold text-theme-text">
               Solicitação em Análise
             </h1>
-            <p className="text-xs sm:text-sm text-theme-muted leading-relaxed">
+            <p className="text-xs sm:text-sm text-theme-muted leading-relaxed sm:leading-5">
               Recebemos seus dados. A equipe analisa cada pedido e avisa pelo contato informado. Seus 30 dias só começam no primeiro acesso depois da aprovação.
             </p>
           </div>

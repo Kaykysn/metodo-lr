@@ -33,14 +33,14 @@ export default function GlossarioPage() {
 
       {/* Aviso de Referências Candidatas */}
       <div className="p-4 bg-theme-secondary/70 border border-theme-border rounded-xl text-xs text-theme-text flex items-start gap-2.5">
-        <ShieldCheck className="w-4 h-4 text-theme-text flex-shrink-0 mt-0.5" />
+        <ShieldCheck className="w-4 h-4 text-theme-text shrink-0 mt-0.5" />
         <p className="text-theme-muted leading-relaxed">
           <strong>Aviso Metodológico de Evidências:</strong> As referências científicas listadas representam literatura clássica candidata à verificação e estudo comparativo, e não garantia ou validação automática do software como dispositivo médico.
         </p>
       </div>
 
       {/* Controles de Busca e Filtro */}
-      <div className="bg-theme-primary rounded-2xl p-5 border border-theme-border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-theme-primary rounded-2xl p-5 border border-theme-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-theme-subtle absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -48,7 +48,7 @@ export default function GlossarioPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar termo ou conceito..."
-            className="w-full pl-9 pr-3 py-2 bg-theme-primary bg-theme-primary border border-theme-boundary/80 rounded-xl text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+            className="w-full pl-9 pr-3 py-2 bg-theme-primary bg-theme-primary border border-theme-boundary/80 rounded-xl text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
           />
         </div>
 
@@ -83,7 +83,7 @@ export default function GlossarioPage() {
                 {item.category}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-theme-text leading-relaxed">
+            <p className="text-xs sm:text-sm text-theme-text leading-relaxed sm:leading-5">
               {item.definition}
             </p>
             <div className="p-3 bg-theme-primary rounded-xl border border-theme-border text-xs text-theme-muted">

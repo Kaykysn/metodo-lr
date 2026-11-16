@@ -82,7 +82,7 @@ export default function SceneVideo() {
             type="button"
             onClick={toggle}
             style={{ borderRadius: 9999 }}
-            className="glass-tile glass-tile-hero inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="glass-tile glass-tile-hero inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-semibold focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             {playing ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />}
             {playing ? "Pausar cena" : "Reproduzir cena"}

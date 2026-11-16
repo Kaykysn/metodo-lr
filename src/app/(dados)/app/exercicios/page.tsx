@@ -194,7 +194,7 @@ function CuratedLibrary() {
           )}
         </section>
 
-        <div ref={detailRef} tabIndex={-1} className="min-w-0 outline-none lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto">
+        <div ref={detailRef} tabIndex={-1} className="min-w-0 outline-hidden lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto">
           {ex ? (
             <Panel className="space-y-4 p-4 sm:p-6">
               <button type="button" onClick={() => select(null)} className="inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-theme-teal lg:hidden">

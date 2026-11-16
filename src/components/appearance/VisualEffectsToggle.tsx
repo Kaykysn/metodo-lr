@@ -43,12 +43,12 @@ export default function VisualEffectsToggle({ compact = false, tone = "surface",
       <span className={compact ? "sr-only" : ""}>Efeitos visuais</span>
       <span
         aria-hidden="true"
-        className={`relative inline-flex h-4 w-7 flex-shrink-0 items-center rounded-full transition-colors ${
+        className={`relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors ${
           on ? (inverse ? "bg-brand-500" : "bg-theme-teal") : inverse ? "bg-white/25" : "bg-theme-boundary/60"
         }`}
       >
         <span
-          className={`absolute h-3 w-3 rounded-full bg-white shadow transition-transform ${on ? "translate-x-3.5" : "translate-x-0.5"}`}
+          className={`absolute h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${on ? "translate-x-3.5" : "translate-x-0.5"}`}
         />
       </span>
     </button>

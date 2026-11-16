@@ -14,7 +14,7 @@ export default function TermosPage() {
       <main className="flex-1 max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="p-4 bg-status-caution-bg border border-status-caution-border rounded-2xl flex items-start gap-3 text-status-caution-fg text-xs">
-            <AlertTriangle className="w-5 h-5 text-status-caution-fg flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-status-caution-fg shrink-0 mt-0.5" />
             <div>
               <strong className="block font-bold">Minuta Preliminar para Revisão Institucional:</strong>
               <span>

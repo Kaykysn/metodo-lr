@@ -88,11 +88,11 @@ export default function GuidedAssessmentWorkflow({
   return (
     <div className="space-y-6">
       {/* Barra de Progresso e Navegação Superior */}
-      <div className="bg-theme-primary rounded-2xl border border-theme-border p-4 sm:p-5 shadow-sm">
+      <div className="bg-theme-primary rounded-2xl border border-theme-border p-4 sm:p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-theme-border">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-theme-secondary text-theme-text">
+              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-sm bg-theme-secondary text-theme-text">
                 {assessment.patientCode}
               </span>
               <span className="text-xs text-theme-muted">
@@ -102,7 +102,7 @@ export default function GuidedAssessmentWorkflow({
             <h2
               ref={stageHeadingRef}
               tabIndex={-1}
-              className="text-lg sm:text-xl font-bold text-theme-text mt-1 scroll-mt-24 focus:outline-none"
+              className="text-lg sm:text-xl font-bold text-theme-text mt-1 scroll-mt-24 focus:outline-hidden"
             >
               {currentStageDef.title}
             </h2>
@@ -168,9 +168,9 @@ export default function GuidedAssessmentWorkflow({
       {assessment.redFlags.overallStatus === "alert_present" && (
         <div
           role="alert"
-          className="bg-status-danger-bg border border-status-danger-border p-4 rounded-xl flex items-start gap-3 text-sm text-status-danger-fg shadow-sm"
+          className="bg-status-danger-bg border border-status-danger-border p-4 rounded-xl flex items-start gap-3 text-sm text-status-danger-fg shadow-xs"
         >
-          <ShieldAlert className="w-5 h-5 text-status-danger-fg flex-shrink-0 mt-0.5" />
+          <ShieldAlert className="w-5 h-5 text-status-danger-fg shrink-0 mt-0.5" />
           <div>
             <strong className="block font-bold">Atenção Clínica Prioritária: Suspeita de Red Flag</strong>
             <p className="text-xs text-status-danger-fg mt-0.5">
@@ -181,14 +181,14 @@ export default function GuidedAssessmentWorkflow({
       )}
 
       {/* Conteúdo Dinâmico da Etapa Atual (transição sem remontar o formulário) */}
-      <div ref={stagePanelRef} className="bg-theme-primary rounded-2xl border border-theme-border p-6 sm:p-8 shadow-sm">
+      <div ref={stagePanelRef} className="bg-theme-primary rounded-2xl border border-theme-border p-6 sm:p-8 shadow-xs">
         {/* ============================================================================== */}
         {/* ETAPA 0: INÍCIO E CONTEXTO */}
         {/* ============================================================================== */}
         {currentStageIndex === 0 && (
           <div className="space-y-6">
             <div className="p-4 rounded-xl bg-theme-secondary/70 border border-theme-border flex items-start gap-3">
-              <HelpCircle className="w-5 h-5 text-theme-text flex-shrink-0 mt-0.5" />
+              <HelpCircle className="w-5 h-5 text-theme-text shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-theme-text">
                 <strong>Orientações Pedagógicas de Uso:</strong>
                 <p className="mt-1 text-theme-muted">
@@ -268,7 +268,7 @@ export default function GuidedAssessmentWorkflow({
                   maxLength={5}
                   onChange={(e) => setAssessment({ ...assessment, patientInitials: e.target.value })}
                   placeholder="Ex: M.R."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
 
@@ -282,7 +282,7 @@ export default function GuidedAssessmentWorkflow({
                   min={1}
                   max={120}
                   onChange={(e) => setAssessment({ ...assessment, age: parseInt(e.target.value, 10) || 0 })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
 
@@ -294,7 +294,7 @@ export default function GuidedAssessmentWorkflow({
                   type="text"
                   value={assessment.painRegion}
                   onChange={(e) => setAssessment({ ...assessment, painRegion: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
 
@@ -306,7 +306,7 @@ export default function GuidedAssessmentWorkflow({
                   type="text"
                   value={assessment.activityLevel}
                   onChange={(e) => setAssessment({ ...assessment, activityLevel: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
 
@@ -318,7 +318,7 @@ export default function GuidedAssessmentWorkflow({
                   rows={3}
                   value={assessment.complaint}
                   onChange={(e) => setAssessment({ ...assessment, complaint: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
             </div>
@@ -374,7 +374,7 @@ export default function GuidedAssessmentWorkflow({
                         },
                       })
                     }
-                    className="w-4 h-4 text-status-danger-fg rounded border-theme-boundary/50"
+                    className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
                   <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
                 </label>
@@ -419,7 +419,7 @@ export default function GuidedAssessmentWorkflow({
                         },
                       })
                     }
-                    className="w-4 h-4 text-status-danger-fg rounded border-theme-boundary/50"
+                    className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
                   <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
                 </label>
@@ -464,7 +464,7 @@ export default function GuidedAssessmentWorkflow({
                         },
                       })
                     }
-                    className="w-4 h-4 text-status-danger-fg rounded border-theme-boundary/50"
+                    className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
                   <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
                 </label>
@@ -509,7 +509,7 @@ export default function GuidedAssessmentWorkflow({
                         },
                       })
                     }
-                    className="w-4 h-4 text-status-danger-fg rounded border-theme-boundary/50"
+                    className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
                   <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
                 </label>
@@ -553,7 +553,7 @@ export default function GuidedAssessmentWorkflow({
                       sinss: { ...assessment.sinss, severity: e.target.value },
                     })
                   }
-                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 >
                   <option value="Leve (EVA 1-3)">Leve (EVA 1-3)</option>
                   <option value="Moderada (EVA 4-6)">Moderada (EVA 4-6)</option>
@@ -573,7 +573,7 @@ export default function GuidedAssessmentWorkflow({
                       sinss: { ...assessment.sinss, irritability: e.target.value },
                     })
                   }
-                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 >
                   <option value="Baixa (demora a piorar, alivia rápido)">Baixa (alívio rápido)</option>
                   <option value="Moderada">Moderada</option>
@@ -593,7 +593,7 @@ export default function GuidedAssessmentWorkflow({
                       sinss: { ...assessment.sinss, stage: e.target.value },
                     })
                   }
-                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 >
                   <option value="Agudo (< 6 sem)">Agudo (&lt; 6 semanas)</option>
                   <option value="Subagudo (6 a 12 sem)">Subagudo (6 a 12 semanas)</option>
@@ -613,7 +613,7 @@ export default function GuidedAssessmentWorkflow({
                       sinss: { ...assessment.sinss, stability: e.target.value },
                     })
                   }
-                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 >
                   <option value="Melhorando">Melhorando</option>
                   <option value="Estável">Estável</option>
@@ -634,7 +634,7 @@ export default function GuidedAssessmentWorkflow({
                       sinss: { ...assessment.sinss, nature: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
 
@@ -651,7 +651,7 @@ export default function GuidedAssessmentWorkflow({
                       sinss: { ...assessment.sinss, dailyPattern: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                  className="w-full px-3.5 py-2 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
                 />
               </div>
             </div>
@@ -754,7 +754,7 @@ export default function GuidedAssessmentWorkflow({
                     mechanisms: { ...assessment.mechanisms, clinicalRationale: e.target.value },
                   })
                 }
-                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-none focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-theme-primary bg-theme-primary border border-theme-boundary/80 text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
               />
             </div>
           </div>
@@ -777,13 +777,13 @@ export default function GuidedAssessmentWorkflow({
                     key={tool.id}
                     className={`p-5 rounded-xl border transition-all ${
                       isSelected
-                        ? "bg-theme-secondary/60 border-theme-boundary/60 shadow-sm"
+                        ? "bg-theme-secondary/60 border-theme-boundary/60 shadow-xs"
                         : "bg-theme-primary border-theme-border hover:border-theme-boundary/50"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
-                        <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-inverse text-inverse-fg">
+                        <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm bg-inverse text-inverse-fg">
                           {tool.acronym}
                         </span>
                         <h4 className="text-sm font-bold text-theme-text mt-1">
@@ -869,7 +869,7 @@ export default function GuidedAssessmentWorkflow({
                           },
                         })
                       }
-                      className="w-full px-2 py-1 bg-theme-primary border border-theme-border rounded text-xs"
+                      className="w-full px-2 py-1 bg-theme-primary border border-theme-border rounded-sm text-xs"
                     />
                   </div>
                   <div>
@@ -886,7 +886,7 @@ export default function GuidedAssessmentWorkflow({
                           },
                         })
                       }
-                      className="w-full px-2 py-1 bg-theme-primary border border-theme-border rounded text-xs"
+                      className="w-full px-2 py-1 bg-theme-primary border border-theme-border rounded-sm text-xs"
                     />
                   </div>
                 </div>
@@ -916,7 +916,7 @@ export default function GuidedAssessmentWorkflow({
                           },
                         })
                       }
-                      className="w-full mt-1 px-3 py-1.5 bg-theme-primary border border-theme-border rounded text-xs"
+                      className="w-full mt-1 px-3 py-1.5 bg-theme-primary border border-theme-border rounded-sm text-xs"
                     />
                   </div>
                   <div>
@@ -938,7 +938,7 @@ export default function GuidedAssessmentWorkflow({
                           },
                         })
                       }
-                      className="w-full mt-1 px-3 py-1.5 bg-theme-primary border border-theme-border rounded text-xs"
+                      className="w-full mt-1 px-3 py-1.5 bg-theme-primary border border-theme-border rounded-sm text-xs"
                     />
                   </div>
                 </div>
@@ -1029,7 +1029,7 @@ export default function GuidedAssessmentWorkflow({
               <div className="space-y-2">
                 {assessment.carePlan.goals.map((goal, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-inverse text-inverse-fg text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-inverse text-inverse-fg text-[11px] font-bold flex items-center justify-center shrink-0">
                       {idx + 1}
                     </span>
                     <input
@@ -1157,7 +1157,7 @@ export default function GuidedAssessmentWorkflow({
                 <div key={item.term} className="p-4 rounded-xl bg-theme-primary border border-theme-border space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-theme-text">{item.term}</span>
-                    <span className="text-[10px] font-semibold bg-theme-secondary text-theme-text px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-semibold bg-theme-secondary text-theme-text px-2 py-0.5 rounded-sm">
                       {item.category}
                     </span>
                   </div>
@@ -1199,7 +1199,7 @@ export default function GuidedAssessmentWorkflow({
             className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
               currentStageIndex === STAGES_LIST.length - 1
                 ? "bg-theme-border text-theme-subtle cursor-not-allowed"
-                : "bg-inverse hover:bg-inverse-hover text-inverse-fg shadow-sm"
+                : "bg-inverse hover:bg-inverse-hover text-inverse-fg shadow-xs"
             }`}
           >
             <span>Próxima Etapa</span>

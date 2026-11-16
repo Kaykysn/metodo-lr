@@ -60,7 +60,7 @@ export default function TestEmailPage() {
       </button>
 
       {message && (
-        <p className="mt-6 break-words">{message}</p>
+        <p className="mt-6 wrap-break-word">{message}</p>
       )}
     </main>
   );
