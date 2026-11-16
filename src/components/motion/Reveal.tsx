@@ -11,7 +11,7 @@ interface RevealProps {
   delayMs?: number;
   durationMs?: number;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
 }
 
 // Deslocamento curto (6 px; 4 px em telas estreitas): só esclarece a ordem de leitura
