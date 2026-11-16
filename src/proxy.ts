@@ -9,6 +9,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { APP_MODE, SUPABASE_PUBLIC_KEY, SUPABASE_URL } from "@/lib/app-mode";
+import { needsCode } from "@/lib/auth/mfa";
 
 // Rotas públicas que não requerem autenticação
 const PUBLIC_ROUTES = [
@@ -180,6 +181,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  // Conta com autenticador e sessão só com a senha: volta ao login para digitar o código
+  const guarded = isProtectedRoute(pathname) || isAdminRoute(pathname);
+  const { data: lv } = user && guarded ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel() : { data: null };
+  if (user && guarded && lv && needsCode(lv.currentLevel, lv.nextLevel)) {
+    const redirectUrl = new URL("/login", request.url);
+    redirectUrl.searchParams.set("etapa", "codigo");
+    redirectUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // Se há usuário mas está tentando acessar admin, verifica role
   if (user && isAdminRoute(pathname)) {
     const { data: profile } = await supabase
@@ -190,6 +201,13 @@ export async function proxy(request: NextRequest) {
 
     if (!profile || profile.role !== "admin" || profile.status !== "active") {
       return NextResponse.redirect(new URL("/app", request.url));
+    }
+
+    // Administração exige o segundo fator (o banco também exige: is_admin() só vale em aal2)
+    if (lv?.currentLevel !== "aal2") {
+      const setup = new URL("/conta/seguranca", request.url);
+      setup.searchParams.set("redirect", "/admin");
+      return NextResponse.redirect(setup);
     }
   }
 

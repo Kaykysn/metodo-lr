@@ -4,6 +4,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createRouteClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { needsCode } from "@/lib/auth/mfa";
 
 const go = (origin: string, path: string) => NextResponse.redirect(new URL(path, origin));
 
@@ -20,6 +21,9 @@ export async function GET(request: NextRequest) {
     if (error) return go(origin, "/login?erro=sessao");
     const { data } = await supabase.auth.getUser();
     if (!data.user) return go(origin, "/login?erro=sessao");
+    // Conta com autenticador: o Google sozinho não basta, o login pede o código
+    const { data: lv } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (lv && needsCode(lv.currentLevel, lv.nextLevel)) return go(origin, "/login?etapa=codigo");
     const { data: profile } = await supabase.from("profiles").select("status").eq("id", data.user.id).maybeSingle();
     const status = (profile as { status?: string } | null)?.status;
     if (!status || status === "pending") return go(origin, "/aguardando-aprovacao");

@@ -177,6 +177,7 @@ function Conteudo() {
               <ButtonLink href="/planos">{live && !renewing(commercial.subscription) && !a.paidPlanId ? "Escolher um plano" : "Comparar planos"}</ButtonLink>
               {a.canCreate && <ButtonLink href="/app" variant="secondary">Ir para a área do professor</ButtonLink>}
               {a.phase === "expired" && mode === "demo" && <ButtonLink href="/app" variant="secondary">Consultar registros</ButtonLink>}
+              {mode === "supabase" && <ButtonLink href="/conta/seguranca" variant="secondary">Segurança da conta</ButtonLink>}
             </div>
           </Panel>
 

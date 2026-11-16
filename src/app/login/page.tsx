@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import AppearanceBar from "@/components/appearance/AppearanceBar";
 import { isSupabaseConfigured, getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { assurance, needsCode, safeNext, verifyCode } from "@/lib/auth/mfa";
+import CodeForm from "@/components/auth/CodeForm";
 import { ShieldCheck, Mail, Lock, ArrowRight, AlertCircle, Check } from "lucide-react";
 
 // Mensagens fixas: nada vindo do provedor vai para a tela, e nenhuma delas revela se o e-mail tem conta.
@@ -26,10 +28,13 @@ function loginErrorMessage(error: { status?: number; code?: string }): string {
   return "E-mail ou senha incorretos.";
 }
 
-/** Destino depois do login: só caminhos internos conhecidos (sem redirecionamento aberto). */
-function safeNext(raw: string | null): string | null {
-  if (!raw || raw.length > 200 || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) return null;
-  return /^\/(app|conta|admin)(\/[A-Za-z0-9/_-]*)?$/.test(raw) ? raw : null;
+/** Encaminha pelo status real do perfil (a RLS só devolve o próprio perfil). */
+async function finishLogin(supabase: NonNullable<ReturnType<typeof getSupabaseBrowserClient>>, userId: string) {
+  const { data: profile } = await supabase.from("profiles").select("status").eq("id", userId).maybeSingle();
+  const status = (profile as { status?: string } | null)?.status;
+  const next = safeNext(new URLSearchParams(window.location.search).get("redirect"));
+  // Navegação completa de propósito: o proxy relê os cookies da sessão recém-criada.
+  window.location.href = !status || status === "pending" ? "/aguardando-aprovacao" : status === "active" ? (next ?? "/app") : "/conta/acesso";
 }
 
 export default function LoginPage() {
@@ -41,6 +46,8 @@ export default function LoginPage() {
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoverySent, setRecoverySent] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  // Segunda etapa: senha (ou Google) confirmada, falta o código do autenticador
+  const [codeStep, setCodeStep] = useState(false);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -48,7 +55,29 @@ export default function LoginPage() {
     if (erro && CALLBACK_ERRORS[erro]) setErrorMessage(CALLBACK_ERRORS[erro]);
     const aviso = q.get("aviso");
     if (aviso && NOTICES[aviso]) setNotice(NOTICES[aviso]);
+    // Vindo do Google ou do proxy com a sessão ainda sem o código: retoma na segunda etapa
+    if (q.get("etapa") === "codigo") {
+      const supabase = getSupabaseBrowserClient();
+      if (supabase) void assurance(supabase).then((lv) => setCodeStep(needsCode(lv.current, lv.next)));
+    }
   }, []);
+
+  const handleCode = async (code: string): Promise<string | null> => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return UNAVAILABLE;
+    const err = await verifyCode(supabase, code);
+    if (err) return err;
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) return "A sessão expirou. Entre de novo.";
+    await finishLogin(supabase, data.user.id);
+    return null;
+  };
+
+  const cancelCode = async () => {
+    await getSupabaseBrowserClient()?.auth.signOut();
+    setCodeStep(false);
+    setPassword("");
+  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,13 +102,13 @@ export default function LoginPage() {
         setErrorMessage(loginErrorMessage(error ?? {}));
         return;
       }
-      // Encaminha pelo status real do perfil (a RLS só devolve o próprio perfil).
-      const { data: profile } = await supabase.from("profiles").select("status").eq("id", data.user.id).maybeSingle();
-      const status = (profile as { status?: string } | null)?.status;
-      const next = safeNext(new URLSearchParams(window.location.search).get("redirect"));
-      // Navegação completa de propósito: o middleware relê os cookies da sessão recém-criada.
-      const target = !status || status === "pending" ? "/aguardando-aprovacao" : status === "active" ? (next ?? "/app") : "/conta/acesso";
-      window.location.href = target;
+      // Conta com autenticador: a senha sozinha não basta, pede o código antes de seguir
+      const lv = await assurance(supabase);
+      if (needsCode(lv.current, lv.next)) {
+        setCodeStep(true);
+        return;
+      }
+      await finishLogin(supabase, data.user.id);
     } catch {
       setErrorMessage("Sem conexão com o servidor. Verifique a internet e tente de novo.");
     } finally {
@@ -171,6 +200,19 @@ export default function LoginPage() {
             </div>
           )}
 
+          {codeStep ? (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-theme-text">Verificação em duas etapas</h3>
+                <p className="mt-1 text-sm text-theme-muted">Abra o aplicativo autenticador no celular e digite o código de 6 números desta conta.</p>
+              </div>
+              <CodeForm submitLabel="Entrar" onSubmit={handleCode} />
+              <button type="button" onClick={cancelCode} className="text-sm text-theme-muted hover:text-theme-text hover:underline">
+                Entrar com outra conta
+              </button>
+            </div>
+          ) : (
+          <>
           {/* Botão de Login Social Google */}
           <div>
             <button
@@ -269,6 +311,8 @@ export default function LoginPage() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
+          </>
+          )}
 
           {/* Nota de Governança de Acesso */}
           <div className="p-3 bg-theme-secondary rounded-xl border border-theme-border text-xs text-theme-muted space-y-1">
