@@ -732,7 +732,7 @@
    sob ele pela altura do header. */
 .hero-shell {
   min-height: var(--hero-min-h);
-  margin-top: calc(-1 * 65px - 64px);
+  margin-top: calc(-1 * var(--header-h));
 }
 
 .hero-backdrop {
@@ -862,7 +862,8 @@
    ------------------------------------------------------------------------------ */
 .hero-model {
   position: absolute;
-  top: 0;
+  /* Começa abaixo do menu: a cabeça nunca entra atrás dele. */
+  top: calc(var(--header-h) + 24px);
   bottom: 0;
   right: clamp(24px, 6vw, 120px);
   width: auto;
@@ -879,13 +880,13 @@
 /* 1024–1279: reduz a altura para o texto nunca entrar no braço esquerdo. */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .hero-model {
-    top: 34%;
+    top: max(calc(var(--header-h) + 24px), 34%);
   }
 }
 /* 1280–1439: 92% evita sobreposição com a coluna de texto. */
 @media (min-width: 1280px) and (max-width: 1439px) {
   .hero-model {
-    top: 8%;
+    top: max(calc(var(--header-h) + 24px), 8%);
   }
 }
 
@@ -899,7 +900,12 @@
     bottom: 0;
     left: auto;
     right: 24px;
-    width: min(calc(100vw - 48px), calc(85vh * 896 / 1114));
+    /* Nunca mais alto que o hero abaixo do menu (no tablet em pé, 85vh passava do topo). */
+    width: min(
+      calc(100vw - 48px),
+      calc(85vh * 896 / 1114),
+      calc((var(--hero-min-h) - var(--header-h) - 24px) * 896 / 1114)
+    );
     height: auto;
     --lens-r-size: 16cqw;
   }

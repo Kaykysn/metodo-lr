@@ -119,7 +119,7 @@
                         Definida só em :root e .dark (tema da PÁGINA): nunca em
                         [data-theme="dark"], para o fade seguir o tema global e
                         não a ilha escura do hero. */
-  --header-h: 2rem;
+  --header-h: 65px; /* altura real do menu fixo: h-16 (64px) + borda de 1px */
   --hero-blur: 18px;
   --hero-fade-start: 72%;
   --hero-visual-opacity: 0.45;
