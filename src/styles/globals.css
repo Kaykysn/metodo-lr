@@ -924,6 +924,11 @@
   .hero-model .hero-xray-canvas {
     --lens-r: 16cqw;
   }
+  /* Abaixo de 1024px o modelo é fundo do texto e não recebe toque: a dica
+     "Toque para revelar" prometeria uma interação que não existe. */
+  .hero-xray-hint {
+    display: none;
+  }
 }
 
 /* Véu de contraste sobre o modelo no mobile (texto por cima). */

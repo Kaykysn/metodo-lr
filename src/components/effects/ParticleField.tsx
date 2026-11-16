@@ -102,6 +102,7 @@ export default function ParticleField() {
     const targetFrameMs = prefersCoarse ? 1000 / 30 : 1000 / 45;
 
     const resize = () => {
+      const previousWidth = width;
       width = window.innerWidth;
       height = window.innerHeight;
       dpr = Math.min(window.devicePixelRatio || 1, prefersCoarse ? 1.35 : 1.75);
@@ -111,6 +112,13 @@ export default function ParticleField() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // No celular a barra de endereço muda só a altura ao rolar: manter as
+      // partículas evita que o fundo "pule" a cada rolagem.
+      if (particles.length && width === previousWidth) {
+        lastPaint = 0;
+        return;
+      }
 
       const baseCount = particleCountFor(width, intensity);
       const areaFactor = Math.min(1.45, Math.max(0.7, width / 1440));

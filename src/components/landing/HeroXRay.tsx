@@ -174,9 +174,11 @@ export default function HeroXRay({
       return;
     }
 
+    // Fora da tela o laço para: cada quadro mede o layout, e não há o que mostrar.
+    let running = false;
     const tick = (now: number) => {
       const node = containerRef.current;
-      if (!node) {
+      if (!node || !running) {
         rafRef.current = null;
         return;
       }
@@ -210,12 +212,29 @@ export default function HeroXRay({
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    lastFrameRef.current = 0;
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
+    const start = () => {
+      if (running) return;
+      running = true;
+      lastFrameRef.current = 0;
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      running = false;
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
+    };
+
+    let io: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver === "undefined") {
+      start();
+    } else {
+      io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? start() : stop()), { threshold: 0 });
+      io.observe(el);
+    }
+
+    return () => {
+      io?.disconnect();
+      stop();
       lastFrameRef.current = 0;
     };
   }, [clampToViewport, measure, prefersReducedMotion, syncLensRadius, writeVars, effectsActive]);
