@@ -1,85 +1,65 @@
-"use client";
+﻿"use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import clsx from "clsx";
 import { useVisualEffects } from "@/components/providers/AppearanceProvider";
-import { loadGsap } from "@/lib/motion/gsap";
 
-/** Arte oficial do Hero: mesmo corpo, pose e enquadramento nas duas camadas. */
-export const DEFAULT_BASE_IMAGE = "/media/hero-body-base.png";
-export const DEFAULT_XRAY_IMAGE = "/media/hero-body-xray.png";
-
-/** WebP otimizado (com transparência); o PNG continua como fallback do <picture>. */
-function webpVariant(src: string): string | null {
-  return /\.(png|jpe?g)(\?.*)?$/i.test(src) ? src.replace(/\.(png|jpe?g)(\?.*)?$/i, ".webp") : null;
-}
+/** Arte oficial do Hero: o mesmo canvas 896x1114 nas duas versões. */
+export const DEFAULT_BASE_IMAGE = "/media/hero-body-base.webp";
+export const DEFAULT_XRAY_IMAGE = "/media/hero-body-xray.webp";
 
 const clamp = (v: number, min: number, max: number) => (v < min ? min : v > max ? max : v);
 
+/** Trilha da varredura automática, em fração do wrapper (antebraço direito). */
+const SWEEP_START = { x: 0.81, y: 0.62 };
+const SWEEP_END = { x: 0.87, y: 0.86 };
+/** Posição estática com movimento reduzido: meio do antebraço. */
+const SWEEP_STATIC = { x: 0.84, y: 0.74 };
+/** Ida e volta completa da varredura. */
+const SWEEP_PERIOD_MS = 8000;
+/** Suavização do cursor (lerp por quadro a 60 fps). */
+const LERP = 0.15;
+/** Folga mínima entre o anel da lente e a borda da viewport. */
+const VIEWPORT_MARGIN = 24;
+
 export interface HeroXRayProps {
-  /**
-   * Imagem original do corpo humano (superfície / pele / postura).
-   * Padrão: /media/hero-body-base.png (fundo transparente).
-   */
+  /** Imagem de superfície (transparente). */
   baseImage?: string;
-  /**
-   * Imagem anatômica (esqueleto, fáscias e músculos profundos) na mesma pose.
-   * Padrão: /media/hero-body-xray.png (fundo transparente).
-   */
+  /** Imagem anatômica (transparente, mesmo canvas). */
   xrayImage?: string;
-  /**
-   * Raio da lanterna reveladora em pixels (escalado por breakpoint no CSS).
-   * Padrão: 190 px.
-   */
+  /** Raio da lente. Mantido por compatibilidade; hoje o raio vem de --lens-r (cqw). */
   revealRadius?: number;
-  /**
-   * Habilita ou desabilita a microanimação respiratória de 4,5 s (escala ~0,4%).
-   * Padrão: true.
-   */
+  /** Liga o pulso lento do anel (desligado com movimento reduzido). */
   breathingEnabled?: boolean;
-  /** Classes CSS adicionais aplicadas ao contêiner externo */
+  /** Classes extras no wrapper (posição/tamanho ficam no CSS). */
   className?: string;
-  /** Descrição acessível da imagem base */
   altBase?: string;
-  /** Descrição acessível da imagem de raio-x */
-  altXRay?: string;
-  /**
-   * Proporção de aspecto para reserva prévia de dimensões (anti-CLS).
-   * Padrão: "896 / 1114" — proporção nativa da arte.
-   */
+  /** Reserva de proporção para CLS zero. */
   aspectRatio?: string;
-  /** Exibe legenda interativa de auxílio para o usuário */
-  showInteractiveHint?: boolean;
-  /**
-   * No celular, revela a anatomia automaticamente conforme a rolagem.
-   * No desktop o efeito continua sendo controlado pelo cursor.
-   * Padrão: true.
-   */
+  /** Mantido por compatibilidade de API. */
   mobileScrollReveal?: boolean;
 }
 
-/** Tempo (ms) que a lanterna permanece visível após soltar o dedo no celular. */
-const TOUCH_LINGER_MS = 1600;
-
 /**
- * HeroXRay — Raio-X anatômico interativo do Método LR.
+ * HeroXRay — modelo em raio-X com lente que segue o cursor.
  *
- * Arquitetura de camadas (todas com a MESMA caixa e o MESMO enquadramento):
+ * Arquitetura (um único wrapper, cinco camadas absolutas no mesmo canvas):
+ *   a) cópia borrada da base, para dissolver o corte da cintura;
+ *   b) base nítida, com fade inferior;
+ *   c) camada de raio-X mascarada pela lente circular ∩ fade inferior;
+ *   d) anel luminoso centrado nas MESMAS coordenadas da lente;
+ *   e) glow âmbar atrás do anel.
  *
- *   1. Imagem base do corpo (object-contain, sem transformação própria).
- *   2. Imagem anatômica sobreposta, revelada por máscara (lanterna no desktop,
- *      varredura sincronizada com a rolagem no celular).
- *   3. Luzes atmosféricas (jade + realce quente) e sombra de contato.
+ * As duas imagens usam `fill` no mesmo wrapper com a mesma proporção, o mesmo
+ * `object-fit: contain` e o mesmo `object-position: center bottom`, portanto o
+ * alinhamento anatômico é garantido pelo layout.
  *
- * A respiração roda apenas no contêiner compartilhado (`.hero-xray-stage`), que
- * envolve as duas imagens: elas escalam juntas e a lanterna nunca desalinha.
- *
- * Performance:
- * - Coordenadas em refs + CSS variables (zero re-render por movimento).
- * - requestAnimationFrame com LERP independente de frame rate e auto-repouso.
- * - GSAP/ScrollTrigger carregados sob demanda apenas no celular.
- * - Imagens pré-carregadas e com reserva de proporção (sem CLS).
- * - Rolagem vertical do celular preservada; a varredura acompanha o scroll.
+ * Movimento: um único requestAnimationFrame escreve `--x`/`--y` (px relativos
+ * ao wrapper) direto no DOM, sem re-render. Sem interação a lente varre o
+ * antebraço direito em 8 s (ida e volta); com o mouse ela segue o cursor com
+ * lerp 0.15 e volta à trilha ao sair. No toque, um tap fixa/desafixa a lente.
+ * As coordenadas são presas à viewport para o anel nunca ser cortado.
  */
 export default function HeroXRay({
   baseImage = DEFAULT_BASE_IMAGE,
@@ -87,605 +67,363 @@ export default function HeroXRay({
   revealRadius = 190,
   breathingEnabled = true,
   className = "",
-  altBase = "Superfície corporal do aluno - Método LR",
-  altXRay = "Estrutura anatômica profunda e esqueleto revelados por raio-x - Método LR",
+  altBase = "Modelo masculino em vista frontal com destaque anatômico dos músculos e ossos",
   aspectRatio = "896 / 1114",
-  showInteractiveHint = true,
-  mobileScrollReveal = true,
 }: HeroXRayProps) {
   const { prefersReducedMotion, effectsActive } = useVisualEffects();
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const coordsRef = useRef({
-    currentX: 0,
-    currentY: 0,
-    targetX: 0,
-    targetY: 0,
-    active: false,
-  });
-
-  const rafId = useRef<number | null>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
   const lastFrameRef = useRef(0);
-  const pointerDownRef = useRef(false);
-  const hideTimerRef = useRef<number | null>(null);
-  const scanModeRef = useRef(false);
-
-  /** Direção do gesto no toque: vertical rola a página, horizontal revela. */
-  const gestureRef = useRef({
-    startX: 0,
-    startY: 0,
-    decided: false,
-    reveal: false,
-  });
+  const pointerIdRef = useRef<number | null>(null);
+  const lensRadiusRef = useRef(0);
 
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [imagesReady, setImagesReady] = useState(false);
-  const [scanMode, setScanMode] = useState(false);
 
-  const baseWebp = webpVariant(baseImage);
-  const xrayWebp = webpVariant(xrayImage);
+  /** Coordenadas em px relativas ao wrapper. */
+  const coordsRef = useRef({
+    x: 0,
+    y: 0,
+    targetX: 0,
+    targetY: 0,
+    mode: "auto" as "auto" | "cursor" | "fixed",
+    initialized: false,
+  });
 
-  // Em telas de toque o efeito é automático; no desktop segue o cursor.
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1023px)");
-    const apply = () => {
-      const next = mobileScrollReveal && mq.matches;
-      scanModeRef.current = next;
-      setScanMode(next);
-    };
-
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, [mobileScrollReveal]);
-
-  // Pré-carregamento das duas camadas; o esqueleto tem prazo máximo próprio.
-  useEffect(() => {
-    let active = true;
-    const preload = (src: string | null) =>
-      new Promise<void>((resolve) => {
-        if (!src) return resolve();
-        const img = new Image();
-        img.decoding = "async";
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-        img.src = src;
-      });
-
-    Promise.all([preload(baseImage), preload(xrayImage)]).then(() => {
-      if (active) setImagesReady(true);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [baseImage, xrayImage]);
-
-  const clearHideTimer = useCallback(() => {
-    if (hideTimerRef.current !== null) {
-      window.clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
+  const writeVars = useCallback((x: number, y: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const px = `${x.toFixed(1)}px`;
+    const py = `${y.toFixed(1)}px`;
+    // --x/--y são a fonte de verdade; --xray-* mantém compatibilidade com o CSS.
+    el.style.setProperty("--x", px);
+    el.style.setProperty("--y", py);
+    el.style.setProperty("--xray-x", px);
+    el.style.setProperty("--xray-y", py);
   }, []);
 
-  // Interpolação suave, com passo proporcional ao tempo real do quadro.
-  const startRaf = useCallback(() => {
-    if (rafId.current !== null) return;
+  const measure = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return null;
+    return el.getBoundingClientRect();
+  }, []);
+
+  /** Raio real da lente (resolvido do CSS/cqw), usado para prender o anel na viewport. */
+  const syncLensRadius = useCallback(() => {
+    const ring = ringRef.current;
+    if (!ring) return;
+    const width = ring.getBoundingClientRect().width;
+    if (width > 0) lensRadiusRef.current = width / 2;
+  }, []);
+
+  /**
+   * Mantém o anel inteiro dentro da viewport (≥24px de folga). O raio vem de
+   * --lens-r: 20cqw, ou seja, 20% da largura do wrapper.
+   */
+  const clampToViewport = useCallback((x: number, y: number) => {
+    const el = containerRef.current;
+    if (!el) return { x, y };
+    const box = el.getBoundingClientRect();
+    const radius = lensRadiusRef.current || el.clientWidth * 0.2;
+
+    const vw = Math.min(
+      window.innerWidth,
+      document.documentElement.clientWidth || window.innerWidth,
+      window.visualViewport?.width || window.innerWidth
+    );
+    const vh = Math.min(
+      window.innerHeight,
+      document.documentElement.clientHeight || window.innerHeight,
+      window.visualViewport?.height || window.innerHeight
+    );
+
+    // Limites do centro para que o círculo não encoste nas bordas da viewport.
+    const minX = VIEWPORT_MARGIN + radius - box.left;
+    const maxX = vw - VIEWPORT_MARGIN - radius - box.left;
+    const minY = VIEWPORT_MARGIN + radius - box.top;
+    const maxY = vh - VIEWPORT_MARGIN - radius - box.top;
+
+    return {
+      x: clamp(x, Math.max(radius * 0.15, minX), Math.max(radius, maxX)),
+      y: clamp(y, Math.max(radius * 0.15, minY), Math.max(radius, maxY)),
+    };
+  }, []);
+
+  // Loop único: varredura automática + perseguição do cursor com lerp.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const rect = measure();
+    if (!rect) return;
+
+    syncLensRadius();
+
+    const c = coordsRef.current;
+    const staticPoint = clampToViewport(rect.width * SWEEP_STATIC.x, rect.height * SWEEP_STATIC.y);
+    c.x = staticPoint.x;
+    c.y = staticPoint.y;
+    c.targetX = c.x;
+    c.targetY = c.y;
+    writeVars(c.x, c.y);
+
+    // Movimento reduzido: lente estática no antebraço, sem varredura nem pulso.
+    if (prefersReducedMotion) {
+      writeVars(c.targetX, c.targetY);
+      return;
+    }
 
     const tick = (now: number) => {
-      const coords = coordsRef.current;
-      const el = containerRef.current;
-
-      if (!el) {
-        rafId.current = null;
+      const node = containerRef.current;
+      if (!node) {
+        rafRef.current = null;
         return;
       }
-
+      const box = node.getBoundingClientRect();
+      const state = coordsRef.current;
       const elapsed = lastFrameRef.current ? Math.min(64, now - lastFrameRef.current) : 16.7;
       lastFrameRef.current = now;
 
-      // 0.22 a 60 fps ≈ 1 - 0.78^(dt/16.7): mesma sensação em 120 Hz ou 30 Hz.
-      const factor = prefersReducedMotion ? 1 : 1 - Math.pow(0.78, elapsed / 16.7);
-
-      const dx = coords.targetX - coords.currentX;
-      const dy = coords.targetY - coords.currentY;
-
-      coords.currentX += dx * factor;
-      coords.currentY += dy * factor;
-
-      if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
-        coords.currentX = coords.targetX;
-        coords.currentY = coords.targetY;
+      if (state.mode === "auto") {
+        // ida e volta com ease-in-out (cosseno): 0 -> 1 -> 0
+        const phase = 0.5 - 0.5 * Math.cos((now / SWEEP_PERIOD_MS) * Math.PI * 2);
+        state.targetX = (SWEEP_START.x + (SWEEP_END.x - SWEEP_START.x) * phase) * box.width;
+        state.targetY = (SWEEP_START.y + (SWEEP_END.y - SWEEP_START.y) * phase) * box.height;
       }
 
-      el.style.setProperty("--xray-x", `${coords.currentX.toFixed(1)}px`);
-      el.style.setProperty("--xray-y", `${coords.currentY.toFixed(1)}px`);
-
-      const settled =
-        Math.abs(coords.targetX - coords.currentX) < 0.05 &&
-        Math.abs(coords.targetY - coords.currentY) < 0.05;
-
-      if (settled) {
-        // Repouso: encerra o ciclo e economiza CPU até o próximo movimento.
-        rafId.current = null;
-        lastFrameRef.current = 0;
-        return;
+      if (state.mode !== "fixed") {
+        const safeTarget = clampToViewport(state.targetX, state.targetY);
+        state.targetX = safeTarget.x;
+        state.targetY = safeTarget.y;
       }
 
-      rafId.current = requestAnimationFrame(tick);
+      const k = 1 - Math.pow(1 - LERP, elapsed / 16.7);
+      state.x += (state.targetX - state.x) * k;
+      state.y += (state.targetY - state.y) * k;
+
+      const safe = clampToViewport(state.x, state.y);
+      state.x = safe.x;
+      state.y = safe.y;
+      writeVars(state.x, state.y);
+
+      rafRef.current = requestAnimationFrame(tick);
     };
 
     lastFrameRef.current = 0;
-    rafId.current = requestAnimationFrame(tick);
-  }, [prefersReducedMotion]);
-
-  const showLens = useCallback(
-    (x: number, y: number, snap = false) => {
-      if (scanModeRef.current) return;
-
-      const coords = coordsRef.current;
-      const el = containerRef.current;
-      const entering = snap && !coords.active;
-
-      // Entrada no painel/toque: a lanterna já nasce sob o cursor (sem varredura).
-      if (entering) {
-        coords.currentX = x;
-        coords.currentY = y;
-      }
-      coords.targetX = x;
-      coords.targetY = y;
-      coords.active = true;
-
-      if (!el) return;
-
-      if (entering) {
-        el.style.setProperty("--xray-x", `${x.toFixed(1)}px`);
-        el.style.setProperty("--xray-y", `${y.toFixed(1)}px`);
-      }
-
-      el.style.setProperty("--xray-opacity", "1");
-
-      if (snap && prefersReducedMotion) {
-        coords.currentX = x;
-        coords.currentY = y;
-        el.style.setProperty("--xray-x", `${x.toFixed(1)}px`);
-        el.style.setProperty("--xray-y", `${y.toFixed(1)}px`);
-      }
-
-      startRaf();
-      if (!hasInteracted) setHasInteracted(true);
-    },
-    [hasInteracted, prefersReducedMotion, startRaf]
-  );
-
-  const hideLens = useCallback(() => {
-    clearHideTimer();
-    coordsRef.current.active = false;
-    containerRef.current?.style.setProperty("--xray-opacity", "0");
-  }, [clearHideTimer]);
-
-  const scheduleHide = useCallback(() => {
-    clearHideTimer();
-    hideTimerRef.current = window.setTimeout(hideLens, TOUCH_LINGER_MS);
-  }, [clearHideTimer, hideLens]);
-
-  // Cancelamentos e timer de permanência no celular.
-  useEffect(
-    () => () => {
-      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
-      if (hideTimerRef.current !== null) window.clearTimeout(hideTimerRef.current);
-    },
-    []
-  );
-
-  // No toque (desktop estreito): bloqueia apenas o gesto horizontal.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || scanMode) return;
-    const onTouchMove = (e: TouchEvent) => {
-      if (gestureRef.current.reveal && e.cancelable) e.preventDefault();
-    };
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    return () => el.removeEventListener("touchmove", onTouchMove);
-  }, [scanMode]);
-
-  // Varredura automática no celular: a máscara acompanha a posição do scroll.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || !scanMode) return;
-
-    // Movimento reduzido: anatomia visível, sem animação.
-    if (prefersReducedMotion) {
-      el.classList.add("hero-xray-scan");
-      el.style.setProperty("--xray-scan", "106%");
-      el.style.setProperty("--xray-scan-opacity", "1");
-      el.style.setProperty("--xray-scan-line", "0");
-      return () => {
-        el.classList.remove("hero-xray-scan");
-        el.style.removeProperty("--xray-scan");
-        el.style.removeProperty("--xray-scan-opacity");
-        el.style.removeProperty("--xray-scan-line");
-      };
-    }
-
-    // Efeitos desligados: mantém apenas a superfície, sem varredura.
-    if (!effectsActive) {
-      el.classList.add("hero-xray-scan");
-      el.style.setProperty("--xray-scan", "-8%");
-      el.style.setProperty("--xray-scan-opacity", "0");
-      el.style.setProperty("--xray-scan-line", "0");
-      return () => {
-        el.classList.remove("hero-xray-scan");
-        el.style.removeProperty("--xray-scan");
-        el.style.removeProperty("--xray-scan-opacity");
-        el.style.removeProperty("--xray-scan-line");
-      };
-    }
-
-    let cancelled = false;
-    let cleanup = () => {};
-
-    (async () => {
-      const { gsap, ScrollTrigger } = await loadGsap();
-      if (cancelled) return;
-
-      el.classList.add("hero-xray-scan");
-      const proxy = { scan: 0 };
-
-      const apply = () => {
-        // A linha começa acima da moldura e termina abaixo dela; a máscara
-        // acompanha exatamente o mesmo ponto, sem salto no início/fim.
-        const position = proxy.scan * 114 - 8;
-        el.style.setProperty("--xray-scan", `${position.toFixed(2)}%`);
-        el.style.setProperty("--xray-scan-opacity", proxy.scan > 0.004 ? "1" : "0");
-        const lineVisible = position > 1 && position < 99 ? "1" : "0";
-        el.style.setProperty("--xray-scan-line", lineVisible);
-      };
-
-      apply();
-
-      const tween = gsap.fromTo(
-        proxy,
-        { scan: 0 },
-        {
-          scan: 1,
-          ease: "none",
-          onUpdate: apply,
-          scrollTrigger: {
-            trigger: el,
-            start: "top 94%",
-            end: "bottom 38%",
-            scrub: 0.55,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-
-      ScrollTrigger.refresh();
-
-      cleanup = () => {
-        tween.scrollTrigger?.kill();
-        tween.kill();
-        el.classList.remove("hero-xray-scan");
-        el.style.removeProperty("--xray-scan");
-        el.style.removeProperty("--xray-scan-opacity");
-        el.style.removeProperty("--xray-scan-line");
-      };
-    })();
+    rafRef.current = requestAnimationFrame(tick);
 
     return () => {
-      cancelled = true;
-      cleanup();
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      lastFrameRef.current = 0;
     };
-  }, [scanMode, effectsActive, prefersReducedMotion]);
+  }, [clampToViewport, measure, prefersReducedMotion, syncLensRadius, writeVars, effectsActive]);
 
-  /**
-   * Coordenadas locais ao quadro da imagem (não à viewport).
-   * A divisão por `offsetWidth`/`offsetHeight` compensa a escala da respiração,
-   * mantendo o centro da lanterna exatamente sob o cursor.
-   */
-  const computeRelativeCoords = useCallback((clientX: number, clientY: number) => {
+  // Reancora a lente se o wrapper mudar de tamanho.
+  useEffect(() => {
     const el = containerRef.current;
-    if (!el) return { x: 0, y: 0 };
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      syncLensRadius();
+      const c = coordsRef.current;
+      if (c.mode === "auto") return;
+      const safe = clampToViewport(c.targetX, c.targetY);
+      c.targetX = safe.x;
+      c.targetY = safe.y;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [clampToViewport, syncLensRadius]);
+
+  const pointFromEvent = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const el = containerRef.current;
+    if (!el) return null;
     const rect = el.getBoundingClientRect();
-    const scaleX = el.offsetWidth ? rect.width / el.offsetWidth : 1;
-    const scaleY = el.offsetHeight ? rect.height / el.offsetHeight : 1;
     return {
-      x: clamp((clientX - rect.left) / (scaleX || 1), 0, el.offsetWidth),
-      y: clamp((clientY - rect.top) / (scaleY || 1), 0, el.offsetHeight),
+      x: clamp(e.clientX - rect.left, 0, rect.width),
+      y: clamp(e.clientY - rect.top, 0, rect.height),
     };
   }, []);
 
-  // --- Pointer Events: mouse no desktop, toque/arraste no celular ---
+  // A lente também acompanha o ponteiro globalmente. Isso garante que o efeito
+  // funcione quando o mouse entra no modelo por qualquer caminho e evita que
+  // um `mousemove` sintético (testes/automação) fique sem resposta.
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const handleMove = (e: MouseEvent) => {
+      const el = containerRef.current;
+      if (!el) return;
+      if (coordsRef.current.mode === "fixed") return;
+      const rect = el.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      if (!inside) {
+        if (pointerIdRef.current === null) {
+          coordsRef.current.mode = "auto";
+        }
+        return;
+      }
+      coordsRef.current.mode = "cursor";
+      coordsRef.current.targetX = clamp(e.clientX - rect.left, 0, rect.width);
+      coordsRef.current.targetY = clamp(e.clientY - rect.top, 0, rect.height);
+    };
+    window.addEventListener("mousemove", handleMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMove);
+  }, [prefersReducedMotion]);
 
   const handlePointerEnter = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (scanModeRef.current || e.pointerType === "touch") return;
-      const { x, y } = computeRelativeCoords(e.clientX, e.clientY);
-      showLens(x, y, true);
+      if (prefersReducedMotion) return;
+      if (e.pointerType === "touch") return;
+      setHasInteracted(true);
+      const point = pointFromEvent(e);
+      if (!point) return;
+      coordsRef.current.mode = "cursor";
+      coordsRef.current.targetX = point.x;
+      coordsRef.current.targetY = point.y;
     },
-    [computeRelativeCoords, showLens]
+    [pointFromEvent, prefersReducedMotion]
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (scanModeRef.current) return;
-
-      if (e.pointerType === "touch") {
-        const g = gestureRef.current;
-        if (!pointerDownRef.current) return;
-
-        if (!g.decided) {
-          const dx = Math.abs(e.clientX - g.startX);
-          const dy = Math.abs(e.clientY - g.startY);
-          if (dx < 6 && dy < 6) return;
-          g.decided = true;
-          g.reveal = dx >= dy;
-          if (!g.reveal) {
-            // Gesto vertical: deixa a página rolar.
-            hideLens();
-            return;
-          }
-        }
-        if (!g.reveal) return;
+      if (prefersReducedMotion || e.pointerType === "touch") return;
+      const point = pointFromEvent(e);
+      if (!point) return;
+      if (coordsRef.current.mode !== "fixed") {
+        coordsRef.current.mode = "cursor";
+        coordsRef.current.targetX = point.x;
+        coordsRef.current.targetY = point.y;
       }
-
-      const { x, y } = computeRelativeCoords(e.clientX, e.clientY);
-      coordsRef.current.targetX = x;
-      coordsRef.current.targetY = y;
-      if (coordsRef.current.active) startRaf();
-      else showLens(x, y, true);
     },
-    [computeRelativeCoords, hideLens, showLens, startRaf]
-  );
-
-  const handlePointerLeave = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (pointerDownRef.current && e.pointerType === "touch") return;
-      hideLens();
-    },
-    [hideLens]
+    [pointFromEvent, prefersReducedMotion]
   );
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (scanModeRef.current) return;
-      clearHideTimer();
-      pointerDownRef.current = true;
+      setHasInteracted(true);
+      const point = pointFromEvent(e);
+      if (!point) return;
 
-      gestureRef.current = {
-        startX: e.clientX,
-        startY: e.clientY,
-        decided: e.pointerType !== "touch",
-        reveal: e.pointerType !== "touch",
-      };
-
+      // Toque: fixa a lente no ponto; um segundo toque retoma a varredura.
       if (e.pointerType === "touch") {
-        try {
-          e.currentTarget.setPointerCapture(e.pointerId);
-        } catch {
-          /* Fallback silencioso */
+        const c = coordsRef.current;
+        if (c.mode === "fixed") {
+          c.mode = "auto";
+        } else {
+          c.mode = "fixed";
+          c.targetX = point.x;
+          c.targetY = point.y;
         }
-      }
-
-      const { x, y } = computeRelativeCoords(e.clientX, e.clientY);
-      showLens(x, y, true);
-    },
-    [clearHideTimer, computeRelativeCoords, showLens]
-  );
-
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      pointerDownRef.current = false;
-      if (scanModeRef.current || e.pointerType !== "touch") return;
-
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {
-        /* Fallback silencioso */
-      }
-
-      // Mantém a anatomia visível por um instante após soltar o dedo.
-      if (gestureRef.current.reveal) scheduleHide();
-      else hideLens();
-    },
-    [hideLens, scheduleHide]
-  );
-
-  const handlePointerCancel = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      pointerDownRef.current = false;
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {
-        /* Fallback silencioso */
-      }
-      hideLens();
-    },
-    [hideLens]
-  );
-
-  // Teclado: setas posicionam a lanterna; foco revela o tórax; Esc fecha.
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const el = containerRef.current;
-      if (!el || scanModeRef.current) return;
-      const step = 30;
-      const coords = coordsRef.current;
-
-      let nextX = coords.targetX || el.offsetWidth / 2;
-      let nextY = coords.targetY || el.offsetHeight * 0.42;
-
-      if (e.key === "ArrowUp") nextY = Math.max(0, nextY - step);
-      else if (e.key === "ArrowDown") nextY = Math.min(el.offsetHeight, nextY + step);
-      else if (e.key === "ArrowLeft") nextX = Math.max(0, nextX - step);
-      else if (e.key === "ArrowRight") nextX = Math.min(el.offsetWidth, nextX + step);
-      else if (e.key === "Escape") {
-        hideLens();
-        return;
-      } else {
         return;
       }
 
-      e.preventDefault();
-      showLens(nextX, nextY, true);
+      if (prefersReducedMotion) return;
+      // Captura o ponteiro para o arraste continuar mesmo saindo do modelo.
+      e.currentTarget.setPointerCapture(e.pointerId);
+      pointerIdRef.current = e.pointerId;
+      coordsRef.current.mode = "cursor";
+      coordsRef.current.targetX = point.x;
+      coordsRef.current.targetY = point.y;
     },
-    [hideLens, showLens]
+    [pointFromEvent, prefersReducedMotion]
   );
 
-  const handleFocus = useCallback(
-    (e: React.FocusEvent<HTMLDivElement>) => {
-      // Só revela no foco por teclado; clique/toque usam as coordenadas do ponteiro.
-      if (scanModeRef.current || !e.currentTarget.matches(":focus-visible")) return;
-      const el = containerRef.current;
-      if (!el || coordsRef.current.active) return;
-      showLens(el.offsetWidth / 2, el.offsetHeight * 0.42, true);
-    },
-    [showLens]
-  );
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (pointerIdRef.current !== null && e.currentTarget.hasPointerCapture(pointerIdRef.current)) {
+      e.currentTarget.releasePointerCapture(pointerIdRef.current);
+    }
+    pointerIdRef.current = null;
+  }, []);
 
-  const isBreathingActive = breathingEnabled && !prefersReducedMotion && effectsActive;
+  // Ao sair do modelo, a lente volta suavemente para a trilha automática.
+  const handlePointerLeave = useCallback(() => {
+    if (pointerIdRef.current !== null) return;
+    if (coordsRef.current.mode === "fixed") return;
+    coordsRef.current.mode = "auto";
+  }, []);
+
+  const isBreathingActive = breathingEnabled && effectsActive && !prefersReducedMotion;
 
   return (
-    <div className={clsx("relative w-full select-none", className)}>
-      <div
-        ref={containerRef}
-        role="region"
-        aria-label={
-          scanMode
-            ? "Raio-X anatômico do Método LR: a anatomia é revelada conforme a rolagem da página"
-            : "Painel de Raio-X Anatômico Interativo do Método LR"
-        }
-        aria-roledescription="imagem interativa"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        onFocus={handleFocus}
-        onBlur={hideLens}
-        onPointerEnter={handlePointerEnter}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
-        style={
-          {
-            "--xray-r": `${revealRadius}px`,
-            "--xray-x": "-9999px",
-            "--xray-y": "-9999px",
-            "--xray-opacity": "0",
-            "--xray-scan": "-8%",
-            "--xray-scan-opacity": "0",
-            "--xray-scan-line": "0",
-            aspectRatio: aspectRatio,
-          } as React.CSSProperties
-        }
-        className={clsx(
-          "hero-xray-canvas relative mx-auto w-full cursor-crosshair outline-none",
-          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#76D7BE]",
-          scanMode && "hero-xray-scan"
-        )}
-      >
-        {/* Aura suave atrás da figura: profundidade sem criar uma caixa visível */}
-        <div className="hero-xray-aura pointer-events-none absolute inset-0 z-0" aria-hidden="true" data-decorative />
-
-        {/* Glow âmbar atrás do braço: valoriza o raio-X e integra o anel ao fundo */}
+    <div
+      ref={containerRef}
+      style={
+        {
+          aspectRatio: aspectRatio,
+          "--reveal-r": `${revealRadius}px`,
+        } as React.CSSProperties
+      }
+      className={clsx("hero-xray-canvas", className)}
+      onPointerEnter={handlePointerEnter}
+      onPointerMove={handlePointerMove}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
+    >
+      <div className="hero-xray-stage">
+        {/* Aura fria: integra o recorte ao fundo, sem desenhar caixa. */}
         <div
-          className="hero-xray-ember hero-xray-ember-pulse pointer-events-none absolute inset-0 z-[1]"
+          className={clsx("hero-xray-aura", isBreathingActive && "hero-xray-breathing")}
           aria-hidden="true"
           data-decorative
         />
 
-        {/*
-          CONTÊINER COMPARTILHADO (respiração):
-          as duas camadas são filhas diretas deste elemento, portanto escalam
-          juntas — a lanterna acompanha o corpo sem desalinhamento.
-        */}
-        <div className={clsx("hero-xray-stage absolute inset-0 z-10", isBreathingActive && "hero-xray-breathing")}>
-          {/* Máscara da arte: a base é dissolvida e nenhuma borda reta fica visível */}
-          <div className="hero-xray-figure-clip">
-            <div className="hero-xray-figure absolute inset-0">
-            {/* CAMADA 1 — corpo (superfície) */}
-            <picture className="absolute inset-0 z-10 block">
-              {baseWebp && <source type="image/webp" srcSet={baseWebp} />}
-              <img
-                src={baseImage}
-                alt={altBase}
-                width={896}
-                height={1114}
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-                draggable={false}
-                className="h-full w-full select-none object-contain object-center pointer-events-none"
-              />
-            </picture>
-
-            {/* CAMADA 2 — anatomia, revelada pela máscara */}
-            <div className="hero-xray-layer absolute inset-0 z-20 select-none pointer-events-none" aria-hidden="true">
-              <picture className="absolute inset-0 block">
-                {xrayWebp && <source type="image/webp" srcSet={xrayWebp} />}
-                <img
-                  src={xrayImage}
-                  alt=""
-                  width={896}
-                  height={1114}
-                  loading="eager"
-                  decoding="async"
-                  draggable={false}
-                  className="h-full w-full select-none object-contain object-center pointer-events-none"
-                />
-              </picture>
-            </div>
-            </div>
-          </div>
-
-          {/* Dissolução da base: 5 camadas de blur progressivo + gradiente final */}
-          <div className="hero-xray-dissolve" aria-hidden="true" data-decorative>
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-
-          {/* Lanterna: halo jade + aro óptico + borda quente discreta */}
-          <div className="hero-xray-glow absolute inset-0 z-30" aria-hidden="true" data-decorative />
-
-          {/* Linha de varredura do celular: traço luminoso no limite da revelação */}
-          <div className="hero-xray-scanline absolute inset-x-0 z-30" aria-hidden="true" data-decorative />
+        {/* (a) cópia borrada da base: dissolve o corte da cintura. */}
+        <div className="hero-xray-blur" aria-hidden="true" data-decorative>
+          <Image
+            src={baseImage}
+            alt=""
+            fill
+            sizes="(max-width: 1023px) 92vw, 46vw"
+            className="hero-xray-img object-contain"
+          />
         </div>
 
-        {/* Esqueleto de carregamento com prazo próprio (não bloqueia sem JS) */}
-        {!imagesReady && (
-          <div
-            aria-hidden="true"
-            className="hero-xray-skeleton pointer-events-none absolute inset-0 z-50 flex items-center justify-center"
-          >
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#011228]/55 px-4 py-2 text-xs font-medium text-[#a9bfc4] backdrop-blur-md">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-t-[#76D7BE] border-white/10" />
-              Carregando anatomia...
-            </span>
-          </div>
-        )}
+        {/* (b) base nítida: única imagem com priority (LCP). */}
+        <div className="hero-xray-base">
+          <Image
+            src={baseImage}
+            alt={altBase}
+            fill
+            priority
+            sizes="(max-width: 1023px) 92vw, 46vw"
+            className="hero-xray-img object-contain"
+          />
+        </div>
 
-        {/* Dica discreta de interação (o celular já revela sozinho) */}
-        {showInteractiveHint && !scanMode && (
-          <div
-            className={clsx(
-              "pointer-events-none absolute inset-x-0 bottom-2 z-50 flex justify-center transition-opacity duration-500",
-              hasInteracted ? "opacity-0" : "opacity-95"
-            )}
-          >
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-[#021226]/70 px-3.5 py-1.5 text-[11px] font-semibold text-[#a9bfc4] shadow-lg backdrop-blur-md">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#76D7BE] opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#76D7BE]" />
-              </span>
-              Passe o cursor para revelar a anatomia
-            </span>
-          </div>
-        )}
+        {/* (c) raio-X: decorativo, carrega logo após o LCP. */}
+        <div className="hero-xray-layer" aria-hidden="true" data-decorative>
+          <Image
+            src={xrayImage}
+            alt=""
+            fill
+            loading="eager"
+            sizes="(max-width: 1023px) 92vw, 46vw"
+            className="hero-xray-img object-contain"
+          />
+        </div>
+
+        {/* (d) anel: mesmas coordenadas da lente. */}
+        <div ref={ringRef} className="hero-xray-ring" aria-hidden="true" data-decorative />
+
+        {/* (e) glow âmbar atrás do anel. */}
+        <div className="hero-xray-ember" aria-hidden="true" data-decorative />
+
+        {/* Primeiro contato: ponto pulsante no centro da lente automática. */}
+        <span
+          className={clsx(
+            "hero-xray-ping",
+            (hasInteracted || prefersReducedMotion) && "is-hidden"
+          )}
+          aria-hidden="true"
+          data-decorative
+        />
       </div>
     </div>
   );

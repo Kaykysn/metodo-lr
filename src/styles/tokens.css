@@ -106,13 +106,35 @@
   --hero-glass-alpha: 0.1;        /* ladrilho de vidro sobre o hero */
   --hero-glass-solid: 16 36 60;   /* mesmo ladrilho sem desfoque (modo leve) */
 
-  /* Hero: geometria e dissolução da arte */
-  --header-h: 4rem;               /* altura real do header (h-16) */
-  --hero-blur-max: 32px;          /* blur da camada 5; as outras são frações desta */
-  --hero-fade-start: 88%;         /* onde a máscara inferior começa a dissolver a arte */
-  --hero-dissolve-height: 36%;    /* altura da faixa de desfoque progressivo na base */
-  --hero-ring-glow: 0.18;         /* glow âmbar atrás do braço em raio-X */
-  --hero-visual-opacity: 0.42;    /* opacidade da arte como fundo no celular */
+  /* Hero: geometria e dissolução da arte
+     --hero-blur        desfoque da cópia borrada que dissolve a cintura (18px)
+     --hero-fade-start  onde a base nítida começa a desaparecer (72%)
+     --hero-visual-opacity  opacidade do modelo como fundo no celular (45%)
+     --hero-min-h       altura mínima/máxima do hero (600–820px, acompanha a viewport)
+     --hero-pad-y       respiro vertical do conteúdo (64–96px)
+     --hero-fade-height faixa de transição para a cor da próxima seção (150px)
+     --hero-video-overlay  véu escuro sobre o vídeo (0 = vídeo puro, 1 = preto)
+     --hero-wave-*      presença e velocidade das duas camadas de ondas SVG
+     --hero-next-bg     cor da PRÓXIMA seção, para o fade do rodapé do hero.
+                        Definida só em :root e .dark (tema da PÁGINA): nunca em
+                        [data-theme="dark"], para o fade seguir o tema global e
+                        não a ilha escura do hero. */
+  --header-h: 2rem;
+  --hero-blur: 18px;
+  --hero-fade-start: 72%;
+  --hero-visual-opacity: 0.45;
+  --hero-ring-glow: 0.18;
+  --hero-min-h: clamp(600px, calc(100svh - var(--header-h)), 820px);
+  --hero-pad-y: clamp(64px, 8vh, 96px);
+  --hero-fade-height: 150px;
+  --hero-video-overlay: 0.55;
+  --hero-wave-opacity-back: 0.26;
+  --hero-wave-opacity-front: 0.1;
+  --hero-wave-blur: 2px;
+  --hero-wave-duration: 34s;
+  --hero-scroll-cue-opacity: 0.6;
+  /* Cor da próxima seção (tema global). Só :root e .dark — nunca na ilha. */
+  --hero-next-bg: 238 244 245;
 
   /* Seções longas de leitura: névoa pálida (claro) / petróleo profundo (escuro) */
   --surface-reading: 230 239 240;
@@ -129,7 +151,17 @@
   --radius-tile: 13px;            /* 12–14px para ladrilhos de vidro */
 }
 
+/* Fundo da próxima seção no tema escuro global. Fora de [data-theme="dark"]:
+   a ilha escura do hero não deve redefinir esta cor. */
 .dark {
+  --hero-next-bg: 2 18 38;
+}
+
+/* Tokens escuros em dois escopos:
+   - `.dark` no <html>, aplicado pelo seletor de tema;
+   - `[data-theme="dark"]` em uma região fixa (o Hero é sempre escuro). */
+.dark,
+[data-theme="dark"] {
   /* Superfícies — Modo Escuro: profundidade original da arte amostrada */
   --bg-page: 2 18 38;              /* Azul-noite profundo da margem esquerda #021226 */
   --surface-primary: 10 26 46;     /* #0A1A2E */

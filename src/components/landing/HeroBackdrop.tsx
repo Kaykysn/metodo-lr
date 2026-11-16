@@ -1,133 +1,204 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import clsx from "clsx";
+import Image from "next/image";
 import { useVisualEffects } from "@/components/providers/AppearanceProvider";
 
-/** Camada 3 do Hero: vídeo de fundo cinematográfico, com fallback estático. */
-const VIDEO = "/videos/hero-background.mp4";
-const VIDEO_SMALL = "/videos/hero-background-960.mp4";
-const POSTER = "/media/hero-background-poster.jpg";
-
 /**
- * HeroBackdrop — plano de fundo do Hero em três estados:
+ * HeroBackdrop — fundo contínuo do Hero.
  *
- * 1. Mesh estático (sempre presente): é o primeiro quadro, o fallback se o vídeo
- *    falhar e a imagem exibida com movimento reduzido/efeitos desligados.
- * 2. Vídeo local (autoplay, mudo, em loop, playsInline): só é montado depois da
- *    primeira pintura e quando o aparelho/rede permitem (useVisualEffects), para
- *    não competir com o LCP.
- * 3. Véu de contraste: garante legibilidade dos textos sobre qualquer quadro.
+ * Camadas, de trás para frente:
+ *   1. poster (primeiro quadro) — sempre presente, evita flash e cobre o caso
+ *      sem vídeo (mobile, reduced-motion, save-data);
+ *   2. vídeo azul (WebM VP9 + MP4 H.264), mudo, em loop, pausado fora da tela;
+ *   3. véu escuro com opacidade controlada por --hero-video-overlay;
+ *   4. radiais de petróleo;
+ *   5. duas famílias de ondas SVG (uma mais larga atrás do modelo e outra mais
+ *      sutil), com deriva lenta de 34 s.
  *
- * O vídeo pausa ao sair da tela e com a aba oculta; todos os listeners são
- * removidos na desmontagem.
+ * Nada aqui recebe máscara lateral: as ondas atravessam a largura inteira, sem
+ * emenda ou borda vertical. As partículas só existem a partir de 768 px.
  */
+
+/** Posições fixas: 18 pontos minúsculos distribuídos pelo hero. */
+const PARTICLES = [
+  { left: "6%", top: "18%", size: 2, dur: 17, delay: 0 },
+  { left: "12%", top: "62%", size: 1, dur: 21, delay: 2 },
+  { left: "18%", top: "36%", size: 2, dur: 19, delay: 4 },
+  { left: "24%", top: "78%", size: 1, dur: 23, delay: 1 },
+  { left: "31%", top: "12%", size: 1, dur: 18, delay: 3 },
+  { left: "37%", top: "54%", size: 2, dur: 20, delay: 5 },
+  { left: "44%", top: "84%", size: 1, dur: 22, delay: 2 },
+  { left: "49%", top: "28%", size: 2, dur: 16, delay: 6 },
+  { left: "55%", top: "68%", size: 1, dur: 24, delay: 0 },
+  { left: "61%", top: "44%", size: 1, dur: 19, delay: 3 },
+  { left: "67%", top: "16%", size: 2, dur: 21, delay: 1 },
+  { left: "72%", top: "74%", size: 1, dur: 18, delay: 4 },
+  { left: "78%", top: "38%", size: 2, dur: 22, delay: 2 },
+  { left: "83%", top: "58%", size: 1, dur: 20, delay: 5 },
+  { left: "88%", top: "22%", size: 1, dur: 17, delay: 3 },
+  { left: "92%", top: "70%", size: 2, dur: 23, delay: 1 },
+  { left: "96%", top: "44%", size: 1, dur: 19, delay: 4 },
+  { left: "42%", top: "8%", size: 1, dur: 25, delay: 2 },
+];
+
 export default function HeroBackdrop() {
-  const { effectsActive, videoAllowed } = useVisualEffects();
+  const { videoAllowed, prefersReducedMotion } = useVisualEffects();
+  const root = useRef<HTMLDivElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const [mountVideo, setMountVideo] = useState(false);
+  const [showParticles, setShowParticles] = useState(false);
 
-  const [mounted, setMounted] = useState(false);
-  const [src, setSrc] = useState(VIDEO);
-  const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Monta o vídeo só após a primeira pintura e escolhe a variante de celular.
+  // Decide uma única vez, no cliente: só monta o vídeo quando ele é permitido.
   useEffect(() => {
-    setSrc(window.matchMedia("(max-width: 767px)").matches ? VIDEO_SMALL : VIDEO);
-    const id = window.setTimeout(() => setMounted(true), 0);
-    return () => window.clearTimeout(id);
-  }, []);
+    const small = window.matchMedia("(max-width: 767px)").matches;
+    const saveData = Boolean(
+      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
+    );
+    setShowParticles(!small);
+    setMountVideo(!small && !prefersReducedMotion && videoAllowed && !saveData);
+  }, [prefersReducedMotion, videoAllowed]);
 
-  const active = mounted && videoAllowed && effectsActive && !failed;
-
-  // Reprodução: tenta tocar, pausa fora da tela e com a aba oculta.
+  // Pausa quando o hero sai da tela e retoma ao voltar.
   useEffect(() => {
-    if (!active) return;
-    const video = videoRef.current;
-    const wrap = wrapRef.current;
-    if (!video) return;
-
-    let inView = true;
-
-    const play = () => {
-      const p = video.play();
-      if (p) p.catch(() => {
-        /* Autoplay bloqueado (ex.: economia de energia): mantém o pôster. */
-      });
-    };
-
-    const sync = () => {
-      if (inView && !document.hidden) play();
-      else video.pause();
-    };
-
-    let io: IntersectionObserver | null = null;
-    if (wrap && "IntersectionObserver" in window) {
-      io = new IntersectionObserver(
-        ([entry]) => {
-          inView = entry.isIntersecting;
-          sync();
-        },
-        { threshold: 0.01 }
-      );
-      io.observe(wrap);
-    }
-
-    const onVisibility = () => sync();
-    document.addEventListener("visibilitychange", onVisibility);
-    play();
-
-    return () => {
-      io?.disconnect();
-      document.removeEventListener("visibilitychange", onVisibility);
-      video.pause();
-    };
-  }, [active]);
+    if (!mountVideo) return;
+    const node = video.current;
+    const host = root.current;
+    if (!node || !host || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          node.pause();
+        } else if (!prefersReducedMotion) {
+          void node.play().catch(() => {});
+        }
+      },
+      { threshold: 0.05 }
+    );
+    io.observe(host);
+    return () => io.disconnect();
+  }, [mountVideo, prefersReducedMotion]);
 
   return (
     <div
-      ref={wrapRef}
+      ref={root}
       aria-hidden="true"
       data-decorative
-      className="pointer-events-none absolute inset-0 -z-20 select-none overflow-hidden"
+      className="hero-backdrop pointer-events-none absolute inset-0 z-0 select-none overflow-hidden"
     >
-      {/* Fallback estático: primeiro quadro e rede de segurança do vídeo. */}
-      <picture className="absolute inset-0">
-        <source type="image/webp" srcSet="/media/mesh-hero-960.webp 960w, /media/mesh-hero.webp 1672w" sizes="100vw" />
-        <img
-          src="/media/mesh-hero.jpg"
-          alt=""
-          fetchPriority="high"
-          decoding="async"
-          className="h-full w-full object-cover object-[70%_0%]"
-        />
-      </picture>
+      {/* 1. Poster: primeiro quadro; fallback permanente em mobile/reduced-motion. */}
+      <Image
+        src="/media/hero-background-poster.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="hero-video-poster"
+      />
 
-      {active && (
+      {/* 2. Vídeo azul: só é montado quando permitido (>=768px, sem save-data). */}
+      {mountVideo && (
         <video
-          ref={videoRef}
-          className={clsx(
-            "hero-video-media absolute inset-0 h-full w-full object-cover object-center",
-            ready && "is-ready"
-          )}
-          src={src}
-          poster={POSTER}
+          ref={video}
+          className="hero-video"
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
+          poster="/media/hero-background-poster.jpg"
+          aria-hidden="true"
           tabIndex={-1}
           disablePictureInPicture
-          onCanPlay={() => setReady(true)}
-          onError={() => setFailed(true)}
-        />
+        >
+          <source src="/videos/hero-background.webm" type="video/webm" />
+          <source src="/videos/hero-background.mp4" type="video/mp4" />
+        </video>
       )}
 
-      {/* Véu de contraste sobre o vídeo/mesh */}
-      <div className="hero-video-scrim absolute inset-0" />
+      {/* 3. Véu de contraste: garante texto ≥4.5:1 sobre qualquer quadro. */}
+      <div className="hero-video-overlay" />
+
+      {/* 5. Ondas: camada de trás (mais larga) e camada da frente (mais sutil). */}
+      <svg
+        className="hero-waves hero-waves-back"
+        viewBox="0 0 1600 900"
+        preserveAspectRatio="none"
+        focusable="false"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="hero-wave-a" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#0e6660" stopOpacity="0.18" />
+            <stop offset="45%" stopColor="#76d7be" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#0e6660" stopOpacity="0.18" />
+          </linearGradient>
+          <linearGradient id="hero-wave-b" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#14a08f" stopOpacity="0.12" />
+            <stop offset="52%" stopColor="#a8e6d4" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#14a08f" stopOpacity="0.12" />
+          </linearGradient>
+        </defs>
+        <path
+          className="hero-wave hero-wave-a"
+          stroke="url(#hero-wave-a)"
+          d="M -80 690 C 260 560 520 800 880 640 S 1380 380 1680 500"
+        />
+        <path
+          className="hero-wave hero-wave-b"
+          stroke="url(#hero-wave-b)"
+          d="M -80 500 C 300 380 600 620 980 450 S 1400 240 1680 340"
+        />
+      </svg>
+
+      <svg
+        className="hero-waves hero-waves-front"
+        viewBox="0 0 1600 900"
+        preserveAspectRatio="none"
+        focusable="false"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="hero-wave-front" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#76d7be" stopOpacity="0.04" />
+            <stop offset="50%" stopColor="#a8e6d4" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#76d7be" stopOpacity="0.22" />
+          </linearGradient>
+        </defs>
+        <path
+          className="hero-wave hero-wave-c"
+          stroke="url(#hero-wave-front)"
+          d="M -80 840 C 340 740 700 940 1080 790 S 1440 640 1680 720"
+        />
+        <path
+          className="hero-wave hero-wave-d"
+          stroke="url(#hero-wave-front)"
+          d="M -80 300 C 300 220 560 420 940 300 S 1380 140 1680 240"
+        />
+      </svg>
+
+      {/* Partículas: decorativas, só no desktop. */}
+      {showParticles && (
+        <div className="absolute inset-0 hero-particles">
+          {PARTICLES.map((p, i) => (
+            <span
+              key={i}
+              className="hero-particle"
+              style={
+                {
+                  left: p.left,
+                  top: p.top,
+                  width: `${p.size}px`,
+                  height: `${p.size}px`,
+                  "--dur": `${p.dur}s`,
+                  "--delay": `${p.delay}s`,
+                  opacity: 0.35,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
