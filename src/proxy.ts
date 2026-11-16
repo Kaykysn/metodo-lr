@@ -32,6 +32,7 @@ const PROTECTED_ROUTES = [
 // Rotas administrativas
 const ADMIN_ROUTES = [
   "/admin",
+  "/test-email", // envia e-mail real pelo Resend: só administração
 ];
 
 /**
