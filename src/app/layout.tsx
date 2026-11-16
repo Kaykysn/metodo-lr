@@ -18,10 +18,38 @@ const manrope = localFont({
   fallback: ["system-ui", "Segoe UI", "Roboto", "Arial", "sans-serif"],
 });
 
+/**
+ * Endereço absoluto das imagens de compartilhamento. Na Vercel vem do domínio de produção
+ * informado no build (acompanha o domínio próprio quando for ligado); fora dela, da URL do
+ * site, ignorando localhost, que não serve para quem recebe o link.
+ */
+function siteOrigin(): URL {
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercel) return new URL(`https://${vercel}`);
+  const site = process.env.NEXT_PUBLIC_SITE_URL;
+  if (site && !/localhost|127\.0\.0\.1/.test(site)) return new URL(site);
+  return new URL("https://metodolr.vercel.app");
+}
+
+const SITE_DESCRIPTION =
+  "Plataforma para profissionais e estudantes de Educação Física organizarem avaliações, montarem treinos individualizados e acompanharem a evolução dos alunos.";
+
 export const metadata: Metadata = {
+  metadataBase: siteOrigin(),
   title: { default: "Leandro Rangel — Avaliação, treino e acompanhamento", template: "%s · Leandro Rangel" },
-  description:
-    "Plataforma para profissionais e estudantes de Educação Física organizarem avaliações, montarem treinos individualizados e acompanharem a evolução dos alunos.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "Leandro Rangel",
+    title: "Leandro Rangel — Entenda o corpo. Evolua com precisão.",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Leandro Rangel — Entenda o corpo. Evolua com precisão.",
+    description: SITE_DESCRIPTION,
+  },
   icons: { icon: [{ url: "/brand/favicon.svg", type: "image/svg+xml" }, { url: "/brand/favicon-32.png", sizes: "32x32" }] },
 };
 
