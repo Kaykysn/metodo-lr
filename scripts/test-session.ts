@@ -2,6 +2,7 @@
    Executar: node scripts/run-ts.mjs scripts/test-session.ts */
 import assert from "node:assert/strict";
 import { loadSession } from "../src/lib/data/session";
+import { reactToAuthEvent } from "../src/lib/auth/session-events";
 
 type Row = Record<string, unknown>;
 function fakeDb(opts: { user: { id: string } | null; profile: Row | null; trainee?: Row | null; rpcProfile?: Row }) {
@@ -66,6 +67,20 @@ const future = new Date(Date.now() + 10 * 864e5).toISOString();
   assert.equal(unknownRole.status, "blocked");
   assert.equal(unknownRole.status === "blocked" && unknownRole.reason, "unknown_role");
   ok("Papel desconhecido vindo do banco continua bloqueado (nem professor, nem admin)");
+
+  // ---- Voltar para a aba não pode recarregar as telas (perderia o que está em edição)
+  const U = "user-1";
+  assert.equal(reactToAuthEvent("INITIAL_SESSION", undefined, U), "ignore");
+  assert.equal(reactToAuthEvent("TOKEN_REFRESHED", U, U), "ignore");
+  assert.equal(reactToAuthEvent("SIGNED_IN", U, U), "ignore");
+  assert.equal(reactToAuthEvent("USER_UPDATED", U, U), "session");
+  assert.equal(reactToAuthEvent("MFA_CHALLENGE_VERIFIED", U, U), "session");
+  ok("Revalidação da mesma pessoa ao voltar para a aba não recarrega as telas");
+  assert.equal(reactToAuthEvent("SIGNED_IN", null, U), "reload");
+  assert.equal(reactToAuthEvent("SIGNED_OUT", U, null), "reload");
+  assert.equal(reactToAuthEvent("SIGNED_IN", U, "user-2"), "reload");
+  assert.equal(reactToAuthEvent("SIGNED_IN", undefined, U), "reload");
+  ok("Entrar, sair ou trocar de conta recarrega tudo (dados de uma pessoa nunca ficam na tela da outra)");
 
   console.log(`\n${n} testes de sessão passaram.`);
 })().catch((e) => {

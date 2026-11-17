@@ -10,6 +10,7 @@ import { useStageTransition } from "@/components/motion/StageTransition";
 import { Button, Panel, RequiredLegend } from "@/components/ui/primitives";
 import { StepComplaint, StepEssentials, StepFunctional, StepSafety, StepSynthesis } from "./Steps";
 import AssessmentReview from "./AssessmentReview";
+import { readTabDraft, writeTabDraft } from "@/lib/tab-drafts";
 
 const STEPS = [
   { key: "essentials", title: "Dados essenciais", desc: "Objetivo, experiência, rotina e equipamentos" },
@@ -26,8 +27,12 @@ export default function AssessmentFlow({ initial, trainee }: { initial: Assessme
   const { repo, actor } = useData();
   const router = useRouter();
   const [a, setA] = useState<Assessment>(initial);
-  const [step, setStep] = useState(0);
+  // O passo atual sobrevive a uma recarga da aba (o navegador do celular descarta abas em segundo plano)
+  const stepKey = `avaliacao-passo:${initial.id}`;
+  const [step, setStep] = useState(() => Math.min(Math.max(readTabDraft<number>(stepKey, "") ?? 0, 0), STEPS.length - 1));
+  useEffect(() => writeTabDraft(stepKey, "", step), [stepKey, step]);
   const [save, setSave] = useState<SaveState>({ kind: "idle" });
+  const pending = useRef(false);
   const readOnly = !can(actor.role, "assessment.write");
   const panelRef = useStageTransition<HTMLDivElement>(step);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -36,6 +41,7 @@ export default function AssessmentFlow({ initial, trainee }: { initial: Assessme
   const timer = useRef<number | null>(null);
 
   const persist = useCallback(async () => {
+    pending.current = false;
     setSave({ kind: "saving" });
     try {
       const r = await repo.saveAssessment(actor, latest.current);
@@ -52,11 +58,23 @@ export default function AssessmentFlow({ initial, trainee }: { initial: Assessme
       (p: Partial<AssessmentBlocks[K]>) => {
         setA((prev) => ({ ...prev, blocks: { ...prev.blocks, [key]: { ...prev.blocks[key], ...p } } }));
         setSave({ kind: "dirty" });
+        pending.current = true;
         if (timer.current) window.clearTimeout(timer.current);
         timer.current = window.setTimeout(persist, 1200);
       },
     [persist]
   );
+
+  // Ao trocar de aba ou de app, salva na hora o que estiver pendente (sem esperar o autosave)
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState !== "hidden" || !pending.current) return;
+      if (timer.current) window.clearTimeout(timer.current);
+      void persist();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+  }, [persist]);
 
   // Salva pendências ao sair da página
   useEffect(() => {

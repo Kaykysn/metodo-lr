@@ -7,6 +7,8 @@ import { DEMO_ACTORS } from "@/lib/data/seed";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SupabaseRepository } from "@/lib/data/supabase-repository";
 import { loadSession, type SessionState } from "@/lib/data/session";
+import { clearAllTabDrafts } from "@/lib/tab-drafts";
+import { reactToAuthEvent } from "@/lib/auth/session-events";
 import { DemoSubscriptionStore, SupabaseSubscriptionStore, type SubscriptionSnapshot, type SubscriptionStore } from "@/lib/subscription/store";
 import { resolveCommercialAccess, type AdminStatus, type CommercialAccess, type PlanIntent, type SubscriptionRecord, type TrialWindow } from "@/lib/subscription/entitlements";
 import { commercialInputsFor, isDemoScenario, type DemoScenario } from "@/lib/subscription/simulation";
@@ -50,6 +52,15 @@ interface DataContextValue {
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
+
+/** Mesma sessão com outro objeto: mantém a referência antiga para as telas não recarregarem. */
+function sameSession(a: SessionState, b: SessionState) {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
 const ACTOR_KEY = "lr_demo_actor";
 const SCENARIO_KEY = "lr_demo_commercial";
 // Ator sem permissões, usado enquanto a sessão real não carrega ou está bloqueada
@@ -89,18 +100,28 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [db]);
 
-  // Sessão real: carrega no início e a cada mudança de autenticação
+  // Sessão real: carrega no início e quando a PESSOA muda (entrou, saiu, trocou de conta).
+  // Ao voltar para a aba, o Supabase revalida a sessão e emite TOKEN_REFRESHED/SIGNED_IN da mesma pessoa:
+  // isso não pode recarregar as telas, senão o que está em edição volta ao estado salvo.
   useEffect(() => {
     if (!db) return;
     let alive = true;
+    let userId: string | null | undefined; // undefined: ainda não sabemos quem é
     const refresh = () =>
       loadSession(db)
-        .then((s) => alive && setSession(s))
+        .then((s) => alive && setSession((prev) => (sameSession(prev, s) ? prev : s)))
         .catch((e: Error) => alive && setSession({ status: "error", message: e.message }));
     refresh();
-    const { data } = db.auth.onAuthStateChange(() => {
-      refresh();
-      setRevision((r) => r + 1);
+    const { data } = db.auth.onAuthStateChange((event, s) => {
+      const next = s?.user?.id ?? null;
+      const reaction = reactToAuthEvent(event, userId, next);
+      userId = next;
+      if (reaction === "ignore") return;
+      // Fora do callback: o Supabase recomenda não chamar o cliente dentro dele
+      window.setTimeout(() => {
+        refresh();
+        if (reaction === "reload") setRevision((r) => r + 1);
+      }, 0);
     });
     return () => {
       alive = false;
@@ -143,6 +164,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    clearAllTabDrafts(); // rascunhos desta aba não sobrevivem ao fim da sessão
     if (db) await db.auth.signOut();
     // Navegação completa de propósito: apaga da memória os dados de alunos da sessão encerrada.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination

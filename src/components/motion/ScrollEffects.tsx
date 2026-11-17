@@ -37,6 +37,7 @@ function revealFrom(kind: RevealKind, distance: number) {
  * - data-scroll-stagger="0.08" no contêiner + data-scroll-item nos filhos
  * - data-scroll-line → linha divisória que cresce no eixo X
  * - data-scroll-parallax="10" → deslocamento discreto (somente desktop)
+ * - data-scroll-sheet (com a classe .section-sheet) → seção que sobe por cima da anterior e abre até a largura toda
  *
  * A entrada é única (`once`): nada desaparece quando a pessoa volta a rolar.
  * Todo o contexto e os listeners são revertidos no unmount/troca de rota.
@@ -57,7 +58,7 @@ export default function ScrollEffects() {
     const start = async () => {
       // Páginas sem marcações não baixam GSAP/ScrollTrigger.
       const hasMarkers = document.querySelector(
-        "[data-scroll-reveal],[data-scroll-stagger],[data-scroll-line],[data-scroll-parallax]"
+        "[data-scroll-reveal],[data-scroll-stagger],[data-scroll-line],[data-scroll-parallax],[data-scroll-sheet]"
       );
       if (!hasMarkers) return;
 
@@ -143,6 +144,29 @@ export default function ScrollEffects() {
               once: true,
             },
           });
+        });
+
+        // Folhas de seção: entram um pouco mais estreitas e abrem até a largura toda enquanto
+        // cobrem a seção de cima (acompanha a rolagem, nos dois sentidos).
+        const sheetInset = window.matchMedia("(min-width: 768px)").matches ? 4 : 2.5;
+        document.querySelectorAll<HTMLElement>("[data-scroll-sheet]").forEach((sheet) => {
+          const r = getComputedStyle(sheet).getPropertyValue("--sheet-radius").trim() || "40px";
+          const shape = (inset: number) => `inset(0% ${inset}% 0% ${inset}% round ${r} ${r} 0px 0px)`;
+          gsap.fromTo(
+            sheet,
+            { clipPath: shape(sheetInset) },
+            {
+              clipPath: shape(0),
+              ease: "none",
+              scrollTrigger: {
+                trigger: sheet,
+                start: "top bottom",
+                end: "top 30%",
+                scrub: 0.6,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
         });
 
         // Parallax só em telas grandes, com deslocamento pequeno.

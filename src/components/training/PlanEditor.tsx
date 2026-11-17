@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, Copy, PanelRightClose, PanelRightOpen, Plus, Repeat2, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, Copy, PanelRightClose, PanelRightOpen, Plus, Repeat2, SlidersHorizontal, Trash2 } from "lucide-react";
+import PickRow from "@/components/catalog/PickRow";
 import type { Assessment, Dose, Effort, PrescribedExercise, RehabContext, Resistance, TrainingPlan, TrainingSession } from "@/lib/domain/types";
 import { EXERCISE_BY_ID, MODALITIES, MUSCLE_OPTIONS, EQUIPMENT, PATTERNS, searchExercises, type Modality, type MovementPattern, type PurposeFilter } from "@/lib/domain/exercise-library";
 import { PURPOSE_LABEL } from "@/lib/domain/exercise-catalog";
 import { defaultPrescription, emptyRehab, estimateMinutes, latest, newId, updateDraft } from "@/lib/domain/plans";
 import { useData } from "@/components/providers/DataProvider";
-import { Badge, Button, ButtonLink, ErrorNote, Field, inputClass, Panel } from "@/components/ui/primitives";
+import { Badge, Button, ButtonLink, ErrorNote, Field, InfoNote, inputClass, Panel } from "@/components/ui/primitives";
+import { clearTabDraft, fingerprint, readTabDraft, writeTabDraft } from "@/lib/tab-drafts";
 import { NumberInput } from "@/components/assessment/flow/controls";
 import { regionLabel } from "@/components/assessment/AnatomyMap";
 import { evaluateTriage } from "@/lib/domain/triage";
@@ -200,58 +202,104 @@ function RehabFields({ item, onChange, suggested }: { item: PrescribedExercise; 
   );
 }
 
-function Library({ onPick, label }: { onPick: (id: string) => void; label: string }) {
-  const [q, setQ] = useState({ text: "", pattern: "" as MovementPattern | "", muscle: "", equipment: "", modality: "" as Modality | "", purpose: "" as PurposeFilter });
+const PURPOSE_SHORT: Record<Exclude<PurposeFilter, "">, string> = { hipertrofia: "Hipertrofia", reabilitacao: "Reabilitação" };
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function Library({ onPick, replacing, inSession }: { onPick: (id: string) => void; replacing: boolean; inSession: Set<string> }) {
+  const empty = { text: "", pattern: "" as MovementPattern | "", muscle: "", equipment: "", modality: "" as Modality | "", purpose: "" as PurposeFilter };
+  const [q, setQ] = useState(empty);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const results = useMemo(() => searchExercises(q), [q]);
+  const activeFilters = [q.pattern, q.modality, q.muscle, q.equipment].filter(Boolean).length;
+  // Sem busca por texto, agrupa por padrão de movimento (ordem da curadoria); com busca, lista direta por relevância
+  const groups = useMemo(() => {
+    if (q.text.trim()) return [{ key: "", items: results }];
+    const by = new Map<string, typeof results>();
+    for (const e of results) by.set(e.pattern, [...(by.get(e.pattern) ?? []), e]);
+    return PATTERNS.filter((p) => by.has(p)).map((p) => ({ key: p, items: by.get(p)! }));
+  }, [results, q.text]);
+
   return (
     <div className="space-y-3">
-      <div role="radiogroup" aria-label="Propósito" className="flex flex-wrap gap-1">
+      <div role="radiogroup" aria-label="Propósito" className="grid grid-cols-3 gap-1 rounded-control border border-theme-border bg-theme-secondary p-1">
         {(["", "hipertrofia", "reabilitacao"] as PurposeFilter[]).map((p) => (
-          <button key={p || "todos"} type="button" role="radio" aria-checked={q.purpose === p} onClick={() => setQ({ ...q, purpose: p })} className={`min-h-[40px] rounded-control border px-3 text-sm font-semibold ${q.purpose === p ? "border-theme-teal bg-theme-teal-subtle text-theme-text" : "border-theme-border text-theme-muted hover:text-theme-text"}`}>
-            {p ? PURPOSE_LABEL[p] : "Todos"}
+          <button
+            key={p || "todos"}
+            type="button"
+            role="radio"
+            aria-checked={q.purpose === p}
+            title={p ? PURPOSE_LABEL[p] : "Todos os propósitos"}
+            onClick={() => setQ({ ...q, purpose: p })}
+            className={`min-h-[36px] rounded-lg px-1 text-[13px] font-semibold transition-colors ${q.purpose === p ? "bg-theme-raised text-theme-text shadow-subtle" : "text-theme-muted hover:text-theme-text"}`}
+          >
+            {p ? PURPOSE_SHORT[p] : "Todos"}
           </button>
         ))}
       </div>
-      <Field label="Buscar exercício" htmlFor="lib-q">
-        <input id="lib-q" type="search" className={inputClass} value={q.text} onChange={(e) => setQ({ ...q, text: e.target.value })} placeholder="nome, apelido, nome em inglês ou músculo" />
-      </Field>
-      <div className="grid grid-cols-2 gap-2">
-        <label className="sr-only" htmlFor="lib-p">Padrão de movimento</label>
-        <select id="lib-p" className={inputClass} value={q.pattern} onChange={(e) => setQ({ ...q, pattern: e.target.value as MovementPattern | "" })}>
-          <option value="">Padrão: todos</option>
-          {PATTERNS.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
-        <label className="sr-only" htmlFor="lib-m">Modalidade</label>
-        <select id="lib-m" className={inputClass} value={q.modality} onChange={(e) => setQ({ ...q, modality: e.target.value as Modality | "" })}>
-          <option value="">Modalidade: todas</option>
-          {MODALITIES.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
-        <label className="sr-only" htmlFor="lib-g">Grupo muscular</label>
-        <select id="lib-g" className={inputClass} value={q.muscle} onChange={(e) => setQ({ ...q, muscle: e.target.value })}>
-          <option value="">Músculo: todos</option>
-          {MUSCLE_OPTIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-        </select>
-        <label className="sr-only" htmlFor="lib-e">Equipamento</label>
-        <select id="lib-e" className={inputClass} value={q.equipment} onChange={(e) => setQ({ ...q, equipment: e.target.value })}>
-          <option value="">Equipamento: todos</option>
-          {EQUIPMENT.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
+      <div>
+        <label className="sr-only" htmlFor="lib-q">Buscar exercício</label>
+        <input id="lib-q" type="search" className={inputClass} value={q.text} onChange={(e) => setQ({ ...q, text: e.target.value })} placeholder="Buscar por nome ou músculo" />
       </div>
-      <p className="text-sm text-theme-muted" aria-live="polite">{results.length} exercício(s)</p>
-      <ul className="max-h-[52vh] divide-y divide-theme-border overflow-y-auto rounded-control border border-theme-border">
-        {results.map((e) => (
-          <li key={e.id} className="flex items-center justify-between gap-2 px-3 py-2">
-            <div className="min-w-0">
-              <p className="truncate text-[15px] font-medium">{e.name}</p>
-              <p className="truncate text-[13px] text-theme-muted">{e.pattern} · {e.primaryMuscles.join(", ")}</p>
-            </div>
-            <button type="button" onClick={() => onPick(e.id)} aria-label={`${label} ${e.name}`} className="inline-flex h-10 min-w-10 shrink-0 items-center justify-center gap-1 rounded-control border border-theme-boundary/60 px-2 text-sm font-semibold hover:bg-theme-secondary">
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">{label}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="flex items-center justify-between gap-2">
+        <button type="button" aria-expanded={filtersOpen} aria-controls="lib-filtros" onClick={() => setFiltersOpen((o) => !o)} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-control px-2 text-sm font-semibold hover:bg-theme-secondary">
+          <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+          Filtros{activeFilters > 0 && <span className="tabular rounded-full bg-theme-teal-subtle px-1.5 text-[12px] text-theme-text">{activeFilters}</span>}
+          <ChevronDown className={`h-4 w-4 transition-transform ${filtersOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+        </button>
+        {(activeFilters > 0 || q.text || q.purpose) && (
+          <button type="button" onClick={() => setQ(empty)} className="min-h-[36px] px-2 text-sm text-theme-muted underline hover:text-theme-text">Limpar</button>
+        )}
+      </div>
+      {filtersOpen && (
+        <div id="lib-filtros" className="grid gap-2">
+          <Field label="Padrão de movimento" htmlFor="lib-p">
+            <select id="lib-p" className={inputClass} value={q.pattern} onChange={(e) => setQ({ ...q, pattern: e.target.value as MovementPattern | "" })}>
+              <option value="">Todos</option>
+              {PATTERNS.map((p) => <option key={p} value={p}>{cap(p)}</option>)}
+            </select>
+          </Field>
+          <Field label="Músculo" htmlFor="lib-g">
+            <select id="lib-g" className={inputClass} value={q.muscle} onChange={(e) => setQ({ ...q, muscle: e.target.value })}>
+              <option value="">Todos</option>
+              {MUSCLE_OPTIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+            </select>
+          </Field>
+          <Field label="Modalidade" htmlFor="lib-m">
+            <select id="lib-m" className={inputClass} value={q.modality} onChange={(e) => setQ({ ...q, modality: e.target.value as Modality | "" })}>
+              <option value="">Todas</option>
+              {MODALITIES.map((p) => <option key={p} value={p}>{cap(p)}</option>)}
+            </select>
+          </Field>
+          <Field label="Equipamento" htmlFor="lib-e">
+            <select id="lib-e" className={inputClass} value={q.equipment} onChange={(e) => setQ({ ...q, equipment: e.target.value })}>
+              <option value="">Todos</option>
+              {EQUIPMENT.map((p) => <option key={p} value={p}>{cap(p)}</option>)}
+            </select>
+          </Field>
+        </div>
+      )}
+      <p className="text-sm text-theme-muted" aria-live="polite">{results.length} exercício{results.length === 1 ? "" : "s"}</p>
+      {results.length === 0 ? (
+        <p className="rounded-control border border-dashed border-theme-border px-3 py-6 text-center text-sm text-theme-muted">Nenhum exercício com esses filtros.</p>
+      ) : (
+        <div className="max-h-[60vh] overflow-y-auto overscroll-contain rounded-control border border-theme-border">
+          {groups.map((g) => (
+            <section key={g.key || "busca"} aria-label={g.key ? cap(g.key) : "Resultados"}>
+              {g.key && (
+                <h3 className="sticky top-0 z-10 flex items-center justify-between border-b border-theme-border bg-theme-raised/95 px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide text-theme-muted backdrop-blur">
+                  {g.key}
+                  <span className="tabular font-semibold">{g.items.length}</span>
+                </h3>
+              )}
+              <ul className="divide-y divide-theme-border">
+                {g.items.map((e) => (
+                  <PickRow key={e.id} name={e.name} meta={e.primaryMuscles.join(", ")} onPick={() => onPick(e.id)} replacing={replacing} inSession={inSession.has(e.id)} />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -260,12 +308,28 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
   const { repo, actor } = useData();
   const [plan, setPlan] = useState(initial);
   const v = latest(plan);
-  const [sessions, setSessions] = useState<TrainingSession[]>(v.sessions);
+  // Rascunho da aba: se a página recarregou com alterações não salvas, elas voltam
+  const draftKey = `treino:${initial.id}:${latest(initial).id}`;
+  const [draftBase, setDraftBase] = useState(() => fingerprint(latest(initial).sessions));
+  const [recovered] = useState(() => readTabDraft<TrainingSession[]>(draftKey, draftBase));
+  const [sessions, setSessions] = useState<TrainingSession[]>(recovered ?? v.sessions);
   const [active, setActive] = useState(v.sessions[0]?.id ?? "");
   const [openItem, setOpenItem] = useState<string | null>(null);
   const [replacing, setReplacing] = useState<string | null>(null);
   const [aside, setAside] = useState(true);
-  const [status, setStatus] = useState<{ kind: "idle" | "dirty" | "saved" | "error"; msg?: string }>({ kind: "idle" });
+  const [status, setStatus] = useState<{ kind: "idle" | "dirty" | "saved" | "error"; msg?: string }>(recovered ? { kind: "dirty" } : { kind: "idle" });
+  const [showRecovered, setShowRecovered] = useState(!!recovered);
+
+  // Avisa antes de fechar ou recarregar com alterações não salvas
+  useEffect(() => {
+    if (status.kind !== "dirty") return;
+    const onLeave = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onLeave);
+    return () => window.removeEventListener("beforeunload", onLeave);
+  }, [status.kind]);
   const [mobileTab, setMobileTab] = useState<"sessao" | "biblioteca">("sessao");
   // Arrastar é só atalho: subir/descer por botões continua disponível (teclado e toque)
   const [dragFrom, setDragFrom] = useState<number | null>(null);
@@ -278,6 +342,14 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
   const mutate = (next: TrainingSession[]) => {
     setSessions(next);
     setStatus({ kind: "dirty" });
+    writeTabDraft(draftKey, draftBase, next);
+  };
+  const discardRecovered = () => {
+    clearTabDraft(draftKey);
+    setSessions(v.sessions);
+    setActive(v.sessions[0]?.id ?? "");
+    setStatus({ kind: "idle" });
+    setShowRecovered(false);
   };
   const setSession = (patch: Partial<TrainingSession>) => mutate(sessions.map((x) => (x.id === s.id ? { ...x, ...patch } : x)));
 
@@ -300,12 +372,17 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
       const next = updateDraft(plan, actor, sessions);
       const r = await repo.savePlan(actor, next);
       setPlan(next);
+      // Salvo no servidor: o rascunho da aba passa a ter como origem o que acabou de ser salvo
+      clearTabDraft(draftKey);
+      setDraftBase(fingerprint(sessions));
+      setShowRecovered(false);
       setStatus({ kind: "saved", msg: new Date(r.savedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }) + (r.target === "supabase" ? " no servidor" : " neste navegador (demonstração)") });
     } catch (e) {
       setStatus({ kind: "error", msg: (e as Error).message });
     }
   };
 
+  const inSession = useMemo(() => new Set(s?.items.map((i) => i.exerciseId) ?? []), [s]);
   const est = s ? estimateMinutes(s) : null;
   const triage = assessment ? evaluateTriage(assessment.blocks.safety) : null;
 
@@ -332,7 +409,7 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
           </button>
         ))}
       </div>
-      {libSource === "curadoria" ? <Library onPick={pick} label={replacing ? "Usar" : "Adicionar"} /> : <CatalogPicker onPick={pick} label={replacing ? "Usar" : "Adicionar"} />}
+      {libSource === "curadoria" ? <Library onPick={pick} replacing={!!replacing} inSession={inSession} /> : <CatalogPicker onPick={pick} replacing={!!replacing} inSession={inSession} />}
     </Panel>
   );
 
@@ -354,6 +431,15 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
         </div>
       </div>
 
+      {showRecovered && (
+        <InfoNote>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>Recuperamos as alterações que você ainda não tinha salvado nesta aba.</span>
+            <button type="button" onClick={discardRecovered} className="font-semibold underline">Descartar e voltar ao salvo</button>
+          </span>
+        </InfoNote>
+      )}
+
       {/* Mobile: alterna entre sessão e biblioteca */}
       <div role="tablist" aria-label="Área de edição" className="glass-soft inline-flex rounded-control border border-theme-border bg-theme-secondary p-1 md:hidden">
         {(["sessao", "biblioteca"] as const).map((t) => (
@@ -363,7 +449,7 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
         ))}
       </div>
 
-      <div className={`grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(240px,300px)_minmax(0,1fr)] ${aside ? "xl:grid-cols-[300px_minmax(0,1fr)_280px]" : "xl:grid-cols-[300px_minmax(0,1fr)]"}`}>
+      <div className={`grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] ${aside ? "xl:grid-cols-[340px_minmax(0,1fr)_260px]" : "xl:grid-cols-[360px_minmax(0,1fr)]"}`}>
         <div className={mobileTab === "biblioteca" ? "block" : "hidden md:block"}>{library}</div>
 
         <section className={`min-w-0 space-y-4 ${mobileTab === "sessao" ? "block" : "hidden md:block"}`} aria-label="Sessões do treino">
@@ -444,11 +530,11 @@ export default function PlanEditor({ initial, assessment }: { initial: TrainingP
                         }}
                         className={`py-3 transition-colors ${dragOver === i && dragFrom !== i ? "bg-theme-teal-subtle/60" : ""} ${dragFrom === i ? "opacity-50" : ""}`}
                       >
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
                           <span className="tabular w-6 cursor-grab text-sm font-bold text-theme-muted" title="Arraste para reordenar ou use as setas">{i + 1}</span>
-                          <button type="button" aria-expanded={open} onClick={() => setOpenItem(open ? null : it.id)} className="min-h-[44px] flex-1 text-left">
-                            <span className="font-semibold">{name}</span>
-                            <span className="ml-2 text-sm text-theme-muted">
+                          <button type="button" aria-expanded={open} onClick={() => setOpenItem(open ? null : it.id)} className="min-h-[44px] min-w-0 flex-1 py-1 text-left">
+                            <span className="block font-semibold leading-snug">{name}</span>
+                            <span className="tabular block whitespace-nowrap text-sm text-theme-muted">
                               {it.dose.kind === "reps" ? `${it.dose.sets} × ${it.dose.repsMin}–${it.dose.repsMax}` : it.dose.kind === "time" ? `${it.dose.sets} × ${it.dose.seconds} s` : `${it.dose.sets} × ${it.dose.meters} m`}
                             </span>
                           </button>

@@ -865,6 +865,47 @@
   backdrop-filter: blur(6px) saturate(1.08);
 }
 
+/* Folhas de seção: cada parte da página inicial sobe por cima da anterior, com cantos superiores
+   bem arredondados (a referência é um cartão que cobre a imagem da seção de cima).
+   Sem JavaScript ou com "reduzir movimento" a folha fica parada, só com os cantos e a sombra.
+   A abertura até a largura toda é feita em ScrollEffects (data-scroll-sheet). */
+.section-sheet {
+  --sheet-radius: 28px;
+  --sheet-surface: var(--surface-reading);
+  position: relative;
+  margin-top: calc(-1 * var(--sheet-radius));
+  padding-top: calc(var(--sheet-radius) * 0.5);
+  border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+  background: rgb(var(--sheet-surface) / 0.94);
+  border-top: 1px solid rgb(var(--glass-edge) / 0.28);
+  box-shadow: 0 -24px 48px -32px rgb(0 0 0 / 0.55);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  backdrop-filter: blur(10px) saturate(1.08);
+}
+.section-sheet--alt {
+  --sheet-surface: var(--bg-page);
+}
+@media (min-width: 768px) {
+  .section-sheet {
+    --sheet-radius: 48px;
+  }
+  .hero-scroll-cue {
+    --hero-sheet-overlap: 48px;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .section-sheet {
+    background: rgb(var(--sheet-surface));
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .section-sheet {
+    background: rgb(var(--sheet-surface));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 /* Bloco de chamada final (sempre escuro, como o CTA): vidro sobre a atmosfera,
    com brilho jade no topo e sombra de profundidade. */
 .glass-cta {
@@ -1203,7 +1244,8 @@
 .hero-scroll-cue {
   position: absolute;
   left: 50%;
-  bottom: 0.875rem;
+  /* Acima da folha da seção seguinte, que sobe sobre o fim do topo */
+  bottom: calc(0.875rem + var(--hero-sheet-overlap, 28px));
   transform: translateX(-50%);
   z-index: 20;
   display: inline-flex;

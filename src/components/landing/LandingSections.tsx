@@ -15,7 +15,7 @@ const STEPS = [
 export function Percurso() {
   const [first, ...rest] = STEPS;
   return (
-    <section id="percurso" className="scroll-mt-20">
+    <section id="percurso" data-scroll-sheet className="section-sheet scroll-mt-20">
       <div className="mx-auto max-w-[1180px] px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
         <h2 data-scroll-reveal="up" data-scroll-distance="22" className="max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">Avaliação, planejamento e acompanhamento no mesmo lugar.</h2>
         <ol data-scroll-stagger="0.14" data-scroll-distance="26" className="mt-12 grid gap-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12">
@@ -65,7 +65,7 @@ function Feature({ icon, title, children }: { icon: React.ComponentProps<typeof 
 
 export function MapaSection() {
   return (
-    <section id="mapa" className="glass-section scroll-mt-20">
+    <section id="mapa" data-scroll-sheet className="section-sheet section-sheet--alt scroll-mt-20">
       <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:px-8 lg:py-24">
         <div data-scroll-reveal="left" data-scroll-distance="26">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Um mapa corporal que respeita o lado da pessoa.</h2>
@@ -88,7 +88,7 @@ export function MapaSection() {
 
 export function TreinoSection() {
   return (
-    <section id="treinos" className="scroll-mt-20">
+    <section id="treinos" data-scroll-sheet className="section-sheet scroll-mt-20">
       <div className="mx-auto grid max-w-[1180px] gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:px-8 lg:py-24">
         <div data-scroll-reveal="left" data-scroll-distance="28">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Monte o treino com a avaliação ao lado.</h2>
@@ -110,10 +110,10 @@ export function TreinoSection() {
 /** Evolução: o gráfico vive na aba Evolução do caso demonstrativo (abertura); aqui fica a explicação. */
 export function EvolucaoSection() {
   return (
-    <section id="evolucao" className="relative isolate scroll-mt-20 overflow-hidden">
+    <section id="evolucao" data-scroll-sheet className="section-sheet section-sheet--alt isolate scroll-mt-20 overflow-hidden">
       <div aria-hidden="true" data-decorative className="glow-jade pointer-events-none absolute right-[-10%] top-0 -z-10 h-full w-[55%]" />
-      <div className="mx-auto max-w-[1180px] px-4 pb-20 sm:px-6 lg:px-8 lg:pb-24">
-        <div data-scroll-stagger="0.12" data-scroll-distance="20" className="max-w-2xl border-t border-theme-border pt-16 lg:pt-20">
+      <div className="mx-auto max-w-[1180px] px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+        <div data-scroll-stagger="0.12" data-scroll-distance="20" className="max-w-2xl">
           <h2 data-scroll-item className="text-3xl font-bold tracking-tight sm:text-4xl">Dor, função, carga e adesão em gráficos separados.</h2>
           <p data-scroll-item className="mt-4 text-[17px] leading-relaxed text-theme-muted">
             Dor em escala fixa de 0 a 10, medidas funcionais com a própria unidade, volume de carga externa por semana e sessões concluídas com o denominador à vista. Semana sem registro não aparece como zero.
@@ -129,7 +129,7 @@ export function EvolucaoSection() {
 
 export function MateriaisSection() {
   return (
-    <section className="glass-section">
+    <section data-scroll-sheet className="section-sheet">
       <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_1fr] lg:px-8 lg:py-24">
         <div data-scroll-reveal="left" data-scroll-distance="24">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Cada sugestão mostra de onde vem.</h2>

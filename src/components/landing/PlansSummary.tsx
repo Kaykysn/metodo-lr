@@ -5,7 +5,7 @@ import { PLANS, formatPrice } from "@/lib/subscription/catalog";
 /** Resumo dos planos na landing. Detalhes e comparação ficam em /planos. */
 export default function PlansSummary() {
   return (
-    <section id="planos" className="scroll-mt-20 border-t border-theme-border">
+    <section id="planos" data-scroll-sheet className="section-sheet section-sheet--alt scroll-mt-20">
       <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:px-8 lg:py-24">
         <div data-scroll-reveal="up" data-scroll-distance="22">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Planos</h2>
