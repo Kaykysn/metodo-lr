@@ -1,6 +1,7 @@
 {
   "name": "studio-leandro-rangel",
   "version": "1.0.0",
+  "author": "Kayky Gomes (https://github.com/Kaykysn)",
   "private": true,
   "scripts": {
     "dev": "next dev",
