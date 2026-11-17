@@ -54,3 +54,9 @@ Thumbs.db
 /backend/
 # Pasta criada por engano se alguém rodar `supabase init` na raiz do site. A CLI roda só em backend/.
 /supabase/
+
+# Relatórios de auditoria de segurança: ficam só na máquina onde rodaram
+/.auditoria-seguranca/
+
+# Configuração temporária do runner de testes (scripts/run-ts.mjs)
+.tsconfig.run.*.json
