@@ -9,6 +9,8 @@ import { latest, published } from "@/lib/domain/plans";
 import { can } from "@/lib/domain/roles";
 import { canPerform, hasFeature } from "@/lib/subscription/entitlements";
 import { ARCHIVED_MESSAGE } from "@/lib/data/repository";
+import FollowUpPanel from "@/components/followup/FollowUpPanel";
+import TraineePhotos from "@/components/posture/TraineePhotos";
 
 export default function AlunoDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -113,6 +115,8 @@ export default function AlunoDetailPage() {
           )}
         </Panel>
       </div>
+      {can(actor.role, "trainee.read") && <FollowUpPanel trainee={trainee} canWrite={canCreate("trainee.write")} />}
+      {can(actor.role, "trainee.read") && <TraineePhotos trainee={trainee} />}
     </div>
   );
 }

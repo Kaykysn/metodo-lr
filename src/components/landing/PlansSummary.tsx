@@ -1,8 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { PLANS, formatPrice } from "@/lib/subscription/catalog";
+import { PLANS } from "@/lib/subscription/catalog";
+import PlanCheckoutDialog from "./PlanCheckoutDialog";
 
-/** Resumo dos planos na landing. Detalhes e comparação ficam em /planos. */
+/**
+ * Resumo dos planos na landing, sem valores: o preço aparece só no resumo aberto por
+ * "Adquirir plano", lido da mesma tabela usada na cobrança. Comparação completa em /planos.
+ */
 export default function PlansSummary() {
   return (
     <section id="planos" data-scroll-sheet className="section-sheet section-sheet--alt scroll-mt-20">
@@ -18,15 +22,14 @@ export default function PlansSummary() {
         </div>
         <ul data-scroll-stagger="0.1" data-scroll-distance="20" className="glass-panel divide-y divide-theme-border px-5 sm:px-7">
           {PLANS.map((p) => (
-            <li key={p.id} data-scroll-item className="grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-5">
-              <p className="text-lg font-semibold">{p.name}</p>
-              <p className="tabular text-lg font-semibold">
-                {formatPrice(p.priceCents)}
-                <span className="text-[15px] font-normal text-theme-muted"> por mês</span>
-              </p>
-              <p className="col-span-2 text-[15px] text-theme-muted">
-                Até {p.activeTraineeLimit} alunos ativos. {p.forWhom}
-              </p>
+            <li key={p.id} data-scroll-item className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <div>
+                <p className="text-lg font-semibold">{p.name}</p>
+                <p className="mt-1 text-[15px] text-theme-muted">
+                  Até {p.activeTraineeLimit} alunos ativos. {p.forWhom}
+                </p>
+              </div>
+              <PlanCheckoutDialog planId={p.id} planName={p.name} />
             </li>
           ))}
         </ul>

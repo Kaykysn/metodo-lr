@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:domain": "node scripts/run-ts.mjs scripts/test-domain.ts && node scripts/run-ts.mjs scripts/test-redesign.ts && node scripts/run-ts.mjs scripts/test-session.ts && node scripts/run-ts.mjs scripts/test-plans.ts && node scripts/run-ts.mjs scripts/test-perf.ts && node scripts/run-ts.mjs scripts/test-catalog.ts && node scripts/run-ts.mjs scripts/test-posture.ts && node scripts/run-ts.mjs scripts/test-photo-access.ts && node scripts/run-ts.mjs scripts/test-app-mode.ts && node scripts/run-ts.mjs scripts/test-catalog-extended.ts && node scripts/run-ts.mjs scripts/test-hero-xray.ts && node scripts/run-ts.mjs scripts/test-anamnese-map.ts && node scripts/run-ts.mjs scripts/test-mfa.ts",
+    "test:domain": "node scripts/run-ts.mjs scripts/test-domain.ts && node scripts/run-ts.mjs scripts/test-redesign.ts && node scripts/run-ts.mjs scripts/test-session.ts && node scripts/run-ts.mjs scripts/test-plans.ts && node scripts/run-ts.mjs scripts/test-perf.ts && node scripts/run-ts.mjs scripts/test-catalog.ts && node scripts/run-ts.mjs scripts/test-posture.ts && node scripts/run-ts.mjs scripts/test-photo-access.ts && node scripts/run-ts.mjs scripts/test-app-mode.ts && node scripts/run-ts.mjs scripts/test-catalog-extended.ts && node scripts/run-ts.mjs scripts/test-hero-xray.ts && node scripts/run-ts.mjs scripts/test-anamnese-map.ts && node scripts/run-ts.mjs scripts/test-mfa.ts && node scripts/run-ts.mjs scripts/test-password.ts && node scripts/run-ts.mjs scripts/test-schedule.ts",
     "brand": "node scripts/build-logo.mjs",
     "optimize:hero": "node scripts/process-hero-video.mjs"
   },

@@ -301,7 +301,7 @@ export class ApiPhotoStore implements PhotoStore {
   }
   putPhoto(_a: Actor, set: PhotoSet, view: PhotoView, profileSide: ProfileSide | null, photo: ProcessedPhoto, originalName: string, idempotencyKey: string) {
     const fd = new FormData();
-    fd.set("arquivo", photo.blob, "foto.jpg");
+    fd.set("arquivo", photo.blob, photo.mime === "image/webp" ? "foto.webp" : "foto.jpg");
     fd.set("conjunto", set.id);
     fd.set("vista", view);
     if (profileSide) fd.set("perfil", profileSide);

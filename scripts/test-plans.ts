@@ -2,6 +2,8 @@
    Executar: node scripts/run-ts.mjs scripts/test-plans.ts
    São testes de funções e do repositório de demonstração; NÃO validam o banco. */
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { BASE_FEATURES, CATALOG_VERSION, COMPARE_ROWS, PLANS, TRIAL_FEATURES, formatPrice, getPlan, recommendPlan, cheapestPlanWith } from "../src/lib/subscription/catalog";
 import { canPerform, hasFeature, resolveCommercialAccess, trialNotice, type SubscriptionRecord } from "../src/lib/subscription/entitlements";
 import { checkActivation, planDowngrade, traineeUsage, usageMessage } from "../src/lib/subscription/limits";
@@ -290,6 +292,32 @@ const practitioner = DEMO_ACTORS.find((a) => a.id === "aluno_142")!;
   const stuCopy = reuseAsDraft({ actor: { ...student, id: target.ownerId }, source: { ...src, ownerId: target.ownerId }, targetAssessment: target, title: "y", startDate: "2027-03-01" });
   assert.throws(() => approve(stuCopy, student), /professor/);
   ok("Reaproveitar: novo rascunho para outro aluno, sem nota privada, sem aprovação automática");
+
+  // ---------------------------------------------------------------- catálogo x banco
+  // O resumo da página inicial e a cobrança (Edge Function billing) leem subscription_plans;
+  // o modo demonstração e as telas usam PLANS. Os dois não podem divergir.
+  const seedSql = fs.readFileSync(path.join(process.cwd(), "backend/supabase/migrations/20261108000000_planos_assinatura.sql"), "utf8");
+  const insert = seedSql.match(/INSERT INTO public\.subscription_plans\s*\([^)]*\)\s*VALUES([\s\S]*?)ON CONFLICT/);
+  assert.ok(insert, "seed de subscription_plans não encontrado na migração");
+  const seedRows = Array.from(insert[1].matchAll(/\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*(\d+)\s*,\s*(\d+)\s*,/g)).map((m) => ({
+    id: m[1],
+    catalogVersion: m[2],
+    name: m[3],
+    priceCents: Number(m[4]),
+    activeTraineeLimit: Number(m[5]),
+  }));
+  assert.equal(seedRows.length, PLANS.length, "quantidade de planos no seed difere do catálogo");
+  for (const p of PLANS) {
+    const row = seedRows.find((r) => r.id === p.id);
+    assert.ok(row, `plano ${p.id} ausente no seed`);
+    assert.deepEqual(
+      { id: row.id, name: row.name, priceCents: row.priceCents, activeTraineeLimit: row.activeTraineeLimit },
+      { id: p.id, name: p.name, priceCents: p.priceCents, activeTraineeLimit: p.activeTraineeLimit },
+      `plano ${p.id} diverge entre catalog.ts e o seed`
+    );
+    assert.equal(row.catalogVersion, CATALOG_VERSION, `versão do catálogo do plano ${p.id} diverge`);
+  }
+  ok("Catálogo: PLANS igual ao seed de subscription_plans (id, nome, preço, limite, versão)");
 
   console.log(`\n${n} testes de planos passaram.`);
 })().catch((e) => {

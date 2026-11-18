@@ -261,8 +261,8 @@ function PhotoSlot({
         <h4 id={`${id}-t`} className="font-semibold">{VIEW_LABEL[view]}</h4>
         {view === "perfil" && (
           <label className="flex items-center gap-2 text-sm">
-            <span>Lado</span>
-            <select aria-label="Lado do perfil" value={side} onChange={(e) => changeSide(e.target.value as ProfileSide | "")} className="min-h-[36px] rounded-control border border-theme-boundary/60 bg-theme-raised px-2 text-sm">
+            <span>Lado fotografado</span>
+            <select aria-label="Lado fotografado (direito ou esquerdo)" value={side} onChange={(e) => changeSide(e.target.value as ProfileSide | "")} className="min-h-[36px] rounded-control border border-theme-boundary/60 bg-theme-raised px-2 text-sm">
               <option value="">Escolher</option>
               <option value="direito">Direito</option>
               <option value="esquerdo">Esquerdo</option>

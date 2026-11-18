@@ -35,7 +35,12 @@ interface Side {
 }
 
 /** Aba "Evolução postural": conjuntos datados, comparação lado a lado e tabela de medidas. */
-export default function PosturalEvolution({ trainee }: { trainee: Trainee }) {
+/**
+ * mode "evolucao": Evolução — antes e depois (registros datados por vista + comparação de duas datas).
+ * mode "postural": Avaliação postural (grade que liga e desliga e observações por vista, usando as
+ * fotos já enviadas, sem novo envio). Sem mode: as duas coisas juntas (página Evolução).
+ */
+export default function PosturalEvolution({ trainee, mode }: { trainee: Trainee; mode?: "evolucao" | "postural" }) {
   const { actor } = useData();
   const store = usePhotoStore();
   const [sets, setSets] = useState<PhotoSet[] | null>(null);
@@ -77,10 +82,16 @@ export default function PosturalEvolution({ trainee }: { trainee: Trainee }) {
     <Panel className="space-y-5 p-4 sm:p-6" as="section">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold">Evolução postural</h2>
-          <p className="text-[15px] text-theme-muted">Compare vistas iguais entre duas datas. Mudanças nas medidas descrevem a foto; o significado clínico depende da sua avaliação.</p>
+          <h2 className="text-xl font-bold">{mode === "evolucao" ? "Evolução — antes e depois" : mode === "postural" ? "Avaliação postural" : "Evolução postural"}</h2>
+          <p className="text-[15px] text-theme-muted">
+            {mode === "evolucao"
+              ? "Cada registro tem uma data e até três fotos: frente, lado e costas. Salve com as vistas que tiver e complete depois. Para comparar, escolha duas datas e uma vista."
+              : mode === "postural"
+                ? "Abra um registro e, em cada vista, use a grade postural (liga e desliga) e escreva suas observações. As fotos já enviadas na ficha servem aqui, sem novo envio."
+                : "Compare vistas iguais entre duas datas. Mudanças nas medidas descrevem a foto; o significado clínico depende da sua avaliação."}
+          </p>
         </div>
-        <Button variant="secondary" onClick={addSet}>Novo conjunto de reavaliação</Button>
+        {mode !== "postural" && <Button variant="secondary" onClick={addSet}>{mode === "evolucao" ? "Novo registro de fotos" : "Novo conjunto de reavaliação"}</Button>}
       </div>
       {error && <ErrorNote>{error}</ErrorNote>}
       {!sets && !error && <Loading label="Carregando fotos…" />}
@@ -93,11 +104,12 @@ export default function PosturalEvolution({ trainee }: { trainee: Trainee }) {
               <li key={s.id} className="space-y-3 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-[15px]">
-                    <span className="font-semibold">{fmtDate(s.capturedOn)}</span> · {s.context} · {Object.keys(s.photos).length} de 3 vistas · {s.assessorName}
+                    <span className="font-semibold">{fmtDate(s.capturedOn)}</span> · {s.context} · {Object.keys(s.photos).length} de 3 vistas
+                    {Object.keys(s.photos).length < 3 && <span className="text-theme-muted"> (falta: {(["frente", "perfil", "costas"] as PhotoView[]).filter((v) => !(v in s.photos)).map((v) => VIEW_LABEL[v].toLocaleLowerCase("pt-BR")).join(", ")})</span>} · {s.assessorName}
                     {s.assessmentId && <> · <Link href={`/app/avaliacoes/${s.assessmentId}`} className="text-theme-teal underline">abrir avaliação</Link></>}
                   </p>
                   <Button variant="ghost" onClick={() => setEditing(editing === s.id ? null : s.id)} aria-expanded={editing === s.id}>
-                    {editing === s.id ? "Fechar" : "Fotos e análise postural"}
+                    {editing === s.id ? "Fechar" : mode === "evolucao" ? "Fotos deste registro" : mode === "postural" ? "Abrir avaliação postural" : "Fotos e análise postural"}
                   </Button>
                 </div>
                 {editing === s.id && <PhotoSetEditor key={s.id} set={s} onChange={updateSet} />}
@@ -107,13 +119,13 @@ export default function PosturalEvolution({ trainee }: { trainee: Trainee }) {
         </section>
       )}
 
-      {sets && sets.length < 2 && (
+      {mode !== "postural" && sets && sets.length < 2 && (
         <EmptyState title="Comparação disponível a partir de duas datas">
           {sets.length === 0 ? "Nenhuma foto registrada para este aluno." : "Há um conjunto de fotos. Registre outra data para comparar."} As fotos da avaliação também aparecem aqui.
         </EmptyState>
       )}
 
-      {sets && sets.length >= 2 && (
+      {mode !== "postural" && sets && sets.length >= 2 && (
         <>
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Data de base" htmlFor="pe-base">

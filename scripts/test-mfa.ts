@@ -24,6 +24,8 @@ ok("Código: só 6 dígitos, aceitando espaço ou hífen no meio");
 
 assert.equal(safeNext("/admin"), "/admin");
 assert.equal(safeNext("/conta/seguranca"), "/conta/seguranca");
+assert.equal(safeNext("/planos?plano=evolucao"), "/planos?plano=evolucao", "volta ao resumo do plano escolhido na página inicial");
+for (const bad of ["/planos?plano=gratis", "/planos?plano=evolucao&x=1", "/planos/../admin"]) assert.equal(safeNext(bad), null, bad);
 for (const bad of ["//evil.com", "https://evil.com", "/\evil", "/login", "/admin?x=1", null]) assert.equal(safeNext(bad as string | null), null, String(bad));
 ok("Destino depois do código: só caminhos internos conhecidos");
 

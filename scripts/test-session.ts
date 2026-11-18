@@ -29,7 +29,7 @@ function fakeDb(opts: { user: { id: string } | null; profile: Row | null; traine
   return { db: db as any, calls };
 }
 
-const base = { id: "u1", email: "a@b.c", full_name: "Ana", role: "teacher", status: "active", trial_started_at: null, trial_expires_at: null, paused_remaining_seconds: 0, created_at: "2026-11-01T00:00:00Z", updated_at: "2026-11-01T00:00:00Z" };
+const base = { id: "u1", email: "a@b.c", full_name: "Ana", role: "teacher", status: "active", trial_started_at: null, trial_expires_at: null, paused_remaining_seconds: 0, created_at: "2026-11-01T00:00:00Z", updated_at: "2026-11-01T00:00:00Z", activated_at: "2026-11-01T00:00:00Z" };
 const future = new Date(Date.now() + 10 * 864e5).toISOString();
 
 (async () => {
@@ -43,6 +43,12 @@ const future = new Date(Date.now() + 10 * 864e5).toISOString();
   assert.equal(pending.status, "blocked");
   assert.equal(pending.status === "blocked" && pending.reason, "pending");
   ok("Perfil pendente → bloqueado sem consumir dias");
+
+  const notActivated = fakeDb({ user: { id: "u1" }, profile: { ...base, activated_at: null } });
+  const na = await loadSession(notActivated.db);
+  assert.equal(na.status === "blocked" && na.reason, "not_activated");
+  assert.ok(!notActivated.calls.includes("rpc:activate_my_trial"), "teste não começa antes de criar a senha");
+  ok("Aprovado sem a senha do convite → bloqueado, sem iniciar os 30 dias");
 
   const f = fakeDb({ user: { id: "u1" }, profile: base, rpcProfile: { ...base, trial_started_at: new Date().toISOString(), trial_expires_at: future } });
   const first = await loadSession(f.db);

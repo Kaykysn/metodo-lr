@@ -7,9 +7,11 @@ import { orientationMatrix, orientedSize } from "./photo-geometry";
 
 export const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 export const MIN_SHORT_SIDE = 480;
-export const MAX_LONG_SIDE = 2400;
+export const MAX_LONG_SIDE = 2048;
+/** Qualidade do WebP gravado (0–1). Detalhe postural visível com arquivos de algumas centenas de KB. */
+export const WEBP_QUALITY = 0.85;
 export const RETENTION_POLICY =
-  "O arquivo original não é guardado. O app guarda só uma versão reprocessada (JPEG, até 2.400 px no lado maior), sem metadados de câmera ou de localização. Ela fica até ser excluída pelo profissional ou até o aluno ser removido conforme a política de privacidade.";
+  "O arquivo original não é guardado. O app guarda só uma versão reprocessada (WebP, até 2.048 px no lado maior, sem ampliar fotos menores), sem metadados de câmera ou de localização. Ela fica até ser excluída pelo profissional ou até o aluno ser removido conforme a política de privacidade.";
 
 export type SniffedType = "image/jpeg" | "image/png" | "image/webp" | "image/heic" | "image/gif" | "unknown";
 
@@ -84,13 +86,14 @@ export interface ProcessedPhoto {
   blob: Blob;
   width: number;
   height: number;
-  mime: "image/jpeg";
+  mime: "image/webp" | "image/jpeg";
   orientation: number;
   orientationApplied: "navegador" | "app" | "não necessária";
 }
 
 /**
- * Decodifica, aplica a orientação EXIF e regrava como JPEG sem metadados.
+ * Decodifica, aplica a orientação EXIF e regrava como WebP sem metadados (JPEG só onde o navegador
+ * não sabe gravar WebP; o servidor confere os bytes e aceita os dois).
  * Navegadores atuais aplicam a orientação ao decodificar; quando a rotação de 90° não
  * aparece nas dimensões, o app aplica a matriz por conta própria.
  */
@@ -145,11 +148,25 @@ export async function processPhoto(file: File, onStep?: (s: string) => void): Pr
   srcW = W;
   srcH = H;
 
-  onStep?.("Removendo metadados");
+  onStep?.("Convertendo para WebP");
   // Regravar no canvas descarta EXIF, GPS e demais metadados.
-  const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.9));
-  if (!blob) return { code: "decodificacao", message: "Não foi possível gerar a versão processada da foto." };
-  return { blob, width: srcW, height: srcH, mime: "image/jpeg", orientation, orientationApplied: applied };
+  const encoded = await encodeCanvas(canvas);
+  if (!encoded) return { code: "decodificacao", message: "Não foi possível gerar a versão processada da foto." };
+  return { blob: encoded.blob, width: srcW, height: srcH, mime: encoded.mime, orientation, orientationApplied: applied };
+}
+
+/**
+ * WebP de verdade: confere os bytes gerados (alguns navegadores, como o Safari, devolvem PNG
+ * quando não sabem gravar WebP). Sem WebP disponível, grava JPEG, que o servidor também aceita.
+ */
+export async function encodeCanvas(canvas: HTMLCanvasElement): Promise<{ blob: Blob; mime: "image/webp" | "image/jpeg" } | null> {
+  const toBlob = (type: string, q: number) => new Promise<Blob | null>((res) => canvas.toBlob(res, type, q));
+  const webp = await toBlob("image/webp", WEBP_QUALITY);
+  if (webp && webp.type === "image/webp" && sniffImageType(new Uint8Array(await webp.slice(0, 16).arrayBuffer())) === "image/webp") {
+    return { blob: webp, mime: "image/webp" };
+  }
+  const jpeg = await toBlob("image/jpeg", 0.9);
+  return jpeg ? { blob: jpeg, mime: "image/jpeg" } : null;
 }
 
 async function probeJpegSize(file: File, type: SniffedType): Promise<{ w: number; h: number } | null> {

@@ -6,7 +6,8 @@
 // ==============================================================================
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Actor, Assessment, ExecutionLog, Trainee, TrainingPlan, PlanVersion } from "@/lib/domain/types";
-import type { Repository, SaveReceipt } from "./repository";
+import { followUpProblem, type NoteInput, type Repository, type SaveReceipt, type SessionChangeInput, type SlotInput } from "./repository";
+import type { FollowUpData, FollowUpNote, SessionChange, WeeklySlot } from "@/lib/domain/schedule";
 import { emptyBlocks } from "./seed";
 import { migrateLegacyRegions } from "@/lib/domain/body-regions";
 
@@ -149,6 +150,62 @@ export class SupabaseRepository implements Repository {
         }))
       )
     );
+    return receipt();
+  }
+
+  // ---------- Acompanhamento (RLS: só o profissional responsável pelo aluno) ----------
+  async getFollowUp(_actor: Actor, traineeId: string): Promise<FollowUpData> {
+    const [slots, changes, notes] = await Promise.all([
+      this.db.from("trainee_schedule").select("*").eq("trainee_id", traineeId).order("weekday").order("start_time"),
+      this.db.from("trainee_sessions").select("*").eq("trainee_id", traineeId),
+      this.db.from("trainee_feedback").select("*").eq("trainee_id", traineeId).order("occurred_on", { ascending: false }).order("created_at", { ascending: false }),
+    ]);
+    return {
+      slots: must(slots).map((r: any): WeeklySlot => ({ id: r.id, traineeId: r.trainee_id, weekday: r.weekday, startTime: String(r.start_time).slice(0, 5), durationMin: r.duration_min })),
+      changes: must(changes).map((r: any): SessionChange => ({ id: r.id, traineeId: r.trainee_id, kind: r.kind, originalAt: r.original_at, scheduledAt: r.scheduled_at, durationMin: r.duration_min, note: r.note, createdAt: r.created_at })),
+      notes: must(notes).map((r: any): FollowUpNote => ({
+        id: r.id, traineeId: r.trainee_id, occurredOn: r.occurred_on, sessionAt: r.session_at, studentReport: r.student_report, professionalNote: r.professional_note,
+        authorId: r.author_id, authorName: r.author_name, createdAt: r.created_at, updatedAt: r.updated_at,
+      })),
+    };
+  }
+  async saveWeeklySlots(actor: Actor, traineeId: string, slots: SlotInput[]) {
+    const why = followUpProblem({ slots });
+    if (why) throw new Error(why);
+    // Grava os horários novos primeiro (upsert) e só depois remove os que saíram: se algo falhar no meio, nada some
+    if (slots.length) {
+      must(await this.db.from("trainee_schedule").upsert(
+        slots.map((x) => ({ trainee_id: traineeId, owner_id: actor.id, weekday: x.weekday, start_time: x.startTime, duration_min: x.durationMin })),
+        { onConflict: "trainee_id,weekday,start_time" }
+      ));
+    }
+    const current = must(await this.db.from("trainee_schedule").select("id, weekday, start_time").eq("trainee_id", traineeId)) as { id: string; weekday: number; start_time: string }[];
+    const wanted = new Set(slots.map((x) => `${x.weekday}-${x.startTime}`));
+    const gone = current.filter((r) => !wanted.has(`${r.weekday}-${String(r.start_time).slice(0, 5)}`)).map((r) => r.id);
+    if (gone.length) must(await this.db.from("trainee_schedule").delete().in("id", gone));
+    return receipt();
+  }
+  async addSessionChange(actor: Actor, c: SessionChangeInput) {
+    const why = followUpProblem({ change: c });
+    if (why) throw new Error(why);
+    const res = await this.db.from("trainee_sessions").insert({
+      trainee_id: c.traineeId, owner_id: actor.id, kind: c.kind, original_at: c.originalAt, scheduled_at: c.scheduledAt, duration_min: c.durationMin, note: c.note,
+    });
+    if (res.error?.code === "23505") throw new Error("Este atendimento já foi remarcado ou cancelado. Desfaça a alteração anterior primeiro.");
+    must(res);
+    return receipt();
+  }
+  async removeSessionChange(_actor: Actor, traineeId: string, changeId: string) {
+    must(await this.db.from("trainee_sessions").delete().eq("id", changeId).eq("trainee_id", traineeId));
+    return receipt();
+  }
+  async saveFollowUpNote(actor: Actor, n: NoteInput) {
+    const why = followUpProblem({ note: n });
+    if (why) throw new Error(why);
+    const row = { occurred_on: n.occurredOn, session_at: n.sessionAt, student_report: n.studentReport, professional_note: n.professionalNote };
+    if (n.id) must(await this.db.from("trainee_feedback").update(row).eq("id", n.id).eq("trainee_id", n.traineeId));
+    // Autor e nome do autor são definidos pelo banco a partir da sessão
+    else must(await this.db.from("trainee_feedback").insert({ ...row, trainee_id: n.traineeId, owner_id: actor.id }));
     return receipt();
   }
 }

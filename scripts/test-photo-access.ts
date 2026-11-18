@@ -47,13 +47,23 @@ ok("RLS em todas as tabelas novas, bucket privado, leitura só pelo dono do alun
 
 // ---- Funções do backend não usam a chave de serviço
 const fnDir = path.join(process.cwd(), "backend/supabase/functions");
-const fnFiles = ["posture/index.ts", "admin-access/index.ts", "_shared/auth.ts", "_shared/http.ts", "_shared/image.ts", "_shared/cors.ts"];
+const fnFiles = ["posture/index.ts", "_shared/auth.ts", "_shared/http.ts", "_shared/image.ts", "_shared/cors.ts"];
 for (const f of fnFiles) {
   const src = fs.readFileSync(path.join(fnDir, f), "utf8");
   assert.doesNotMatch(src, /SERVICE_ROLE|service_role/, `${f} não pode usar a chave de serviço`);
   assert.doesNotMatch(src, /console\.(log|info|warn)/, `${f} não deve registrar dados das fotos em log`);
 }
-ok("Funções de fotos e de administração usam só a sessão do usuário (RLS vale) e não registram dados em log");
+ok("Funções de fotos usam só a sessão do usuário (RLS vale) e não registram dados em log");
+
+// ---- Chave de serviço: só no módulo próprio, usado só pelo convite e pela senha
+const svcUsers = fs.readdirSync(fnDir).filter((d) => fs.existsSync(path.join(fnDir, d, "index.ts")) && /serviceClient|SERVICE_ROLE/.test(fs.readFileSync(path.join(fnDir, d, "index.ts"), "utf8")));
+assert.deepEqual(svcUsers.sort(), ["account-password", "admin-access"], "só o convite (admin-access) e a senha (account-password) usam a chave de serviço");
+const shared = fs.readdirSync(path.join(fnDir, "_shared")).filter((f) => f.endsWith(".ts") && !f.endsWith("_test.ts") && /SERVICE_ROLE/.test(fs.readFileSync(path.join(fnDir, "_shared", f), "utf8")));
+assert.deepEqual(shared, ["service.ts"], "a chave de serviço só é lida em _shared/service.ts");
+const admin = fs.readFileSync(path.join(fnDir, "admin-access/index.ts"), "utf8");
+const handlerSrc = admin.slice(admin.indexOf("async function handler("));
+assert.ok(handlerSrc.indexOf('rpc("is_admin")') > 0 && handlerSrc.indexOf('rpc("is_admin")') < handlerSrc.indexOf("requestRoutes(ctx"), "admin-access confere is_admin antes das rotas que usam a chave de serviço");
+ok("Chave de serviço só em _shared/service.ts, usada só pelo convite e pela senha, depois de conferir quem pede");
 }
 
 // ---- O site não tem rotas de servidor próprias: todo acesso a dados passa pelo backend

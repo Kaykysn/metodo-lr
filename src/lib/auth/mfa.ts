@@ -18,7 +18,9 @@ export function normalizeCode(raw: string): string | null {
 /** Destino depois do login: só caminhos internos conhecidos (sem redirecionamento aberto). */
 export function safeNext(raw: string | null): string | null {
   if (!raw || raw.length > 200 || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) return null;
-  return /^\/(app|conta|admin)(\/[A-Za-z0-9/_-]*)?$/.test(raw) ? raw : null;
+  if (/^\/(app|conta|admin)(\/[A-Za-z0-9/_-]*)?$/.test(raw)) return raw;
+  // Volta ao resumo do plano escolhido na página inicial (só os planos conhecidos)
+  return /^\/planos(\?plano=(essencial|evolucao|completo))?$/.test(raw) ? raw : null;
 }
 
 export const CODE_INVALID = "Código incorreto ou vencido. Confira o horário do celular e use o código atual.";

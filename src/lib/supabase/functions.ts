@@ -9,7 +9,7 @@ export class FunctionError extends Error {
   }
 }
 
-export async function callFunction<T>(name: "posture" | "admin-access" | "exercise-sync" | "send-email" | "billing", path: string, init: RequestInit = {}): Promise<T> {
+export async function callFunction<T>(name: "posture" | "admin-access" | "exercise-sync" | "send-email" | "billing" | "account-password", path: string, init: RequestInit = {}): Promise<T> {
   const db = getSupabaseBrowserClient();
   const base = SUPABASE_URL;
   const anon = SUPABASE_PUBLIC_KEY;

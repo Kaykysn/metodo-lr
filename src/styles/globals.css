@@ -1125,6 +1125,86 @@
 }
 
 /* ------------------------------------------------------------------------------
+   HERO — blocos de informação com movimento sutil
+   O selo e os benefícios "respiram": alguns derivam ~4 px na diagonal, outros
+   crescem de 1 a 1,015. Durações e atrasos (negativos) vêm por elemento em
+   --dur/--delay, então os ciclos nunca coincidem. Título e CTAs não animam.
+   Só transform; o brilho jade atrás de cada bloco é um ::before contido, sem
+   eventos de ponteiro, recortado pelo overflow do hero.
+   ------------------------------------------------------------------------------ */
+@keyframes hero-info-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--drift-x, 3px), var(--drift-y, -3px), 0);
+  }
+}
+
+@keyframes hero-info-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.015);
+  }
+}
+
+.hero-info-drift,
+.hero-info-scale {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-info-drift {
+  animation: hero-info-drift var(--dur, 11s) ease-in-out var(--delay, 0s) infinite;
+  will-change: transform;
+}
+
+.hero-info-scale {
+  /* Cresce a partir do marcador: a coluna de bullets continua alinhada. */
+  transform-origin: 0% 50%;
+  animation: hero-info-scale var(--dur, 8s) ease-in-out var(--delay, 0s) infinite;
+}
+
+.hero-info-drift::before,
+.hero-info-scale::before {
+  content: "";
+  position: absolute;
+  inset: -6px -10px;
+  z-index: -1;
+  border-radius: 9999px;
+  background: rgb(var(--hero-jade) / var(--glow-alpha, 0.12));
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-info-drift,
+  .hero-info-scale {
+    animation: none;
+    will-change: auto;
+  }
+}
+.lite .hero-info-drift,
+.lite .hero-info-scale {
+  animation: none;
+  will-change: auto;
+}
+/* Modo leve: sem desfoque; um gradiente radial mantém o brilho difuso. */
+.lite .hero-info-drift::before,
+.lite .hero-info-scale::before {
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--hero-jade) / var(--glow-alpha, 0.12)),
+    rgb(var(--hero-jade) / 0)
+  );
+  filter: none;
+}
+
+/* ------------------------------------------------------------------------------
    HERO — wrapper único do modelo
    Desktop: coluna à direita, apoiada no rodapé do hero, com folga até a borda.
    Mobile: vira fundo atrás do texto (opacidade reduzida + véu de contraste).
