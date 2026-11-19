@@ -6,11 +6,17 @@ import { PERF_BOOT_SCRIPT } from "@/lib/perf";
 import AmbientBackground from "@/components/effects/AmbientBackground";
 import ParticleField from "@/components/effects/ParticleField";
 import ScrollEffects from "@/components/motion/ScrollEffects";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
 
 // Manrope (OFL) hospedada localmente: src/fonts/OFL.txt
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const manrope = localFont({
+  src: [
+    { path: "../fonts/manrope-latin-wght-normal.woff2", weight: "200 800", style: "normal" },
+    { path: "../fonts/manrope-latin-ext-wght-normal.woff2", weight: "200 800", style: "normal" },
+  ],
+  variable: "--font-sans",
+  display: "swap",
+  fallback: ["system-ui", "Segoe UI", "Roboto", "Arial", "sans-serif"],
+});
 
 /**
  * Endereço absoluto das imagens de compartilhamento. Na Vercel vem do domínio de produção
@@ -58,7 +64,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+    <html lang="pt-BR" suppressHydrationWarning className={manrope.variable}>
       <head>
         {/* Antes da pintura: marca "js" e classifica o aparelho (design completo ou leve) */}
         <script dangerouslySetInnerHTML={{ __html: PERF_BOOT_SCRIPT }} />
