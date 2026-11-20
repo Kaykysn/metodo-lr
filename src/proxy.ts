@@ -186,6 +186,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  // Área profissional só com a conta ativada (senha criada pelo convite ou Google aprovado).
+  // A RLS e as funções exigem o mesmo; aqui só evita abrir a tela vazia.
+  if (user && (pathname === "/app" || pathname.startsWith("/app/"))) {
+    const { data: p } = await supabase.from("profiles").select("status, activated_at").eq("id", user.id).maybeSingle();
+    if (p && p.status === "active" && !p.activated_at) {
+      return NextResponse.redirect(new URL("/aguardando-aprovacao", request.url));
+    }
+  }
+
   // Se há usuário mas está tentando acessar admin, verifica role
   if (user && isAdminRoute(pathname)) {
     const { data: profile } = await supabase

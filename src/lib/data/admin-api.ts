@@ -64,6 +64,38 @@ export async function loadAudit(accounts: UserAccessProfile[]): Promise<AccessAu
   }));
 }
 
+// ---------- Pedidos de acesso (nome e e-mail) ----------
+export type RequestStatus = "pendente" | "aprovado" | "convidado" | "ativado" | "recusado" | "conta_existente";
+export interface AccessRequest {
+  id: string;
+  full_name: string;
+  email: string;
+  status: RequestStatus;
+  request_count: number;
+  created_at: string;
+  last_requested_at: string;
+  decided_at: string | null;
+  invite_count: number;
+  invite_sent_at: string | null;
+  invite_channel: "email" | "link" | null;
+  invite_email_ok: boolean | null;
+  activated_at: string | null;
+}
+
+export async function loadRequests(status: RequestStatus | "all" = "all"): Promise<AccessRequest[]> {
+  const r = await callFunction<{ items: AccessRequest[] }>("admin-access", `/requests?status=${status}`);
+  return r.items;
+}
+
+/** Aprova e gera o convite (ou gera um novo). O link volta só para o admin, para enviar por outro canal. */
+export async function inviteRequest(id: string) {
+  return callFunction<{ id: string; status: RequestStatus; emailed: boolean; link: string; validity: string }>("admin-access", `/requests/${id}/invite`, { method: "POST" });
+}
+
+export async function rejectRequest(id: string) {
+  return callFunction<{ id: string; status: RequestStatus }>("admin-access", `/requests/${id}/reject`, { method: "POST" });
+}
+
 export async function runAdminAction(target: string, action: AdminAction, days?: number, note?: string) {
   return callFunction<{ id: string; status: string }>("admin-access", "", {
     method: "POST",

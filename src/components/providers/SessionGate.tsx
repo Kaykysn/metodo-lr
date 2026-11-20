@@ -8,6 +8,7 @@ import { BILLING_ENABLED } from "@/lib/subscription/billing";
 
 const BLOCKED: Record<string, { title: string; text: string; href: string; cta: string }> = {
   pending: { title: "Seu acesso ainda está em análise", text: "A equipe avisa quando o pedido for aprovado. Os 30 dias só começam no primeiro acesso depois disso.", href: "/aguardando-aprovacao", cta: "Ver situação do pedido" },
+  not_activated: { title: "Falta criar a sua senha", text: "Seu acesso foi aprovado. Abra o convite que enviamos ao seu e-mail e crie a senha para liberar a área profissional. Se o convite expirou, peça um novo à equipe.", href: "/login", cta: "Voltar ao login" },
   paused: { title: "Seu acesso está pausado", text: "O tempo restante ficou congelado. Fale com a equipe para retomar.", href: "/conta/acesso", cta: "Ver detalhes do acesso" },
   expired: { title: "Seu período de teste terminou", text: BILLING_ENABLED ? "Seus dados continuam guardados e nada foi apagado. Assine um plano para voltar a usar a área do professor." : "Seus dados continuam guardados e nada foi apagado. Na página de plano e acesso você vê as datas e os planos; a contratação ainda não está aberta.", href: BILLING_ENABLED ? "/planos" : "/conta/acesso", cta: BILLING_ENABLED ? "Escolher um plano" : "Ver plano e acesso" },
   revoked: { title: "Acesso encerrado", text: "Este acesso foi encerrado pela administração. Fale com a equipe se achar que é um engano.", href: "/conta/acesso", cta: "Ver detalhes" },

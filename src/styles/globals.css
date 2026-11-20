@@ -1,6 +1,8 @@
 @import './tokens.css' layer(base);
 
 @import 'tailwindcss';
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -1125,6 +1127,86 @@
 }
 
 /* ------------------------------------------------------------------------------
+   HERO — blocos de informação com movimento sutil
+   O selo e os benefícios "respiram": alguns derivam ~4 px na diagonal, outros
+   crescem de 1 a 1,015. Durações e atrasos (negativos) vêm por elemento em
+   --dur/--delay, então os ciclos nunca coincidem. Título e CTAs não animam.
+   Só transform; o brilho jade atrás de cada bloco é um ::before contido, sem
+   eventos de ponteiro, recortado pelo overflow do hero.
+   ------------------------------------------------------------------------------ */
+@keyframes hero-info-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--drift-x, 3px), var(--drift-y, -3px), 0);
+  }
+}
+
+@keyframes hero-info-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.015);
+  }
+}
+
+.hero-info-drift,
+.hero-info-scale {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-info-drift {
+  animation: hero-info-drift var(--dur, 11s) ease-in-out var(--delay, 0s) infinite;
+  will-change: transform;
+}
+
+.hero-info-scale {
+  /* Cresce a partir do marcador: a coluna de bullets continua alinhada. */
+  transform-origin: 0% 50%;
+  animation: hero-info-scale var(--dur, 8s) ease-in-out var(--delay, 0s) infinite;
+}
+
+.hero-info-drift::before,
+.hero-info-scale::before {
+  content: "";
+  position: absolute;
+  inset: -6px -10px;
+  z-index: -1;
+  border-radius: 9999px;
+  background: rgb(var(--hero-jade) / var(--glow-alpha, 0.12));
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-info-drift,
+  .hero-info-scale {
+    animation: none;
+    will-change: auto;
+  }
+}
+.lite .hero-info-drift,
+.lite .hero-info-scale {
+  animation: none;
+  will-change: auto;
+}
+/* Modo leve: sem desfoque; um gradiente radial mantém o brilho difuso. */
+.lite .hero-info-drift::before,
+.lite .hero-info-scale::before {
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--hero-jade) / var(--glow-alpha, 0.12)),
+    rgb(var(--hero-jade) / 0)
+  );
+  filter: none;
+}
+
+/* ------------------------------------------------------------------------------
    HERO — wrapper único do modelo
    Desktop: coluna à direita, apoiada no rodapé do hero, com folga até a borda.
    Mobile: vira fundo atrás do texto (opacidade reduzida + véu de contraste).
@@ -1602,4 +1684,82 @@ html.lite.theme-switching *::after {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(var(--border-control) / 0.8);
+}
+
+/* ==============================================================================
+   Cores dos componentes shadcn/ui, ligadas à paleta do Studio (tokens.css).
+   Só geram utilitários novos (bg-primary, border-input…): nada aqui muda o que já existe.
+   Raios e fonte ficam com os padrões do Tailwind e do site, de propósito.
+   ============================================================================== */
+@theme inline {
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+}
+
+/* Derivadas dos tokens: acompanham sozinhas o modo escuro (.dark e [data-theme="dark"]). */
+:root,
+.dark,
+[data-theme="dark"] {
+  --background: rgb(var(--bg-page));
+  --foreground: rgb(var(--text-primary));
+  --card: rgb(var(--surface-primary));
+  --card-foreground: rgb(var(--text-primary));
+  --popover: rgb(var(--surface-raised));
+  --popover-foreground: rgb(var(--text-primary));
+  --primary: rgb(var(--action-bg));
+  --primary-foreground: rgb(var(--action-text));
+  --secondary: rgb(var(--surface-secondary));
+  --secondary-foreground: rgb(var(--text-primary));
+  --muted: rgb(var(--surface-secondary));
+  --muted-foreground: rgb(var(--text-secondary));
+  --accent: rgb(var(--accent-teal-subtle));
+  --accent-foreground: rgb(var(--text-primary));
+  --destructive: rgb(var(--status-danger-fg));
+  --border: rgb(var(--border-decorative));
+  --input: rgb(var(--border-control));
+  --ring: rgb(var(--accent-teal));
+  --chart-1: rgb(var(--chart-bar-active));
+  --chart-2: rgb(var(--chart-bar));
+  --chart-3: rgb(var(--accent-teal));
+  --chart-4: rgb(var(--cta-bg));
+  --chart-5: rgb(var(--text-secondary));
+  --radius: 10px;
+  --sidebar: rgb(var(--surface-primary));
+  --sidebar-foreground: rgb(var(--text-primary));
+  --sidebar-primary: rgb(var(--action-bg));
+  --sidebar-primary-foreground: rgb(var(--action-text));
+  --sidebar-accent: rgb(var(--accent-teal-subtle));
+  --sidebar-accent-foreground: rgb(var(--text-primary));
+  --sidebar-border: rgb(var(--border-decorative));
+  --sidebar-ring: rgb(var(--accent-teal));
 }

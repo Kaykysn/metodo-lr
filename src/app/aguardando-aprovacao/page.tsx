@@ -33,7 +33,7 @@ export default function AguardandoAprovacaoPage() {
               Solicitação em Análise
             </h1>
             <p className="text-xs sm:text-sm text-theme-muted leading-relaxed sm:leading-5">
-              Recebemos seus dados. A equipe analisa cada pedido e avisa pelo contato informado. Seus 30 dias só começam no primeiro acesso depois da aprovação.
+              A equipe analisa cada pedido. Com a aprovação, enviamos ao seu e-mail um convite para criar a senha. Se já recebeu o convite, abra o link dele para concluir a ativação. Seus 30 dias só começam no primeiro acesso depois disso.
             </p>
           </div>
 

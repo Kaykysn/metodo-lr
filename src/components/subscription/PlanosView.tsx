@@ -4,7 +4,7 @@ import React, { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { useData } from "@/components/providers/DataProvider";
-import { COMPARE_ROWS, FEATURE_LABEL, PLANS, formatPrice, getPlan, priceDifference, recommendPlan, type CatalogPlan, type PlanId } from "@/lib/subscription/catalog";
+import { COMPARE_ROWS, FEATURE_LABEL, PLANS, formatPrice, getPlan, isPlanId, priceDifference, recommendPlan, type CatalogPlan, type PlanId } from "@/lib/subscription/catalog";
 import { BILLING_ENABLED, BILLING_UNAVAILABLE_MESSAGE, firstChargeDate } from "@/lib/subscription/billing";
 import { startCheckout } from "@/lib/subscription/checkout";
 import { formatSaoPauloDate } from "@/lib/access-policy";
@@ -21,8 +21,12 @@ export default function PlanosView({ prioritySupportReady, contactEmail }: Plano
   const [selected, setSelected] = useState<PlanId | null>(null);
   const [returned, setReturned] = useState<"cancelada" | "expirada" | null>(null);
   useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    // Vindo do resumo da página inicial (?plano=): abre a confirmação daquele plano
+    const plano = q.get("plano");
+    if (isPlanId(plano)) setSelected(plano);
     // Volta do checkout sem pagar: avisa e limpa o endereço
-    const v = new URLSearchParams(window.location.search).get("assinatura");
+    const v = q.get("assinatura");
     if (v === "cancelada" || v === "expirada") {
       setReturned(v);
       window.history.replaceState(null, "", window.location.pathname);

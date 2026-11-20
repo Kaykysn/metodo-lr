@@ -626,7 +626,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
               <option value="inclinada">Inclinada</option>
             </select>
           </label>
-          <label className="block text-sm">Observações sobre a foto
+          <label className="block text-sm">Observações do profissional sobre esta vista
             <textarea value={data.quality.notes} onChange={(e) => setData({ ...data, quality: { ...data.quality, notes: e.target.value } })} className="mt-1 block min-h-[60px] w-full rounded-sm border border-white/15 bg-[#0f1418] p-2" />
           </label>
         </section>

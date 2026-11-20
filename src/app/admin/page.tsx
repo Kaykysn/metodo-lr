@@ -5,6 +5,7 @@ import CatalogAdminPanel from "@/components/catalog/CatalogAdminPanel";
 
 import React, { useCallback, useEffect, useState } from "react";
 import { loadAccounts, loadAudit, runAdminAction, type AdminAction } from "@/lib/data/admin-api";
+import AccessRequestsPanel from "@/components/admin/AccessRequestsPanel";
 import Link from "next/link";
 import {
   INITIAL_DEMO_USERS,
@@ -198,6 +199,17 @@ export default function AdminPage() {
             {feedbackNotice}
           </div>
         )}
+
+        {/* Pedidos de acesso (nome e e-mail) e convites de primeiro acesso */}
+        {isSupabaseConfigured ? (
+          <AccessRequestsPanel />
+        ) : (
+          <p className="rounded-xl border border-theme-border bg-theme-secondary/60 p-4 text-sm text-theme-muted">
+            Na demonstração não há pedidos reais. Com o servidor configurado, os pedidos de acesso aparecem aqui com nome e e-mail.
+          </p>
+        )}
+
+        <h2 className="text-lg font-bold text-theme-text">Contas</h2>
 
         {/* Painel de Filtros e Busca */}
         <div className="bg-theme-primary rounded-2xl p-5 border border-theme-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">

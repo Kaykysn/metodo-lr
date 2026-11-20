@@ -2,28 +2,23 @@
 
 // Nova senha a partir do link de recuperação enviado por e-mail.
 // O cliente do navegador troca o código do link por uma sessão de recuperação (PKCE, mesmo
-// navegador que pediu o link). A regra de senha vale no servidor (backend/supabase/config.toml);
-// a checagem aqui só adianta o aviso. Mensagens fixas, nada do provedor vai para a tela.
+// navegador que pediu o link). A senha é gravada pela função account-password, que aplica a
+// regra do Método LR no servidor; a checagem aqui só adianta os avisos.
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import AppearanceBar from "@/components/appearance/AppearanceBar";
+import PasswordFields, { passwordReady } from "@/components/auth/PasswordFields";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
-import { AlertCircle, Lock } from "lucide-react";
-
-const MIN_LENGTH = 10;
+import { savePassword } from "@/lib/auth/account-password";
+import { AlertCircle } from "lucide-react";
 
 type Stage = "checking" | "ready" | "invalid" | "unavailable";
-
-function passwordProblem(pw: string): string | null {
-  if (pw.length < MIN_LENGTH) return `Use pelo menos ${MIN_LENGTH} caracteres.`;
-  if (!/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/\d/.test(pw)) return "Misture letras minúsculas, maiúsculas e números.";
-  return null;
-}
 
 export default function ResetPasswordPage() {
   const [stage, setStage] = useState<Stage>("checking");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -49,6 +44,11 @@ export default function ResetPasswordPage() {
         }
         // Tira o código da barra de endereço (não fica no histórico nem em capturas de tela).
         if (code) window.history.replaceState(null, "", window.location.pathname);
+        // Nome cadastrado: a senha não pode conter o nome nem o sobrenome
+        if (data.session) {
+          const { data: p } = await db.from("profiles").select("full_name").eq("id", data.session.user.id).maybeSingle();
+          if (active) setFullName(p?.full_name ?? "");
+        }
         if (active) setStage(data.session ? "ready" : "invalid");
       } catch {
         if (active) setStage("invalid");
@@ -62,20 +62,15 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const problem = passwordProblem(password);
-    if (problem) return setError(problem);
     if (password !== confirm) return setError("As duas senhas não são iguais.");
     const db = getSupabaseBrowserClient();
     if (!db) return setStage("unavailable");
     setSaving(true);
     try {
-      const { error: err } = await db.auth.updateUser({ password });
-      if (err) {
-        if (err.code === "same_password") setError("Use uma senha diferente da anterior.");
-        else if (err.code === "weak_password") setError("Senha fraca. Use pelo menos 10 caracteres com minúsculas, maiúsculas e números.");
-        else if (err.status === 429) setError("Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.");
-        else if (err.status === 401 || err.status === 403) setStage("invalid");
-        else setError("Não foi possível alterar a senha agora. Tente de novo.");
+      const r = await savePassword("reset", password, fullName);
+      if (!r.ok) {
+        if (r.expired) setStage("invalid");
+        else setError(r.message);
         return;
       }
       // Encerra todas as sessões (inclusive esta): quem tinha a senha antiga perde o acesso.
@@ -89,9 +84,6 @@ export default function ResetPasswordPage() {
       setSaving(false);
     }
   };
-
-  const inputClass =
-    "w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-theme-primary border border-theme-boundary/80 text-sm text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25";
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -136,48 +128,10 @@ export default function ResetPasswordPage() {
                   <span>{error}</span>
                 </div>
               )}
-              <div>
-                <label htmlFor="nova-senha" className="block text-xs font-bold text-theme-text mb-1">
-                  Nova senha
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-theme-subtle absolute left-3 top-1/2 -translate-y-1/2" aria-hidden />
-                  <input
-                    id="nova-senha"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    minLength={MIN_LENGTH}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    aria-describedby="regra-senha"
-                    className={inputClass}
-                  />
-                </div>
-                <p id="regra-senha" className="mt-1 text-[11px] text-theme-muted">
-                  Pelo menos {MIN_LENGTH} caracteres, com minúsculas, maiúsculas e números.
-                </p>
-              </div>
-              <div>
-                <label htmlFor="confirmar-senha" className="block text-xs font-bold text-theme-text mb-1">
-                  Repita a nova senha
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-theme-subtle absolute left-3 top-1/2 -translate-y-1/2" aria-hidden />
-                  <input
-                    id="confirmar-senha"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-              </div>
+              <PasswordFields password={password} confirm={confirm} onPassword={setPassword} onConfirm={setConfirm} fullName={fullName} labels={{ password: "Nova senha", confirm: "Confirmar nova senha" }} />
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || !passwordReady(password, confirm, fullName)}
                 className="w-full py-3 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-sm font-bold shadow-xs transition-all disabled:opacity-60"
               >
                 {saving ? "Salvando…" : "Salvar nova senha"}

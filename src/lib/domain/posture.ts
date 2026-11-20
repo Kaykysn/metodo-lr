@@ -10,7 +10,8 @@
 
 export type PhotoView = "frente" | "perfil" | "costas";
 export type ProfileSide = "direito" | "esquerdo";
-export const VIEW_LABEL: Record<PhotoView, string> = { frente: "Frente", perfil: "Perfil", costas: "Costas" };
+// "perfil" é o nome interno da vista lateral; na tela, "Lado"
+export const VIEW_LABEL: Record<PhotoView, string> = { frente: "Frente", perfil: "Lado", costas: "Costas" };
 
 export interface Pt {
   x: number;

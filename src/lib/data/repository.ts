@@ -9,6 +9,7 @@ import { can, PermissionError } from "@/lib/domain/roles";
 import { buildSeed, DEMO_ACTORS, emptyBlocks } from "./seed";
 import { newId } from "@/lib/domain/plans";
 import { checkActivation, traineeUsage } from "@/lib/subscription/limits";
+import { isValidTime, type FollowUpData, type FollowUpNote, type SessionChange, type WeeklySlot } from "@/lib/domain/schedule";
 
 export interface SaveReceipt {
   savedAt: string;
@@ -31,6 +32,47 @@ export interface Repository {
   savePlan(actor: Actor, plan: TrainingPlan): Promise<SaveReceipt>;
   listLogs(actor: Actor, traineeId: string): Promise<ExecutionLog[]>;
   addLogs(actor: Actor, logs: ExecutionLog[]): Promise<SaveReceipt>;
+  // Acompanhamento (horário, atendimentos e feedback). Não cria login nem convite para o aluno.
+  getFollowUp(actor: Actor, traineeId: string): Promise<FollowUpData>;
+  saveWeeklySlots(actor: Actor, traineeId: string, slots: SlotInput[]): Promise<SaveReceipt>;
+  addSessionChange(actor: Actor, change: SessionChangeInput): Promise<SaveReceipt>;
+  removeSessionChange(actor: Actor, traineeId: string, changeId: string): Promise<SaveReceipt>;
+  saveFollowUpNote(actor: Actor, note: NoteInput): Promise<SaveReceipt>;
+}
+
+export type SlotInput = Pick<WeeklySlot, "weekday" | "startTime" | "durationMin">;
+export type SessionChangeInput = Pick<SessionChange, "traineeId" | "kind" | "originalAt" | "scheduledAt" | "durationMin" | "note">;
+export type NoteInput = Pick<FollowUpNote, "traineeId" | "occurredOn" | "sessionAt" | "studentReport" | "professionalNote"> & { id?: string };
+
+/** Mesmas regras dos CHECKs do banco (migração 20261118000100), com mensagens para a tela. */
+export function followUpProblem(x: { slots?: SlotInput[]; change?: SessionChangeInput; note?: NoteInput }): string | null {
+  if (x.slots) {
+    const seen = new Set<string>();
+    for (const s of x.slots) {
+      if (!Number.isInteger(s.weekday) || s.weekday < 0 || s.weekday > 6) return "Dia da semana inválido.";
+      if (!isValidTime(s.startTime)) return "Informe a hora no formato 00:00.";
+      if (!Number.isInteger(s.durationMin) || s.durationMin < 10 || s.durationMin > 300) return "A duração vai de 10 a 300 minutos.";
+      const k = `${s.weekday}-${s.startTime}`;
+      if (seen.has(k)) return "Há dois horários iguais no mesmo dia.";
+      seen.add(k);
+    }
+  }
+  if (x.change) {
+    const c = x.change;
+    if (c.kind === "avulso" && (!c.scheduledAt || c.originalAt)) return "Informe a data e a hora do atendimento.";
+    if (c.kind === "remarcacao" && (!c.scheduledAt || !c.originalAt)) return "Informe o novo horário.";
+    if (c.kind === "cancelamento" && (!c.originalAt || c.scheduledAt)) return "Atendimento inválido.";
+    if (c.scheduledAt && !Number.isFinite(Date.parse(c.scheduledAt))) return "Data ou hora inválida.";
+    if (c.durationMin < 10 || c.durationMin > 300) return "A duração vai de 10 a 300 minutos.";
+    if (c.note.length > 500) return "Observação longa demais (até 500 caracteres).";
+  }
+  if (x.note) {
+    const n = x.note;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(n.occurredOn)) return "Informe a data.";
+    if (!n.studentReport.trim() && !n.professionalNote.trim()) return "Escreva o relato do aluno ou a sua observação.";
+    if (n.studentReport.length > 4000 || n.professionalNote.length > 4000) return "Texto longo demais (até 4.000 caracteres por campo).";
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -69,7 +111,7 @@ export interface CommercialGuard {
 // Demonstração no navegador
 // ---------------------------------------------------------------------------
 const KEY = "lr_demo_v2";
-type DemoState = ReturnType<typeof buildSeed>;
+type DemoState = ReturnType<typeof buildSeed> & { schedule?: WeeklySlot[]; sessionChanges?: SessionChange[]; followups?: FollowUpNote[] };
 
 function storageAvailable(): Storage | null {
   try {
@@ -294,6 +336,70 @@ export class DemoRepository implements Repository {
       if (!v || v.status !== "published") deny("execution.log", "Só é possível registrar execução de um treino disponibilizado.");
     }
     s.logs.push(...logs);
+    return this.commit(s);
+  }
+
+  // ---------- Acompanhamento ----------
+  private followUpTrainee(s: DemoState, actor: Actor, traineeId: string, write: boolean) {
+    const t = s.trainees.find((x) => x.id === traineeId);
+    if (!t || !canAccessTrainee(actor, t) || !can(actor.role, write ? "trainee.write" : "trainee.read")) deny("trainee.read", "Aluno fora da sua responsabilidade.");
+    if (write) {
+      this.assertNotArchived(t, "trainee.write");
+      this.assertCanCreate("trainee.write");
+    }
+    return t;
+  }
+  async getFollowUp(actor: Actor, traineeId: string): Promise<FollowUpData> {
+    const s = this.load();
+    const t = s.trainees.find((x) => x.id === traineeId);
+    if (!t || !canAccessTrainee(actor, t) || !can(actor.role, "trainee.read")) return { slots: [], changes: [], notes: [] };
+    return {
+      slots: (s.schedule ?? []).filter((x) => x.traineeId === traineeId),
+      changes: (s.sessionChanges ?? []).filter((x) => x.traineeId === traineeId),
+      notes: (s.followups ?? []).filter((x) => x.traineeId === traineeId),
+    };
+  }
+  async saveWeeklySlots(actor: Actor, traineeId: string, slots: SlotInput[]) {
+    const s = this.load();
+    this.followUpTrainee(s, actor, traineeId, true);
+    const why = followUpProblem({ slots });
+    if (why) throw new Error(why);
+    const keep = (s.schedule ?? []).filter((x) => x.traineeId !== traineeId);
+    s.schedule = [...keep, ...slots.map((x) => ({ ...x, id: newId("hr"), traineeId }))];
+    return this.commit(s);
+  }
+  async addSessionChange(actor: Actor, change: SessionChangeInput) {
+    const s = this.load();
+    this.followUpTrainee(s, actor, change.traineeId, true);
+    const why = followUpProblem({ change });
+    if (why) throw new Error(why);
+    const list = s.sessionChanges ?? [];
+    if (change.originalAt && list.some((x) => x.traineeId === change.traineeId && x.originalAt && Date.parse(x.originalAt) === Date.parse(change.originalAt!))) {
+      throw new Error("Este atendimento já foi remarcado ou cancelado. Desfaça a alteração anterior primeiro.");
+    }
+    s.sessionChanges = [...list, { ...change, id: newId("at"), createdAt: new Date().toISOString() }];
+    return this.commit(s);
+  }
+  async removeSessionChange(actor: Actor, traineeId: string, changeId: string) {
+    const s = this.load();
+    this.followUpTrainee(s, actor, traineeId, true);
+    s.sessionChanges = (s.sessionChanges ?? []).filter((x) => !(x.id === changeId && x.traineeId === traineeId));
+    return this.commit(s);
+  }
+  async saveFollowUpNote(actor: Actor, note: NoteInput) {
+    const s = this.load();
+    this.followUpTrainee(s, actor, note.traineeId, true);
+    const why = followUpProblem({ note });
+    if (why) throw new Error(why);
+    const list = s.followups ?? [];
+    const now = new Date().toISOString();
+    const existing = note.id ? list.find((x) => x.id === note.id && x.traineeId === note.traineeId) : undefined;
+    if (existing) {
+      Object.assign(existing, { occurredOn: note.occurredOn, sessionAt: note.sessionAt, studentReport: note.studentReport, professionalNote: note.professionalNote, updatedAt: now });
+    } else {
+      list.push({ id: newId("fb"), traineeId: note.traineeId, occurredOn: note.occurredOn, sessionAt: note.sessionAt, studentReport: note.studentReport, professionalNote: note.professionalNote, authorId: actor.id, authorName: actor.name, createdAt: now, updatedAt: now });
+    }
+    s.followups = list;
     return this.commit(s);
   }
 

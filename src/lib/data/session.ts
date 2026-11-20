@@ -20,7 +20,7 @@ export type SessionState =
   | { status: "loading" }
   | { status: "signed_out" }
   | { status: "error"; message: string }
-  | { status: "blocked"; reason: "pending" | "paused" | "expired" | "revoked" | "no_profile" | "unknown_role"; actor?: Actor; entitlement?: TrialTimeRemaining; account?: AccountInfo }
+  | { status: "blocked"; reason: "pending" | "not_activated" | "paused" | "expired" | "revoked" | "no_profile" | "unknown_role"; actor?: Actor; entitlement?: TrialTimeRemaining; account?: AccountInfo }
   | { status: "active"; actor: Actor; entitlement: TrialTimeRemaining | null; account?: AccountInfo };
 
 const ROLES: Role[] = ["teacher", "pe_student", "practitioner", "admin", "student", "postgraduate", "physiotherapist"];
@@ -55,6 +55,11 @@ export async function loadSession(db: SupabaseClient): Promise<SessionState> {
   let { data: profile, error } = await db.from("profiles").select("*").eq("id", auth.user.id).maybeSingle();
   if (error) return { status: "error", message: error.message };
   if (!profile) return { status: "blocked", reason: "no_profile" };
+
+  // Aprovado mas sem a senha criada pelo convite: nada da área profissional (o banco também barra)
+  if (profile.status === "active" && !profile.activated_at) {
+    return { status: "blocked", reason: "not_activated" };
+  }
 
   // Primeiro acesso após aprovação: o banco inicia os 30 dias (só para o próprio usuário)
   if (profile.status === "active" && !profile.trial_started_at && profile.role !== "admin") {

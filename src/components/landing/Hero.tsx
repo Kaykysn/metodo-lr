@@ -15,6 +15,23 @@ const BENEFITS = [
   "Acompanhamento da evolução",
 ];
 
+type InfoMotion = { kind: "drift" | "scale"; vars: Record<string, string> };
+
+/** Movimento sutil por bloco: durações e atrasos distintos para os ciclos não coincidirem. */
+const BADGE_MOTION: InfoMotion = {
+  kind: "drift",
+  vars: { "--dur": "11s", "--delay": "-3s", "--drift-x": "3px", "--drift-y": "-3px", "--glow-alpha": "0.16" },
+};
+const BENEFIT_MOTION: InfoMotion[] = [
+  { kind: "scale", vars: { "--dur": "8s", "--delay": "-1.5s", "--glow-alpha": "0.1" } },
+  { kind: "drift", vars: { "--dur": "12.5s", "--delay": "-7s", "--drift-x": "-3px", "--drift-y": "3px", "--glow-alpha": "0.12" } },
+  { kind: "scale", vars: { "--dur": "9.5s", "--delay": "-5.2s", "--glow-alpha": "0.1" } },
+  { kind: "scale", vars: { "--dur": "7.2s", "--delay": "-2.6s", "--glow-alpha": "0.1" } },
+];
+
+const motionClass = (m: InfoMotion) => (m.kind === "drift" ? "hero-info-drift" : "hero-info-scale");
+const motionStyle = (m: InfoMotion) => m.vars as React.CSSProperties;
+
 /**
  * Abertura cinematográfica em duas colunas:
  *
@@ -106,7 +123,10 @@ export default function Hero() {
       {/* Coluna de texto: mesma margem esquerda do logo no header */}
       <div className="hero-inner relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 sm:px-6 lg:px-8">
         <div className="hero-copy w-full py-12 sm:py-16 lg:max-w-xl lg:py-20">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--hero-jade))] backdrop-blur-md mt-4 -mb-4">
+          <p
+            className={`${motionClass(BADGE_MOTION)} inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--hero-jade))] backdrop-blur-md mt-4 -mb-4`}
+            style={motionStyle(BADGE_MOTION)}
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--hero-jade))]" aria-hidden="true" />
             Biomecânica aplicada
           </p>
@@ -125,10 +145,11 @@ export default function Hero() {
 
           {/* Benefícios: 2x2 com colunas iguais; 1 coluna no celular */}
           <ul className="mt-6 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-            {BENEFITS.map((benefit) => (
+            {BENEFITS.map((benefit, i) => (
               <li
                 key={benefit}
-                className="flex items-start gap-2.5 text-[15px] leading-snug text-[rgb(var(--hero-muted))]"
+                className={`${motionClass(BENEFIT_MOTION[i])} flex items-start gap-2.5 justify-self-start text-[15px] leading-snug text-[rgb(var(--hero-muted))]`}
+                style={motionStyle(BENEFIT_MOTION[i])}
               >
                 <span
                   className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--hero-jade))]"
