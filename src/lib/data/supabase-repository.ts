@@ -118,17 +118,41 @@ export class SupabaseRepository implements Repository {
         start_date: plan.startDate, weeks: plan.weeks, frequency_per_week: plan.frequencyPerWeek,
       })
     );
+    // INSERT de versão nova é sempre draft (RLS). Aprovar/publicar é UPDATE da linha
+    // existente: um upsert aqui geraria INSERT ... ON CONFLICT e a política de INSERT
+    // recusaria o status 'approved' antes do CONFLICT ("new row violates RLS").
+    const existing = must(
+      await this.db.from("plan_versions").select("id").eq("plan_id", plan.id)
+    ) as { id: string }[];
+    const existingIds = new Set(existing.map((r) => r.id));
     // Ordem importa por causa do índice "uma publicada por plano": substituídas antes da nova publicada
     const ordered = [...plan.versions].sort((a, b) => (a.status === "published" ? 1 : 0) - (b.status === "published" ? 1 : 0));
     for (const v of ordered) {
-      must(
-        await this.db.from("plan_versions").upsert({
-          id: v.id, plan_id: plan.id, number: v.number, status: v.status, sessions: v.sessions,
-          source_assessment_id: v.sourceAssessmentId, source_assessment_version: v.sourceAssessmentVersion,
-          suggestion_trace: v.suggestionTrace, manual_draft: v.manualDraft, author_id: v.authorId,
-          published_at: v.publishedAt ?? null, change_note: v.changeNote,
-        })
-      );
+      const values = {
+        status: v.status,
+        sessions: v.sessions,
+        source_assessment_id: v.sourceAssessmentId ?? null,
+        source_assessment_version: v.sourceAssessmentVersion ?? null,
+        suggestion_trace: v.suggestionTrace ?? null,
+        manual_draft: v.manualDraft,
+        published_at: v.publishedAt ?? null,
+        change_note: v.changeNote,
+      };
+      if (existingIds.has(v.id)) {
+        // UPDATE não informa id/plan_id/number/author_id: gatilho de imutabilidade e
+        // approved_by/approved_at ficam a cargo do banco (trigger guard_plan_version).
+        must(await this.db.from("plan_versions").update(values).eq("id", v.id).select("id").single());
+      } else {
+        must(
+          await this.db.from("plan_versions").insert({
+            id: v.id,
+            plan_id: plan.id,
+            number: v.number,
+            author_id: v.authorId,
+            ...values,
+          }).select("id").single()
+        );
+      }
     }
     return receipt();
   }
