@@ -1,10 +1,5 @@
-// ==============================================================================
-// STUDIO LEANDRO RANGEL - Next.js Proxy (antigo middleware)
-// ==============================================================================
-// Middleware de segurança executado em todas as requisições.
-// - Validação de Origin/Referer para proteção CSRF
-// - Redirecionamento de autenticação
-// - Headers de segurança adicionais
+// DEPRECADO: a proteção de borda roda em src/middleware.ts (Next.js carrega middleware.ts).
+// Este arquivo é mantido como referência e reutilizável para testes; não é executado pelo Next.
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
