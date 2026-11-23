@@ -52,6 +52,9 @@ export default config;
 const nextConfig = (phase) => ({
   reactStrictMode: true,
 
+  // Não gerar AGENTS.md durante o `next dev`.
+  agentRules: false,
+
   // Fotografias editoriais (1672 × 941) saem em 90 para manter definição de pele e tecido;
   // o restante usa o padrão 75.
   images: {

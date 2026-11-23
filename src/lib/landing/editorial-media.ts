@@ -1,6 +1,5 @@
 /**
- * Mapa único das seis cenas editoriais do Método LR, espelho de
- * banco-lr-cor/manifesto.json (Banco-Editorial-Metodo-LR-Cor).
+ * Mapa único das seis cenas editoriais do Método LR.
  *
  * Cada cena tem cinco arquivos com o mesmo recorte (1672 × 941 px):
  * - `pb`: a base em preto e branco — é a imagem de conteúdo (alt);
@@ -9,13 +8,11 @@
  * - `vidro` / `vidroPb`: a cena refratada por vidro canelado, numa faixa da foto.
  *
  * As versões P&B saem de scripts/build-editorial-pb.mjs, a partir das fotos em cor.
- * O hero (homem em posição de largada) foi gerado no mesmo estilo da cena original
- * do banco e usa arquivos com nome próprio (hero-homem*), para nenhum cache servir a
- * atleta anterior; a trama e o vidro dele também saem do script.
+ * O hero (homem em posição de largada) usa arquivos com nome próprio (hero-homem*),
+ * para nenhum cache servir a foto anterior; a trama e o vidro dele também saem do script.
  *
  * Todas as camadas compartilham caixa, object-fit, object-position e o mesmo
  * contêiner de zoom, então nada se desloca quando a lente revela a cor.
- * Os PNGs originais do banco ficam fora da distribuição web.
  */
 export type EditorialSceneId =
   | "hero"

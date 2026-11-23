@@ -54,7 +54,7 @@ export const EVIDENCE: EvidenceSource[] = [
       "Recomendação condicional para exercício; não estabelece modalidade superior para todos. Escolha depende de contexto e preferência. Exclui patologia grave específica.",
     url: "https://www.who.int/publications/i/item/9789240081789",
     verifiedOn: "2026-11-06",
-    verificationNote: "Página oficial acessível. Detalhes em https://www.ncbi.nlm.nih.gov/books/NBK599213/ (não relido integralmente nesta sessão).",
+    verificationNote: "Página oficial acessível. Detalhes em https://www.ncbi.nlm.nih.gov/books/NBK599213/ (leitura integral pendente).",
   },
   {
     id: "walkback-2024",
@@ -116,7 +116,7 @@ export const EVIDENCE: EvidenceSource[] = [
     intervention: "Avaliação de sinais de alerta e encaminhamento",
     comparator: "—",
     outcome: "Identificação de condições que exigem avaliação médica",
-    limitations: "NÃO VERIFICADO nesta sessão: o site bloqueou acesso automatizado. Revisar manualmente antes de usar como fonte.",
+    limitations: "NÃO VERIFICADO: a página não pôde ser conferida. Revisar manualmente antes de usar como fonte.",
     url: "https://cks.nice.org.uk/topics/back-pain-low-without-radiculopathy/",
     verifiedOn: null,
     verificationNote: "Acesso retornou 403 em 06/11/2026. Mantido como ponto de partida a conferir.",
@@ -137,7 +137,7 @@ export const EVIDENCE: EvidenceSource[] = [
     limitations: "Descreve ações anatômicas gerais. Não informa carga, ativação ou hipertrofia em exercícios específicos.",
     url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/11-5-muscles-of-the-pectoral-girdle-and-upper-limbs",
     verifiedOn: null,
-    verificationNote: "URL indicada no briefing do catálogo. Capítulo não conferido nesta sessão.",
+    verificationNote: "Referência indicada para o catálogo. Capítulo ainda não conferido.",
   },
   {
     id: "openstax-ap2e-11-6",
