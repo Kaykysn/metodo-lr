@@ -137,6 +137,8 @@ export default function AdminPage() {
   const handleRevoke = (userId: string) => {
     const user = users.find((u) => u.id === userId);
     if (!user) return;
+    // Revogar corta o acesso na hora e invalida um convite ainda não usado: pede confirmação
+    if (!window.confirm(`Revogar o acesso de ${user.fullName} (${user.email})? A pessoa deixa de entrar e um convite ainda não usado para de funcionar.`)) return;
     if (real) return void remote(userId, "revoke", `Ação registrada para ${user.fullName}.`);
     const { updatedProfile, audit } = adminRevokeUser(user, "Determinação administrativa da moderação", "admin@studioleandrorangel.com.br");
     setUsers(users.map((u) => (u.id === userId ? updatedProfile : u)));
