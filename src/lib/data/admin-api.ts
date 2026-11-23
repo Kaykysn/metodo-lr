@@ -82,14 +82,38 @@ export interface AccessRequest {
   activated_at: string | null;
 }
 
-export async function loadRequests(status: RequestStatus | "all" = "all"): Promise<AccessRequest[]> {
-  const r = await callFunction<{ items: AccessRequest[] }>("admin-access", `/requests?status=${status}`);
-  return r.items;
+/** Situação do envio de e-mail no servidor: ready (entrega a qualquer e-mail), test_sender (remetente
+ *  de teste do Resend, só entrega ao dono da conta) ou not_configured. */
+export type MailStatus = "ready" | "test_sender" | "not_configured";
+export type MailOutcome = "sent" | "not_configured" | "test_sender" | "failed";
+
+export interface RequestQueue {
+  items: AccessRequest[];
+  /** Validade dos links, em horas (vem do servidor; versões antigas não mandam). */
+  linkHours: number;
+  mail: MailStatus | null;
 }
 
-/** Aprova e gera o convite (ou gera um novo). O link volta só para o admin, para enviar por outro canal. */
+export async function loadRequests(status: RequestStatus | "all" = "all"): Promise<RequestQueue> {
+  const r = await callFunction<{ items: AccessRequest[]; link_hours?: number; mail?: MailStatus }>("admin-access", `/requests?status=${status}`);
+  return { items: r.items, linkHours: r.link_hours ?? 1, mail: r.mail ?? null };
+}
+
+export interface InviteResult {
+  id: string;
+  status: RequestStatus;
+  /** invite: primeiro acesso · password: conta já ativada recebe link para criar nova senha */
+  kind?: "invite" | "password";
+  emailed: boolean;
+  email?: MailOutcome;
+  link: string;
+  validity: string;
+  validity_hours?: number;
+}
+
+/** Aprova e envia o convite ao e-mail do pedido (ou reenvia). O link também volta para o admin. */
 export async function inviteRequest(id: string) {
-  return callFunction<{ id: string; status: RequestStatus; emailed: boolean; link: string; validity: string }>("admin-access", `/requests/${id}/invite`, { method: "POST" });
+  return callFunction<InviteResult>("admin-access", `/requests/${id}/invite`, { method: "POST" });
 }
 
 export async function rejectRequest(id: string) {

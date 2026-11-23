@@ -5,6 +5,7 @@
 // "Continuar": programas que abrem links de e-mail para checar segurança não gastam o convite.
 // Depois: Criar senha + Confirmar senha. A função account-password confere o vínculo do convite,
 // a aprovação e a regra de senha no servidor, grava a senha e ativa a conta.
+// Conta já ativada que chega por um link de nova senha (enviado pelo admin) cria a senha nova aqui.
 import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import AppearanceBar from "@/components/appearance/AppearanceBar";
@@ -14,6 +15,13 @@ import { savePassword } from "@/lib/auth/account-password";
 import { AlertCircle, CheckCircle2, KeyRound } from "lucide-react";
 
 type Stage = "intro" | "checking" | "form" | "saving" | "done" | "invalid" | "unavailable";
+type Invalid = "expired" | "used" | "not_ready" | "bad_link";
+const INVALID_TEXT: Record<Invalid, string> = {
+  expired: "Este link venceu. Peça um novo à equipe pelo mesmo e-mail.",
+  used: "Este link venceu, já foi usado ou foi trocado por um mais novo (cada reenvio cancela o anterior). Abra o e-mail mais recente ou peça um novo link à equipe.",
+  not_ready: "Seu convite precisa ser reenviado pela equipe. Peça um novo link pelo mesmo e-mail.",
+  bad_link: "O link está incompleto. Abra de novo pelo botão do e-mail ou peça um novo à equipe.",
+};
 const LINK_TYPES = ["invite", "recovery", "magiclink", "email"] as const;
 type LinkType = (typeof LINK_TYPES)[number];
 
@@ -33,6 +41,8 @@ function PrimeiroAcesso() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [invalid, setInvalid] = useState<Invalid>("used");
+  const [mode, setMode] = useState<"activate" | "reset">("activate");
 
   // Lê o código do link e tira da barra de endereço (não fica no histórico nem em capturas)
   useEffect(() => {
@@ -41,7 +51,10 @@ function PrimeiroAcesso() {
     const token = q.get("token_hash") ?? "";
     const type = q.get("type") as LinkType | null;
     if (token && token.length <= 512 && type && LINK_TYPES.includes(type)) setLink({ token, type });
-    else setStage("invalid");
+    else {
+      setInvalid("bad_link");
+      setStage("invalid");
+    }
     window.history.replaceState(null, "", window.location.pathname);
   }, []);
 
@@ -52,9 +65,16 @@ function PrimeiroAcesso() {
     setError(null);
     try {
       const { data, error: err } = await db.auth.verifyOtp({ token_hash: link.token, type: link.type });
-      if (err || !data.session) return setStage("invalid");
+      if (err || !data.session) {
+        // O Auth usa o mesmo código para link vencido, já usado ou substituído por um mais novo
+        setInvalid("used");
+        return setStage("invalid");
+      }
       const { data: p } = await db.from("profiles").select("full_name, email, activated_at").eq("id", data.session.user.id).maybeSingle();
-      if (p?.activated_at) {
+      if (p?.activated_at && link.type === "recovery") {
+        // Conta já ativada com link de nova senha: cria a senha nova aqui
+        setMode("reset");
+      } else if (p?.activated_at) {
         // Já ativada: o link serviu só para entrar; segue para a área profissional
         // (navegação completa de propósito: o proxy relê os cookies da sessão recém-criada)
         // eslint-disable-next-line @next/next/no-location-assign-relative-destination
@@ -75,9 +95,12 @@ function PrimeiroAcesso() {
     setError(null);
     if (password !== confirm) return setError("As duas senhas não são iguais.");
     setStage("saving");
-    const r = await savePassword("activate", password, fullName);
+    const r = await savePassword(mode, password, fullName);
     if (!r.ok) {
-      if (r.expired) return setStage("invalid");
+      if (r.expired) {
+        setInvalid(/convite/i.test(r.message) ? "not_ready" : "expired");
+        return setStage("invalid");
+      }
       setError(r.message);
       return setStage("form");
     }
@@ -97,7 +120,7 @@ function PrimeiroAcesso() {
           <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-black text-ink-950 text-lg shadow-xs">LR</div>
           <span className="text-xl font-bold tracking-tight text-theme-text">Leandro Rangel</span>
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-theme-text">Primeiro acesso</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-theme-text">{mode === "reset" ? "Criar nova senha" : "Primeiro acesso"}</h1>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
@@ -105,7 +128,9 @@ function PrimeiroAcesso() {
           {stage === "intro" && (
             <div className="space-y-4 text-center">
               <KeyRound className="mx-auto h-8 w-8 text-theme-teal" aria-hidden />
-              <p className="text-sm text-theme-muted">Seu acesso foi aprovado. Continue para criar a sua senha.</p>
+              <p className="text-sm text-theme-muted">
+                {link?.type === "recovery" ? "Continue para criar a sua senha." : "Seu acesso foi aprovado. Continue para criar a sua senha."}
+              </p>
               {error && <p role="alert" className="text-sm text-status-danger-fg">{error}</p>}
               <button type="button" onClick={openLink} className="w-full py-3 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-sm font-bold">
                 Continuar
@@ -120,9 +145,7 @@ function PrimeiroAcesso() {
               <div role="alert" className="p-4 rounded-xl bg-status-danger-bg border border-status-danger-border text-sm text-status-danger-fg flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
                 <span>
-                  {stage === "invalid"
-                    ? "Este convite expirou ou já foi usado. Peça um novo convite à equipe pelo mesmo e-mail."
-                    : "O primeiro acesso ainda não está disponível neste ambiente."}
+                  {stage === "invalid" ? INVALID_TEXT[invalid] : "O primeiro acesso ainda não está disponível neste ambiente."}
                 </span>
               </div>
               <Link href="/login" className="block w-full text-center py-3 rounded-xl border border-theme-boundary/60 text-sm font-semibold hover:bg-theme-secondary">
@@ -148,7 +171,7 @@ function PrimeiroAcesso() {
                 disabled={stage === "saving" || !passwordReady(password, confirm, fullName)}
                 className="w-full py-3 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-sm font-bold disabled:opacity-60"
               >
-                {stage === "saving" ? "Salvando…" : "Criar senha e entrar"}
+                {stage === "saving" ? "Salvando…" : mode === "reset" ? "Salvar nova senha e entrar" : "Criar senha e entrar"}
               </button>
             </form>
           )}
