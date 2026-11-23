@@ -47,6 +47,17 @@ export interface HeroXRayProps {
   priority?: boolean;
   /** Classe aplicada somente às camadas de pele (ex.: grayscale no mapa). */
   skinClassName?: string;
+  /**
+   * Prende o anel dentro da viewport (padrão). Num visor recortado, como o mapa,
+   * desligue: a lente precisa ficar sobre o ponto anatômico mesmo com o modelo
+   * parcialmente fora da tela.
+   */
+  keepInViewport?: boolean;
+  /**
+   * Trajeto (pontos normalizados 0–1) que a lente percorre conforme a rolagem em
+   * telas de toque. A página continua rolando normalmente; o mouse tem prioridade.
+   */
+  scrollPath?: ReadonlyArray<{ x: number; y: number }>;
 }
 
 /**
@@ -81,6 +92,8 @@ export default function HeroXRay({
   autoSweep = true,
   priority = true,
   skinClassName = "",
+  keepInViewport = true,
+  scrollPath,
 }: HeroXRayProps) {
   const { prefersReducedMotion, effectsActive } = useVisualEffects();
 
@@ -92,6 +105,26 @@ export default function HeroXRay({
   const lensRadiusRef = useRef(0);
 
   const [hasInteracted, setHasInteracted] = useState(false);
+
+  // O trajeto muda sem reiniciar o laço de animação; o toque é lido uma vez por montagem.
+  const scrollPathRef = useRef(scrollPath);
+  const touchRef = useRef(false);
+  const focusRef = useRef(focusPoint);
+  useEffect(() => {
+    scrollPathRef.current = scrollPath;
+  }, [scrollPath]);
+  useEffect(() => {
+    focusRef.current = focusPoint;
+  }, [focusPoint]);
+  useEffect(() => {
+    const media = window.matchMedia("(hover: none)");
+    const sync = () => {
+      touchRef.current = media.matches;
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   /** Coordenadas em px relativas ao wrapper. */
   const coordsRef = useRef({
@@ -137,6 +170,10 @@ export default function HeroXRay({
     const el = containerRef.current;
     if (!el) return { x, y };
     const box = el.getBoundingClientRect();
+    // Visor recortado: só mantém o centro dentro do próprio modelo.
+    if (!keepInViewport) {
+      return { x: clamp(x, 0, box.width), y: clamp(y, 0, box.height) };
+    }
     const radius = lensRadiusRef.current || el.clientWidth * 0.2;
 
     const vw = Math.min(
@@ -160,7 +197,7 @@ export default function HeroXRay({
       x: clamp(x, Math.max(radius * 0.15, minX), Math.max(radius, maxX)),
       y: clamp(y, Math.max(radius * 0.15, minY), Math.max(radius, maxY)),
     };
-  }, []);
+  }, [keepInViewport]);
 
   // Loop único: varredura automática + perseguição do cursor com lerp.
   useEffect(() => {
@@ -173,14 +210,20 @@ export default function HeroXRay({
     syncLensRadius();
 
     const c = coordsRef.current;
-    const staticPoint = clampToViewport(rect.width * SWEEP_STATIC.x, rect.height * SWEEP_STATIC.y);
+    // Com um ponto escolhido por fora (regiões do mapa), o laço parte dele: reiniciar
+    // o efeito (por exemplo, quando a preferência de efeitos é lida) não pode
+    // devolver a lente ao ponto padrão do antebraço.
+    const focus = focusRef.current;
+    const origin = focus ?? SWEEP_STATIC;
+    const staticPoint = clampToViewport(rect.width * origin.x, rect.height * origin.y);
     c.x = staticPoint.x;
     c.y = staticPoint.y;
     c.targetX = c.x;
     c.targetY = c.y;
+    if (focus) c.mode = "fixed";
     writeVars(c.x, c.y);
 
-    // Movimento reduzido: lente estática no antebraço, sem varredura nem pulso.
+    // Movimento reduzido: lente estática (no ponto escolhido ou no antebraço), sem varredura nem pulso.
     if (prefersReducedMotion) {
       writeVars(c.targetX, c.targetY);
       return;
@@ -204,6 +247,21 @@ export default function HeroXRay({
         const phase = 0.5 - 0.5 * Math.cos((now / SWEEP_PERIOD_MS) * Math.PI * 2);
         state.targetX = (SWEEP_START.x + (SWEEP_END.x - SWEEP_START.x) * phase) * box.width;
         state.targetY = (SWEEP_START.y + (SWEEP_END.y - SWEEP_START.y) * phase) * box.height;
+      }
+
+      // Toque: a posição do modelo na tela escolhe o ponto do trajeto. A lente percorre
+      // o caminho enquanto o centro do modelo vai de 85% a 15% da altura da viewport.
+      const path = scrollPathRef.current;
+      if (path && path.length > 1 && touchRef.current && state.mode !== "cursor") {
+        const vh = window.innerHeight || 1;
+        const center = box.top + box.height / 2;
+        const p = clamp((vh * 0.85 - center) / (vh * 0.7), 0, 1);
+        const seg = p * (path.length - 1);
+        const i = Math.min(path.length - 2, Math.floor(seg));
+        const t = seg - i;
+        const e = t * t * (3 - 2 * t); // pausa breve sobre cada ponto anatômico
+        state.targetX = (path[i].x + (path[i + 1].x - path[i].x) * e) * box.width;
+        state.targetY = (path[i].y + (path[i + 1].y - path[i].y) * e) * box.height;
       }
 
       if (state.mode !== "fixed") {

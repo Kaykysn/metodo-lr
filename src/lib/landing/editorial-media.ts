@@ -1,14 +1,21 @@
 /**
- * Mapa único das seis cenas editoriais do Método LR.
+ * Mapa único das seis cenas editoriais do Método LR, espelho de
+ * banco-lr-cor/manifesto.json (Banco-Editorial-Metodo-LR-Cor).
  *
- * Origem: lr-preto-dourado/fotos. Cada cena tem um par com dimensões e recorte
- * idênticos: `pb` (base em preto e branco) e `foto` (original em cor). As duas
- * camadas usam o mesmo `foco`/object-position e a mesma caixa, para que pele,
- * olhos, mãos e equipamentos não se deslocem durante a revelação.
+ * Cada cena tem cinco arquivos com o mesmo recorte (1672 × 941 px):
+ * - `pb`: a base em preto e branco — é a imagem de conteúdo (alt);
+ * - `foto`: a fotografia em cor, revelada pela lente (mouse) ou pela rolagem (toque);
+ * - `pontos`: a mesma cena com trama de pontos, sobreposta à base;
+ * - `vidro` / `vidroPb`: a cena refratada por vidro canelado, numa faixa da foto.
  *
- * Os arquivos são copiados para public/images/lr-pb por
- * scripts/prepare-lr-pb-fotos.py, que também gera as máscaras de pontilhado a
- * partir da luminosidade da foto P&B. Nenhum original é editado.
+ * As versões P&B saem de scripts/build-editorial-pb.mjs, a partir das fotos em cor.
+ * O hero (homem em posição de largada) foi gerado no mesmo estilo da cena original
+ * do banco e usa arquivos com nome próprio (hero-homem*), para nenhum cache servir a
+ * atleta anterior; a trama e o vidro dele também saem do script.
+ *
+ * Todas as camadas compartilham caixa, object-fit, object-position e o mesmo
+ * contêiner de zoom, então nada se desloca quando a lente revela a cor.
+ * Os PNGs originais do banco ficam fora da distribuição web.
  */
 export type EditorialSceneId =
   | "hero"
@@ -21,89 +28,75 @@ export type EditorialSceneId =
 export type EditorialScene = {
   id: EditorialSceneId;
   alt: string;
-  /** Ponto focal compartilhado pelas duas camadas, em object-position CSS. */
+  /** Ponto focal compartilhado pelas camadas, em object-position CSS. */
   foco: string;
   largura: number;
   altura: number;
-  /** Foto original em cor. */
+  /** Fotografia limpa em cor (revelada pela lente). */
   foto: string;
-  /** Base em preto e branco, mesma dimensão e recorte da foto em cor. */
+  /** Base em preto e branco, mesmo recorte da foto. */
   pb: string;
-  /** Pontilhado sutil derivado da luminosidade da base P&B. */
-  dither: string;
+  /** Mesma cena com trama de pontos. */
+  pontos: string;
+  /** Mesma cena refratada pelo vidro canelado, em cor. */
+  vidro: string;
+  /** Vidro canelado em preto e branco, sobre a base P&B. */
+  vidroPb: string;
 };
 
-const BASE = "/images/lr-pb/";
+const BASE = "/images/metodo-lr/";
 
-type SceneInput = {
+type SceneInput = Pick<EditorialScene, "id" | "alt" | "foco"> & {
+  /** Nome-base dos arquivos, quando difere do id. */
   arquivo?: string;
-  id: EditorialSceneId;
-  alt: string;
-  foco: string;
-  largura: number;
-  altura: number;
 };
 
-function scene({ id, arquivo = id, alt, foco, largura, altura }: SceneInput): EditorialScene {
+function scene({ id, alt, foco, arquivo = id }: SceneInput): EditorialScene {
   return {
     id,
     alt,
     foco,
-    largura,
-    altura,
+    largura: 1672,
+    altura: 941,
     foto: `${BASE}${arquivo}.webp`,
     pb: `${BASE}${arquivo}-pb.webp`,
-    dither: `${BASE}${arquivo}-dither.webp`,
+    pontos: `${BASE}${arquivo}-pontos.webp`,
+    vidro: `${BASE}${arquivo}-vidro.webp`,
+    vidroPb: `${BASE}${arquivo}-vidro-pb.webp`,
   };
 }
 
 export const EDITORIAL_SCENES: Record<EditorialSceneId, EditorialScene> = {
   hero: scene({
     id: "hero",
-    alt: "Atleta se prepara para a largada",
-    foco: "77% 50%",
-    largura: 1672,
-    altura: 941,
+    arquivo: "hero-homem",
+    alt: "Atleta em posição de largada, apoiado nas mãos e olhando à frente",
+    foco: "62% 30%",
   }),
   avaliacao: scene({
     id: "avaliacao",
-    alt: "Profissional observa o agachamento de uma aluna",
-    foco: "50% 50%",
-    largura: 1536,
-    altura: 1024,
+    alt: "Professor observa uma aluna durante o agachamento",
+    foco: "50% 48%",
   }),
   planejamento: scene({
     id: "planejamento",
-    alt: "Professor planeja a sessão no estúdio",
-    foco: "50% 50%",
-    largura: 1536,
-    altura: 1024,
+    alt: "Profissional prepara o treino em um caderno no estúdio",
+    foco: "50% 45%",
   }),
   acompanhamento: scene({
     id: "acompanhamento",
-    alt: "Aluna realiza uma remada com elástico",
-    foco: "50% 50%",
-    largura: 1536,
-    altura: 1024,
+    alt: "Aluna e professora conversam sobre o treino com um tablet",
+    foco: "50% 45%",
   }),
   reavaliacao: scene({
     id: "reavaliacao",
-    arquivo: "reavaliacao-mobilidade",
-    alt: "Profissional observa o aluno testar a mobilidade do tornozelo com o joelho junto à parede",
-    foco: "50% 50%",
-    largura: 1536,
-    altura: 1024,
+    alt: "Profissional registra a observação enquanto o aluno eleva os braços",
+    foco: "50% 45%",
   }),
-  prescricao: scene({
-    id: "prescricao",
-    alt: "Professora demonstra uma rosca com halter",
-    foco: "50% 50%",
-    largura: 1536,
-    altura: 1024,
-  }),
+  prescricao: scene({ id: "prescricao", alt: "Detalhe de anilhas e barra no estúdio", foco: "52% 52%" }),
 };
 
-/** Proporção das cenas 16:9 (hero) e 3:2 (demais), usada pelos contêineres. */
+/** Proporção das cenas (todas 1672 × 941), usada para reservar espaço. */
 export function editorialAspect(scene: EditorialScene): string {
   return `${scene.largura} / ${scene.altura}`;
 }

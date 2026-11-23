@@ -84,7 +84,7 @@ export function Percurso() {
         <div className="lr-intro-row">
           <div>
             <p className="lr-eyebrow"><span className="lr-rule" aria-hidden="true" /> Como funciona</p>
-            <h2 id="percurso-title" className="lr-display lr-display-lg">Da avaliação<br /><em>ao treino.</em></h2>
+            <h2 id="percurso-title" className="lr-display lr-display-lg">Três etapas,<br /><em>um só percurso.</em></h2>
           </div>
           <p className="lr-intro-text">Avaliação, planejamento e acompanhamento no mesmo lugar.</p>
         </div>
@@ -214,15 +214,15 @@ export function TreinoSection() {
             Biblioteca com {EXERCISES.length} exercícios filtráveis por padrão de movimento, músculo, equipamento e modalidade. Sessões A, B e C, séries, repetições ou duração, carga, descanso, RPE ou RIR, regressão e progressão.
           </p>
           <div className="lr-fluted mt-8 min-w-0">
-            <figure className="relative aspect-[3/2] overflow-hidden bg-[#343434]">
+            <figure className="lr-photo-card">
               <DitherReveal
                 scene={EDITORIAL_SCENES.prescricao}
                 sizes="(min-width: 1024px) 560px, 100vw"
                 fill
               />
-              <figcaption className="pointer-events-none absolute bottom-3 left-3 bg-[rgba(17,17,17,.86)] px-3 py-1.5 text-xs font-semibold text-white">
+              <figcaption className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-[4px] bg-[rgba(16,15,14,.86)] px-3 py-1.5 text-xs font-semibold text-white">
                 <span className="mr-2 inline-block h-2 w-2 border-2 border-[var(--lr-gold)]" aria-hidden="true" />
-                Cena de treino
+                Barra e anilhas
               </figcaption>
             </figure>
           </div>

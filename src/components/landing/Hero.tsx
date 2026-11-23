@@ -16,9 +16,10 @@ const BENEFITS = [
 ];
 
 /**
- * Hero de ponta a ponta: a atleta à direita, a cópia alinhada embaixo à
- * esquerda no desktop e uma faixa escura que garante contraste sob o texto.
- * Em 360–390 px a foto fica acima do texto, sem recortar rosto/mãos.
+ * Abertura panorâmica (composição do Averio): a atleta à direita, com rosto e
+ * linha do ombro livres; o título à esquerda, perto da base da imagem. A faixa de
+ * vidro canelado da própria foto marca a passagem entre o texto e a fotografia.
+ * Abaixo de 768 px a foto fica acima do texto, sem recortar rosto e ombro.
  */
 export default function Hero() {
   return (
@@ -27,11 +28,10 @@ export default function Hero() {
         <DitherReveal
           scene={EDITORIAL_SCENES.hero}
           variant="hero"
-          sizes="100vw"
+          sizes="(max-width: 1100px) 100vw, 86vw"
           priority
           fill
         />
-        <div aria-hidden="true" data-decorative className="lr-hero-flute" />
       </div>
 
       <div className="lr-wrap lr-hero-inner">

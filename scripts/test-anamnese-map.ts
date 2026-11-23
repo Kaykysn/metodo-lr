@@ -67,7 +67,8 @@ assert.ok(heroSrc.includes("ao treino."), "Hero deve conter o título 'ao treino
 assert.ok(heroSrc.includes("Avalie o movimento, publique o treino e acompanhe o que cada aluno fez."), "Hero deve conter a nova descrição");
 assert.ok(!heroSrc.includes("Mova o cursor para revelar"), "Hero não deve conter a instrução da lente (movida para #mapa)");
 const mapDemoSrc = fs.readFileSync(path.join(root, "src", "components", "landing", "BodyMapDemo.tsx"), "utf-8");
-assert.ok(mapDemoSrc.includes("Mova o cursor ou toque na imagem para revelar a anatomia."), "A instrução da lente deve viver no mapa corporal");
+assert.ok(mapDemoSrc.includes("Mova o cursor sobre o corpo para revelar a musculatura."), "A instrução da lente (mouse) deve viver no mapa corporal");
+assert.ok(mapDemoSrc.includes("Role a página: a lente percorre ombro, tórax e braço."), "A instrução da lente (toque) deve viver no mapa corporal");
 assert.ok(heroSrc.includes("href=\"/solicitar-acesso\""), "Hero deve preservar o botão Solicitar acesso");
 assert.ok(heroSrc.includes("href=\"#demonstracao\""), "Hero deve preservar o botão Ver demonstração");
 assert.ok(heroSrc.includes("Avaliação física individualizada"), "Hero deve conter o elemento complementar 'Avaliação física individualizada'");

@@ -302,11 +302,29 @@ const photoPath = path.join(root, "src", "components", "landing", "ReavaliacaoPh
 const photoSrc = fs.readFileSync(photoPath, "utf-8");
 assert.ok(photoSrc.includes("EDITORIAL_SCENES.reavaliacao"), "A cena reavaliacao deve vir do mapa editorial");
 assert.ok(photoSrc.includes('from "@/lib/landing/editorial-media"'), "A reavaliação deve usar o mapa editorial único");
-assert.ok(photoSrc.includes("aspect-[3/2]"), "A foto deve preservar a proporção original 3:2");
-for (const suffix of ["", "-pb", "-dither"]) {
-  assert.ok(fs.existsSync(path.join(root, "public/images/lr-pb", `reavaliacao-mobilidade${suffix}.webp`)));
-}
+assert.ok(photoSrc.includes("lr-photo-card"), "A foto deve usar o cartão editorial (proporção do manifesto)");
 console.log("✓ Reavaliação exibida como fotografia local, sem player.");
+
+// Banco editorial em cor (Banco-Editorial-Metodo-LR-Cor): seis cenas × foto, pontos e vidro.
+const mediaSrc = fs.readFileSync(path.join(root, "src", "lib", "landing", "editorial-media.ts"), "utf-8");
+assert.ok(mediaSrc.includes('"/images/metodo-lr/"'), "O mapa editorial deve apontar para o banco em cor");
+assert.ok(!mediaSrc.includes("lr-pb"), "O mapa editorial não deve citar o banco preto e branco antigo");
+for (const base of ["hero-homem", "avaliacao", "planejamento", "acompanhamento", "reavaliacao", "prescricao"]) {
+  for (const suffix of ["", "-pb", "-pontos", "-vidro", "-vidro-pb"]) {
+    const file = path.join(root, "public", "images", "metodo-lr", `${base}${suffix}.webp`);
+    assert.ok(fs.existsSync(file), `Camada editorial ausente: ${base}${suffix}.webp`);
+  }
+}
+assert.ok(mediaSrc.includes('arquivo: "hero-homem"'), "O hero deve usar os arquivos novos (hero-homem*), sem colidir com o cache da cena anterior");
+assert.ok(!fs.existsSync(path.join(root, "public/images/metodo-lr/hero.webp")), "A foto anterior do hero não deve continuar publicada");
+const avaliacaoFile = fs.readFileSync(path.join(root, "public/images/metodo-lr/avaliacao.webp"));
+const reavaliacaoFile = fs.readFileSync(path.join(root, "public/images/metodo-lr/reavaliacao.webp"));
+assert.ok(!avaliacaoFile.equals(reavaliacaoFile), "Avaliação e reavaliação devem ser cenas diferentes");
+const revealSrc = fs.readFileSync(path.join(root, "src", "components", "effects", "DitherReveal.tsx"), "utf-8");
+assert.ok(revealSrc.includes("layered ? scene.pb : scene.foto"), "A base deve ser P&B (cor só na lente), e cor com movimento reduzido");
+assert.ok(revealSrc.includes("src={scene.vidroPb}"), "A faixa de vidro deve usar a versão P&B");
+assert.ok(!sectionsSrc.includes("Da avaliação<br />"), "O título do hero não deve se repetir na seção do percurso");
+console.log("✓ Banco editorial completo (cor + P&B), com reavaliação distinta da avaliação.");
 console.log("✓ Integração não destrutiva no Hero validada com sucesso.");
 
 console.log("\n=== TODOS OS CRITÉRIOS DO NOVO HERO FORAM APROVADOS! ===");
