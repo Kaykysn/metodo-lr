@@ -601,7 +601,7 @@
 
   ::selection {
     background: var(--lr-gold);
-    color: var(--lr-ink);
+    color: #181612;
   }
 
   a {
@@ -1848,124 +1848,146 @@ html.lite.theme-switching *::after {
   backdrop-filter: none;
 }
 
-/* Ondas de luz difusa. O plano externo acompanha a rolagem, enquanto
-   os reflexos internos se movem lentamente mesmo com a página parada. */
+/* Fundo granulado em campos de luz (referências do cliente):
+   - claro: monocromático, cinza claro com dois focos de luz branca no alto e uma
+     sombra cinza embaixo (versão clara da referência 1);
+   - escuro: quase preto com luz vermelho-alaranjada e laranja (referência 2).
+   Três campos ficam em "ondas" (.lr-onda) que o LayeredBackdrop desloca com a
+   rolagem suavizada, cada uma em fase própria; dentro delas os campos ainda
+   derivam sozinhos (14–22 s), então a luz muda com a página parada.
+   Limites de contraste: no claro o cinza mais escuro não passa de ~76% L (texto
+   secundário ≥ 4,5:1 sob a película das seções); no escuro o laranja fica em
+   ~56% L com alfa, para o marfim e o texto secundário continuarem legíveis. */
 .lr-backdrop {
-  --wave-base: #eee9e3;
-  --wave-smoke: rgb(100 98 118 / .32);
-  --wave-shadow: rgb(145 128 143 / .22);
-  --wave-gold: rgb(237 177 71 / .82);
-  --wave-violet: rgb(154 111 171 / .49);
+  --campo-base: oklch(85% 0 0);
+  --campo-luz: oklch(100% 0 0);
+  --campo-luz-2: oklch(100% 0 0 / 0.92);
+  --campo-sombra: oklch(76% 0 0 / 0.75);
+  --campo-borda: oklch(80% 0 0 / 0.6);
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: var(--wave-base);
+  background: var(--campo-base);
 }
 .dark .lr-backdrop {
-  --wave-base: #0e0d10;
-  --wave-smoke: rgb(181 187 197 / .38);
-  --wave-shadow: rgb(74 76 83 / .55);
-  --wave-gold: rgb(224 162 58 / .68);
-  --wave-violet: rgb(117 69 148 / .64);
+  --campo-base: oklch(13.5% 0.008 45);
+  --campo-luz: oklch(50% 0.16 34 / 0.78);
+  --campo-luz-2: oklch(57% 0.15 52 / 0.72);
+  --campo-sombra: oklch(52% 0.14 48 / 0.5);
+  --campo-borda: oklch(6% 0.004 45 / 0.85);
 }
+/* Sem filtro de desfoque: a borda suave vem do próprio degradê. As camadas passam
+   da tela para que deslocamento e rotação nunca mostrem a borda de uma elipse. */
 .lr-waves {
   position: absolute;
-  inset: -18%;
+  inset: -20%;
 }
-.lr-wave {
+.lr-onda {
   position: absolute;
-  inset: -12%;
+  inset: 0;
+  will-change: transform;
 }
-.lr-wave--smoke {
+.lr-campo {
+  position: absolute;
+  inset: -8%;
+  will-change: transform;
+}
+.lr-campo--a {
   background:
-    radial-gradient(ellipse 60% 33% at 43% 43%, transparent 55%, var(--wave-smoke) 88%, transparent 121%),
-    radial-gradient(ellipse 30% 53% at 85% 48%, var(--wave-shadow), transparent 93%);
-  transform: rotate(-13deg);
+    radial-gradient(ellipse 17% 26% at 30% 24% in oklch, var(--campo-luz) 8%, 32%, transparent),
+    radial-gradient(ellipse 15% 17% at 74% 20% in oklch, var(--campo-luz-2) 6%, 34%, transparent);
+  animation: lr-campo-a 17s ease-in-out infinite alternate;
 }
-.lr-ribbed-sheen {
+.lr-campo--b {
   background:
-    radial-gradient(ellipse 40% 13% at 48% 56%, var(--wave-gold) 0%, transparent 96%),
-    radial-gradient(ellipse 28% 23% at 77% 52%, var(--wave-violet) 0%, transparent 95%);
-  transform: rotate(24deg);
-  animation: lr-wave-drift 21s ease-in-out infinite alternate;
+    radial-gradient(ellipse 30% 22% at 62% 62% in oklch, var(--campo-sombra), 36%, transparent),
+    radial-gradient(ellipse 18% 16% at 26% 82% in oklch, var(--campo-luz-2), 30%, transparent);
+  animation: lr-campo-b 21s ease-in-out infinite alternate;
 }
-@keyframes lr-wave-drift {
-  from { transform: translate3d(-4%, 0, 0) rotate(19deg); }
-  to { transform: translate3d(4%, -3%, 0) rotate(30deg); }
+/* Vinheta: escurece as bordas no escuro e assenta o cinza nas bordas no claro. */
+.lr-campo--c {
+  background: radial-gradient(ellipse 62% 58% at 50% 50% in oklch, transparent 55%, var(--campo-borda));
+  animation: lr-campo-c 14s ease-in-out infinite alternate;
 }
+@keyframes lr-campo-a {
+  from { transform: translate3d(-6%, -3%, 0) scale(1); }
+  to { transform: translate3d(7%, 5%, 0) scale(1.08); }
+}
+@keyframes lr-campo-b {
+  from { transform: translate3d(5%, 4%, 0) rotate(0deg); }
+  to { transform: translate3d(-6%, -5%, 0) rotate(7deg) scale(1.06); }
+}
+@keyframes lr-campo-c {
+  from { transform: scale(1); }
+  to { transform: scale(1.06) translate3d(1.5%, -1%, 0); }
+}
+/* Grão bem visível, como nas referências, sem modo de mesclagem (mesclar a tela
+   inteira a cada quadro pesa em aparelhos sem GPU dedicada). */
 .lr-grain {
   position: absolute;
   inset: 0;
-  opacity: .16;
-  background: url("/images/metodo-lr/grao.png") repeat 0 0 / 144px 144px;
-  mix-blend-mode: soft-light;
+  opacity: 0.13;
+  background: url("/images/metodo-lr/grao.png") repeat 0 0 / 120px 120px;
 }
-.lr-backdrop.is-internal .lr-waves { opacity: .42; }
-.lr-backdrop.is-static .lr-ribbed-sheen,
-.lite .lr-ribbed-sheen { animation: none; }
+.dark .lr-grain { opacity: 0.1; }
+.lr-backdrop.is-internal .lr-waves { opacity: 0.45; }
+.lr-backdrop.is-static .lr-campo,
+.lite .lr-campo,
+.lr-backdrop.is-oculta .lr-campo { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .lr-ribbed-sheen { animation: none; }
-  .lr-waves { transform: none !important; }
+  .lr-campo { animation: none; }
+  .lr-onda { transform: none !important; }
 }
 
-/* O espaço entre o vidro e a foto deixa a luz da página atravessar a moldura. */
 .lr-landing {
   --lr-glass-ribs: repeating-linear-gradient(90deg,
     rgb(255 255 255 / .17) 0, rgb(255 255 255 / .03) 1px,
     transparent 3px, rgb(27 19 29 / .08) 5px, rgb(255 255 255 / .12) 6px);
 }
+/* Contêiner das fotos: o vidro agora mora na própria fotografia (camada refratada),
+   então a moldura externa é só estrutural. */
 .lr-fluted {
   position: relative;
-  isolation: isolate;
   min-width: 0;
 }
-.lr-fluted:not(.lr-fluted--scan) {
-  align-self: center;
-  padding: clamp(7px, .9vw, 14px);
-  border: 1px solid rgb(159 138 111 / .6);
-  border-radius: 15px;
-  background: var(--lr-glass-ribs), linear-gradient(126deg, rgb(255 255 255 / .16), transparent 50%, rgb(225 189 117 / .12));
-  backdrop-filter: blur(5px);
-  box-shadow: inset 1px 1px 0 rgb(255 255 255 / .4), 0 12px 30px -24px rgb(0 0 0 / .5);
-}
-.lr-landing :is(.lr-button, .lr-color-toggle, .lr-menu-toggle, .lr-view-button, .lr-regions button) {
+.lr-landing :is(.lr-button, .lr-menu-toggle, .lr-view-button, .lr-regions button) {
   background-image: linear-gradient(155deg, rgb(255 255 255 / .12), transparent 50%), var(--lr-glass-ribs);
   backdrop-filter: blur(5px);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / .28);
 }
-.lr-landing .lr-button--gold { background-color: rgb(231 192 118 / .84); }
-.lr-landing .lr-button--gold:hover { background-color: rgb(245 215 161 / .94); }
-.lr-landing .lr-button--dark, .lr-landing .lr-color-toggle { background-color: rgb(22 19 24 / .76); }
-.lr-landing .lr-button--ghost { background-color: rgb(28 24 30 / .60); }
-.lite .lr-landing :is(.lr-button, .lr-color-toggle, .lr-menu-toggle, .lr-view-button, .lr-regions button, .lr-fluted) {
+.lr-landing .lr-button--gold { background-color: rgb(231 192 118 / .92); }
+.lr-landing .lr-button--gold:hover { background-color: rgb(245 215 161 / .96); }
+.lr-landing .lr-button--dark { background-color: rgb(22 19 18 / .82); }
+.lr-landing .lr-button--ghost { background-color: rgb(24 22 20 / .62); }
+.lite .lr-landing :is(.lr-button, .lr-menu-toggle, .lr-view-button, .lr-regions button) {
   backdrop-filter: none;
 }
 
-/* Transição canelada do hero: entre o texto e a fotografia, sem tocar nas letras. */
-.lr-hero-flute {
-  position: absolute;
-  top: 6%;
-  bottom: 10%;
-  left: 48%;
-  width: clamp(56px, 9vw, 148px);
-  pointer-events: none;
-  border-left: 1px solid rgb(255 255 255 / 0.16);
-  border-right: 1px solid rgb(255 255 255 / 0.1);
-  background:
-    linear-gradient(90deg, rgb(255 255 255 / 0.1), transparent 45%, rgb(var(--accent-teal) / 0.05)),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.085) 0 1px, transparent 1px 8px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 80%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 80%, transparent);
-  opacity: 0.85;
+/* Cartão de fotografia: raio de 10 px, contorno fino e brilho dourado discreto ao interagir. */
+.lr-photo-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1672 / 941;
+  border: 1px solid rgb(var(--border-decorative) / 0.9);
+  border-radius: 10px;
+  background: #1b1916;
+  box-shadow: 0 7px 24px rgb(0 0 0 / 0.18);
+  transition: box-shadow 300ms, border-color 300ms;
 }
-@media (max-width: 767px) {
-  .lr-hero-flute { left: 62%; width: 52px; opacity: 0.6; }
+.lr-photo-card:hover,
+.lr-photo-card:focus-within {
+  border-color: rgb(213 174 98 / 0.72);
+  box-shadow: 0 0 17px rgb(213 174 98 / 0.24), 0 6px 18px rgb(0 0 0 / 0.2);
 }
 
-/* Fotografia editorial — par P&B/cor com lente radial. As duas camadas
-   compartilham caixa, object-fit, object-position e transform. */
+/* ---------------------------------------------------------------------------
+   Fotografia editorial: foto em cor + trama + janela limpa + faixa de vidro.
+   Todas as camadas vivem dentro de .lr-media-zoom (mesmo recorte e mesmo zoom).
+   --------------------------------------------------------------------------- */
 .lr-dither {
   position: relative;
   overflow: hidden;
@@ -1973,35 +1995,39 @@ html.lite.theme-switching *::after {
   --mx: -300px;
   --my: -300px;
   --lens-r: 125px;
-  cursor: auto;
+  /* Faixa do vidro canelado, em % da largura da foto. Cartões: o terço esquerdo. */
+  --vidro-ini: 0%;
+  --vidro-fim: 30%;
   touch-action: pan-y;
   background: #181612;
-}
-.lr-dither--hero { background: transparent; }
-.lr-dither--hero .lr-media-zoom {
-  mask-image: linear-gradient(90deg, rgb(0 0 0 / .12), rgb(0 0 0 / .32) 27%, #000 62%);
-}
-@media (max-width: 767px) {
-  .lr-dither--hero .lr-media-zoom { mask-image: linear-gradient(90deg, rgb(0 0 0 / .62), #000 38%); }
 }
 .lr-dither--fill {
   position: absolute;
   inset: 0;
 }
-.lr-dither--card {
-  border-radius: 10px;
-  border: 1px solid rgb(225 189 117 / 0.5);
-  box-shadow: 0 1px 0 rgb(225 189 117 / 0.16) inset, 0 10px 30px -24px rgb(0 0 0 / 0.85);
+.lr-dither--hero {
+  background: transparent;
+  --vidro-ini: 26%;
+  --vidro-fim: 38%;
 }
 .lr-media-zoom {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transform: scale(1);
-  transition: transform 650ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transform-origin: var(--scene-foco, 50% 50%);
+  animation: lr-respira 9s ease-in-out infinite alternate;
   will-change: transform;
 }
-.lr-dither.is-approx .lr-media-zoom { transform: scale(1.025); }
+@keyframes lr-respira {
+  from { transform: scale(1.005); }
+  to { transform: scale(1.045); }
+}
+.lr-dither[data-fora] .lr-media-zoom { animation-play-state: paused; }
+.lr-dither.is-estatica .lr-media-zoom,
+.lite .lr-media-zoom {
+  animation: none;
+  transform: scale(1.005);
+}
 .lr-dither img {
   position: absolute;
   inset: 0;
@@ -2013,87 +2039,95 @@ html.lite.theme-switching *::after {
   filter: none;
 }
 .lr-media-base { z-index: 0; }
-.lr-media-dither {
+
+/* Trama: a camada de pontos é monocromática; mesclada por luminosidade, ela
+   imprime a retícula sem apagar a cor da pele e do tecido. */
+.lr-media-pontos {
   z-index: 1;
-  opacity: 0.42;
-  mix-blend-mode: soft-light;
+  mix-blend-mode: luminosity;
+  opacity: 0.78;
+  animation: lr-camada-entra 420ms ease-out both;
+  -webkit-mask-image: linear-gradient(110deg, #000 0%, rgb(0 0 0 / .82) 30%, rgb(0 0 0 / .34) 66%, rgb(0 0 0 / .55));
+  mask-image: linear-gradient(110deg, #000 0%, rgb(0 0 0 / .82) 30%, rgb(0 0 0 / .34) 66%, rgb(0 0 0 / .55));
 }
+.lr-dither--hero .lr-media-pontos {
+  -webkit-mask-image: linear-gradient(110deg, transparent 14%, rgb(0 0 0 / .9) 34%, rgb(0 0 0 / .5) 58%, rgb(0 0 0 / .26) 78%, rgb(0 0 0 / .4));
+  mask-image: linear-gradient(110deg, transparent 14%, rgb(0 0 0 / .9) 34%, rgb(0 0 0 / .5) 58%, rgb(0 0 0 / .26) 78%, rgb(0 0 0 / .4));
+}
+
+/* Janela: foto em cor plena dentro de um círculo suave (~125 px). Fica acima do
+   vidro: dentro da lente a cena aparece inteira em cor, sem caneluras. */
 .lr-media-janela {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 190ms ease-out;
-  -webkit-mask-image: radial-gradient(circle var(--lens-r) at var(--mx) var(--my), #000 0 58%, transparent 100%);
-  mask-image: radial-gradient(circle var(--lens-r) at var(--mx) var(--my), #000 0 58%, transparent 100%);
+  transition: opacity 200ms ease-out;
+  -webkit-mask-image: radial-gradient(circle var(--lens-r) at var(--mx) var(--my), #000 38%, transparent 100%);
+  mask-image: radial-gradient(circle var(--lens-r) at var(--mx) var(--my), #000 38%, transparent 100%);
 }
-.lr-dither.is-ativa .lr-media-janela,
-.lr-dither.is-full .lr-media-janela { opacity: 1; }
-.lr-dither.is-full .lr-media-janela {
-  -webkit-mask-image: none;
-  mask-image: none;
-}
+.lr-dither[data-ativa] .lr-media-janela { opacity: 1; }
 .lr-media-clean { z-index: 0; }
 
-/* Faixa de vidro: fatias finas da MESMA foto, deslocadas poucos pixels.
-   O gradiente de máscara deixa áreas tranquilas ao redor de rostos e textos. */
-.lr-media-refraction {
+/* Vidro canelado: a versão refratada da própria cena (P&B), numa faixa com
+   bordas esfumadas; o restante da foto continua nítido. */
+.lr-media-vidro {
+  z-index: 2;
+  animation: lr-camada-entra 520ms ease-out both;
+  -webkit-mask-image: linear-gradient(90deg,
+    transparent calc(var(--vidro-ini) - 2%), #000 calc(var(--vidro-ini) + 1.5%),
+    #000 calc(var(--vidro-fim) - 3%), transparent var(--vidro-fim));
+  mask-image: linear-gradient(90deg,
+    transparent calc(var(--vidro-ini) - 2%), #000 calc(var(--vidro-ini) + 1.5%),
+    #000 calc(var(--vidro-fim) - 3%), transparent var(--vidro-fim));
+}
+/* Reflexo dourado e arestas das caneluras sobre a faixa de vidro (fora do zoom,
+   não acompanha a escala). As arestas repetem o passo da canelura da imagem. */
+.lr-media-brilho {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 4;
   pointer-events: none;
-  opacity: 0.75;
-  -webkit-mask-image: linear-gradient(90deg, transparent 4%, #000 12% 20%, transparent 29% 74%, #000 84% 92%, transparent 98%);
-  mask-image: linear-gradient(90deg, transparent 4%, #000 12% 20%, transparent 29% 74%, #000 84% 92%, transparent 98%);
+  background:
+    linear-gradient(90deg,
+      transparent var(--vidro-ini),
+      rgb(225 189 117 / .14) calc(var(--vidro-ini) + (var(--vidro-fim) - var(--vidro-ini)) * .45),
+      transparent var(--vidro-fim)),
+    repeating-linear-gradient(90deg,
+      rgb(255 255 255 / .16) 0, rgb(255 255 255 / .03) 2px, transparent 7px,
+      rgb(0 0 0 / .1) 12px, transparent 13px, transparent 15px);
+  -webkit-mask-image: linear-gradient(90deg,
+    transparent calc(var(--vidro-ini) - 2%), #000 calc(var(--vidro-ini) + 1.5%),
+    #000 calc(var(--vidro-fim) - 3%), transparent var(--vidro-fim));
+  mask-image: linear-gradient(90deg,
+    transparent calc(var(--vidro-ini) - 2%), #000 calc(var(--vidro-ini) + 1.5%),
+    #000 calc(var(--vidro-fim) - 3%), transparent var(--vidro-fim));
+  animation: lr-camada-entra 520ms ease-out both;
 }
-.lr-media-refraction span {
-  position: absolute;
-  inset: 0;
-  background-image: var(--scene-pb);
-  background-size: cover;
-  background-position: var(--scene-foco, 50% 50%);
-  opacity: 0.64;
-}
-.lr-media-janela .lr-media-refraction span {
-  background-image: var(--scene-foto);
-}
-.lr-media-refraction span:nth-child(1) { transform: translateX(-3px); clip-path: inset(0 84% 0 14%); }
-.lr-media-refraction span:nth-child(2) { transform: translateX(2px); clip-path: inset(0 80% 0 18%); }
-.lr-media-refraction span:nth-child(3) { transform: translateX(-2px); clip-path: inset(0 76% 0 22%); }
-.lr-media-refraction span:nth-child(4) { transform: translateX(3px); clip-path: inset(0 18% 0 80%); }
-.lr-media-refraction span:nth-child(5) { transform: translateX(-2px); clip-path: inset(0 13% 0 85%); }
-.lr-dither--hero .lr-media-refraction { opacity: 0.45; }
-
-/* Controle manual: toque e teclado também revelam a cor. */
-.lr-color-toggle {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  z-index: 5;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid rgb(225 189 117 / 0.85);
-  border-radius: 6px;
-  background: rgb(16 15 14 / 0.9);
-  color: #f7f2e8;
-  font: 600 13px/1 var(--font-sans), sans-serif;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-}
-.lr-color-toggle:focus-visible { outline: 3px solid #e1bd75; outline-offset: 2px; }
-.lr-color-toggle:hover { background: rgb(24 22 18 / 0.96); }
-.lr-dither--hero .lr-color-toggle { bottom: 16px; right: max(16px, var(--lr-gutter)); }
-@media (max-width: 767px) {
-  .lr-dither--hero .lr-color-toggle { left: var(--lr-gutter); right: auto; bottom: 10px; }
+@keyframes lr-camada-entra {
+  from { opacity: 0; }
 }
 
+@media (max-width: 767px), (max-width: 1100px) and (orientation: portrait) {
+  .lr-dither--hero {
+    --vidro-ini: 0%;
+    --vidro-fim: 18%;
+  }
+  .lr-dither--hero .lr-media-pontos {
+    -webkit-mask-image: linear-gradient(110deg, rgb(0 0 0 / .85), rgb(0 0 0 / .45) 55%, rgb(0 0 0 / .3));
+    mask-image: linear-gradient(110deg, rgb(0 0 0 / .85), rgb(0 0 0 / .45) 55%, rgb(0 0 0 / .3));
+  }
+}
+
+/* Movimento reduzido: foto limpa em cor, sem zoom, trama, vidro ou lente. */
 @media (prefers-reduced-motion: reduce) {
-  .lr-media-zoom { transition: none; transform: none !important; }
-  .lr-media-janela { transition: none; }
+  .lr-media-zoom { animation: none; transform: none; }
+  .lr-media-pontos,
+  .lr-media-janela,
+  .lr-media-vidro,
+  .lr-media-brilho { display: none; }
 }
-.lite .lr-media-zoom { transition: none; transform: none !important; }
-.lite .lr-media-refraction { opacity: 0.35; }
 
 /* Pulso dourado no ponto do clique — instância única no layout. */
 .lr-click-layer {
@@ -2108,9 +2142,9 @@ html.lite.theme-switching *::after {
   width: 16px;
   height: 16px;
   margin: -8px 0 0 -8px;
-  border: 1.5px solid rgb(var(--action-bg));
+  border: 1.5px solid #d5ae62;
   border-radius: 50%;
-  animation: lr-click-pulse 500ms ease-out 1 forwards;
+  animation: lr-click-pulse 400ms ease-out 1 forwards;
 }
 @keyframes lr-click-pulse {
   from { transform: scale(0.6); }

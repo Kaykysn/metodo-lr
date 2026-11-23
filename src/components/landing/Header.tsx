@@ -30,7 +30,8 @@ export default function Header() {
         btn.current?.focus();
       }
     };
-    const onResize = () => window.innerWidth >= 791 && setOpen(false);
+    // Mesmo ponto do CSS: a partir de 1200 px a navegação completa cabe numa linha.
+    const onResize = () => window.innerWidth >= 1200 && setOpen(false);
     document.addEventListener("keydown", onKey);
     window.addEventListener("resize", onResize);
     return () => {

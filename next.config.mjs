@@ -52,6 +52,12 @@ export default config;
 const nextConfig = (phase) => ({
   reactStrictMode: true,
 
+  // Fotografias editoriais (1672 × 941) saem em 90 para manter definição de pele e tecido;
+  // o restante usa o padrão 75.
+  images: {
+    qualities: [75, 90],
+  },
+
   // Headers de segurança (Nível C)
   async headers() {
     return [

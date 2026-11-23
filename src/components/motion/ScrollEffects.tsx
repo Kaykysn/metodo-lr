@@ -75,9 +75,9 @@ export default function ScrollEffects() {
           if (el.closest("[data-scroll-stagger]") && !staggerGroups.has(el)) return;
 
           const kind = (el.dataset.scrollReveal as RevealKind) || "up";
-          const distance = Number.parseFloat(el.dataset.scrollDistance || "26");
+          const distance = Number.parseFloat(el.dataset.scrollDistance || "22");
           const delay = Number.parseFloat(el.dataset.scrollDelay || "0") / 1000;
-          const from = revealFrom(kind, Number.isFinite(distance) ? distance : 26);
+          const from = revealFrom(kind, Number.isFinite(distance) ? distance : 22);
 
           if (!from) return;
 
@@ -93,7 +93,7 @@ export default function ScrollEffects() {
 
           gsap.from(el, {
             ...safeFrom,
-            duration: 0.78,
+            duration: 0.6,
             delay,
             ease: "power3.out",
             clearProps: "transform,opacity,clipPath",
@@ -101,7 +101,7 @@ export default function ScrollEffects() {
               ? {
                   scrollTrigger: {
                     trigger: el,
-                    start: "top 88%",
+                    start: "top 90%",
                     once: true,
                     invalidateOnRefresh: true,
                   },
@@ -115,14 +115,14 @@ export default function ScrollEffects() {
           if (!items.length) return;
 
           const stagger = Number.parseFloat(group.dataset.scrollStagger || "0.08");
-          const distance = Number.parseFloat(group.dataset.scrollDistance || "24");
+          const distance = Number.parseFloat(group.dataset.scrollDistance || "22");
           const bounds = group.getBoundingClientRect();
           const belowFold = bounds.top > window.innerHeight * 0.9;
 
           gsap.from(items, {
             opacity: 0,
-            y: Number.isFinite(distance) ? distance : 24,
-            duration: 0.72,
+            y: Number.isFinite(distance) ? distance : 22,
+            duration: 0.6,
             ease: "power3.out",
             stagger: Number.isFinite(stagger) ? stagger : 0.08,
             clearProps: "transform,opacity",
@@ -130,7 +130,7 @@ export default function ScrollEffects() {
               ? {
                   scrollTrigger: {
                     trigger: group,
-                    start: "top 86%",
+                    start: "top 90%",
                     once: true,
                     invalidateOnRefresh: true,
                   },
@@ -188,7 +188,7 @@ export default function ScrollEffects() {
           const timeline = gsap.timeline({
             scrollTrigger: {
               trigger: section,
-              start: "top 86%",
+              start: "top 90%",
               once: true,
               invalidateOnRefresh: true,
             },

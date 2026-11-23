@@ -30,7 +30,7 @@ export default function ClickEffects() {
       const timer = window.setTimeout(() => {
         pulse.remove();
         timers.delete(timer);
-      }, 500);
+      }, 440);
       timers.add(timer);
     };
 
