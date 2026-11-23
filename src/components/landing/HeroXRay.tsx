@@ -39,6 +39,14 @@ export interface HeroXRayProps {
   aspectRatio?: string;
   /** Mantido por compatibilidade de API. */
   mobileScrollReveal?: boolean;
+  /** Ponto normalizado (0–1) fixado por controles externos, como as regiões do mapa. */
+  focusPoint?: { x: number; y: number } | null;
+  /** Desliga a varredura automática quando a lente é controlada por outra interface. */
+  autoSweep?: boolean;
+  /** A imagem base é LCP no hero; em outros usos deve carregar sob demanda. */
+  priority?: boolean;
+  /** Classe aplicada somente às camadas de pele (ex.: grayscale no mapa). */
+  skinClassName?: string;
 }
 
 /**
@@ -69,6 +77,10 @@ export default function HeroXRay({
   className = "",
   altBase = "Modelo masculino em vista frontal com destaque anatômico dos músculos e ossos",
   aspectRatio = "896 / 1114",
+  focusPoint = null,
+  autoSweep = true,
+  priority = true,
+  skinClassName = "",
 }: HeroXRayProps) {
   const { prefersReducedMotion, effectsActive } = useVisualEffects();
 
@@ -187,7 +199,7 @@ export default function HeroXRay({
       const elapsed = lastFrameRef.current ? Math.min(64, now - lastFrameRef.current) : 16.7;
       lastFrameRef.current = now;
 
-      if (state.mode === "auto") {
+      if (state.mode === "auto" && autoSweep) {
         // ida e volta com ease-in-out (cosseno): 0 -> 1 -> 0
         const phase = 0.5 - 0.5 * Math.cos((now / SWEEP_PERIOD_MS) * Math.PI * 2);
         state.targetX = (SWEEP_START.x + (SWEEP_END.x - SWEEP_START.x) * phase) * box.width;
@@ -237,7 +249,24 @@ export default function HeroXRay({
       stop();
       lastFrameRef.current = 0;
     };
-  }, [clampToViewport, measure, prefersReducedMotion, syncLensRadius, writeVars, effectsActive]);
+  }, [autoSweep, clampToViewport, measure, prefersReducedMotion, syncLensRadius, writeVars, effectsActive]);
+
+  // Regiões selecionadas por botões/teclado movem a lente sem disputar com o ponteiro.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !focusPoint) return;
+    const c = coordsRef.current;
+    const rect = el.getBoundingClientRect();
+    const point = clampToViewport(focusPoint.x * rect.width, focusPoint.y * rect.height);
+    c.mode = "fixed";
+    c.targetX = point.x;
+    c.targetY = point.y;
+    if (prefersReducedMotion) {
+      c.x = point.x;
+      c.y = point.y;
+      writeVars(point.x, point.y);
+    }
+  }, [clampToViewport, focusPoint, prefersReducedMotion, writeVars]);
 
   // Reancora a lente se o wrapper mudar de tamanho.
   useEffect(() => {
@@ -394,7 +423,7 @@ export default function HeroXRay({
         />
 
         {/* (a) cópia borrada da base: dissolve o corte da cintura. */}
-        <div className="hero-xray-blur" aria-hidden="true" data-decorative>
+        <div className={clsx("hero-xray-blur", skinClassName)} aria-hidden="true" data-decorative>
           <Image
             src={baseImage}
             alt=""
@@ -405,12 +434,12 @@ export default function HeroXRay({
         </div>
 
         {/* (b) base nítida: única imagem com priority (LCP). */}
-        <div className="hero-xray-base">
+        <div className={clsx("hero-xray-base", skinClassName)}>
           <Image
             src={baseImage}
             alt={altBase}
             fill
-            priority
+            priority={priority}
             sizes="(max-width: 1023px) 92vw, 46vw"
             className="hero-xray-img object-contain"
           />

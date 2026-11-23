@@ -18,7 +18,7 @@ export function normalizeCode(raw: string): string | null {
 /** Destino depois do login: só caminhos internos conhecidos (sem redirecionamento aberto). */
 export function safeNext(raw: string | null): string | null {
   if (!raw || raw.length > 200 || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) return null;
-  if (/^\/(app|conta|admin)(\/[A-Za-z0-9/_-]*)?$/.test(raw)) return raw;
+  if (/^\/(app|conta|admin|aluno)(\/[A-Za-z0-9/_-]*)?$/.test(raw)) return raw;
   // Volta ao resumo do plano escolhido na página inicial (só os planos conhecidos)
   return /^\/planos(\?plano=(essencial|evolucao|completo))?$/.test(raw) ? raw : null;
 }

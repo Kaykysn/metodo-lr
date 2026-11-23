@@ -364,10 +364,10 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
   const px = (n: number) => n / k; // tamanho em px de tela → px da imagem
   const P = (p: Pt) => ({ x: p.x * W, y: p.y * H });
   const gridStep = (data.grid.spacingPct / 100) * H;
-  const gridColor = data.grid.contrast === "claro" ? "#ffffff" : "#0b1620";
+  const gridColor = data.grid.contrast === "claro" ? "#ffffff" : "#111111";
   const label = (p: Pt, text: string, key: string) => (
     <g key={key} transform={`translate(${p.x + px(10)} ${p.y - px(10)})`}>
-      <text fontSize={px(13)} fontWeight={700} paintOrder="stroke" stroke="#0b1620" strokeWidth={px(3.5)} fill="#ffffff" style={{ fontFamily: "var(--font-sans), system-ui" }}>
+      <text fontSize={px(13)} fontWeight={700} paintOrder="stroke" stroke="#111111" strokeWidth={px(3.5)} fill="#ffffff" style={{ fontFamily: "var(--font-sans), system-ui" }}>
         {text}
       </text>
     </g>
@@ -449,7 +449,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
                   const la = lmById.get(a);
                   const lb = lmById.get(b);
                   if (!la || !lb || la.visibility === "não visível" || lb.visibility === "não visível") return null;
-                  return <line key={`${a}-${b}`} x1={la.x * W} y1={la.y * H} x2={lb.x * W} y2={lb.y * H} stroke="#7ee2c4" strokeWidth={px(2)} />;
+                  return <line key={`${a}-${b}`} x1={la.x * W} y1={la.y * H} x2={lb.x * W} y2={lb.y * H} stroke="#EBC886" strokeWidth={px(2)} />;
                 })}
                 {data.angles.map((g) => (
                   <polyline key={g.id} points={[g.a, g.vertex, g.c].map((p) => `${p.x * W},${p.y * H}`).join(" ")} fill="none" stroke="#ff9d6f" strokeWidth={px(2)} />
@@ -461,7 +461,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
                   return (
                     <g key={l.id} data-landmark={l.id} style={{ cursor: "move" }}>
                       <circle cx={l.x * W} cy={l.y * H} r={px(14)} fill="transparent" />
-                      <circle cx={l.x * W} cy={l.y * H} r={px(sel ? 7 : 5)} fill={l.visibility === "estimado" ? "#ffd36f" : "#7ee2c4"} stroke="#0b1620" strokeWidth={px(2)} />
+                      <circle cx={l.x * W} cy={l.y * H} r={px(sel ? 7 : 5)} fill={l.visibility === "estimado" ? "#ffd36f" : "#EBC886"} stroke="#111111" strokeWidth={px(2)} />
                       {sel && <circle cx={l.x * W} cy={l.y * H} r={px(11)} fill="none" stroke="#ffffff" strokeWidth={px(1.5)} />}
                       {label({ x: l.x * W, y: l.y * H + px(22) }, def?.label ?? l.id, `t-${l.id}`)}
                     </g>
@@ -479,7 +479,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
             <p className="text-lg font-bold">{VIEW_LABEL[view]}{photo.profileSide ? ` — perfil ${photo.profileSide}` : ""}</p>
-            <p className="text-xs text-[#b7c4c9]">{set.capturedOn.split("-").reverse().join("/")} · {set.assessorName}{baseVersion ? ` · versão ${baseVersion}` : ""}</p>
+            <p className="text-xs text-[#cdcbc6]">{set.capturedOn.split("-").reverse().join("/")} · {set.assessorName}{baseVersion ? ` · versão ${baseVersion}` : ""}</p>
           </div>
           <button type="button" onClick={tryClose} aria-label="Fechar análise" className="close-x-highlight inline-flex h-11 w-11 items-center justify-center rounded-lg border transition-colors hover:bg-[#f87171]/35"><X className="h-5 w-5" /></button>
         </div>
@@ -499,13 +499,13 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
           <legend className="mb-1 text-sm font-semibold">Ferramenta</legend>
           <div className="grid grid-cols-2 gap-1">
             {(Object.keys(TOOL_LABEL) as Tool[]).map((t) => (
-              <button key={t} type="button" aria-pressed={tool === t} onClick={() => { setTool(t); setClicks([]); }} className={`min-h-[40px] rounded-lg border px-2 text-left text-sm ${tool === t ? "border-[#7ee2c4] bg-[#7ee2c4]/15" : "border-white/15 hover:bg-white/5"}`}>
+              <button key={t} type="button" aria-pressed={tool === t} onClick={() => { setTool(t); setClicks([]); }} className={`min-h-[40px] rounded-lg border px-2 text-left text-sm ${tool === t ? "border-[#EBC886] bg-[#EBC886]/15" : "border-white/15 hover:bg-white/5"}`}>
                 {t === "mover" ? <Hand className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" /> : t === "marco" ? <Crosshair className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" /> : null}
                 {TOOL_LABEL[t]}
               </button>
             ))}
           </div>
-          {CLICKS[tool] && <p className="mt-1 text-xs text-[#b7c4c9]" aria-live="polite">Toque {CLICKS[tool]} pontos na foto ({clicks.length} de {CLICKS[tool]}).{tool === "vertical" ? " Use um fio de prumo fotografado quando houver." : ""}</p>}
+          {CLICKS[tool] && <p className="mt-1 text-xs text-[#cdcbc6]" aria-live="polite">Toque {CLICKS[tool]} pontos na foto ({clicks.length} de {CLICKS[tool]}).{tool === "vertical" ? " Use um fio de prumo fotografado quando houver." : ""}</p>}
           {tool === "calibracao" && (
             <label className="mt-2 block text-sm">
               Comprimento real entre os dois pontos (cm), no mesmo plano do corpo
@@ -522,15 +522,15 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
 
         <section className="mb-3">
           <h3 className="mb-1 text-sm font-semibold">Pontos anatômicos</h3>
-          <p className="mb-2 text-xs text-[#b7c4c9]">Escolha um ponto e toque na foto. Selecionado, ele se move pelas setas do teclado (Shift = 10 px). Pontos cobertos ou incertos podem ficar sem marcação.</p>
+          <p className="mb-2 text-xs text-[#cdcbc6]">Escolha um ponto e toque na foto. Selecionado, ele se move pelas setas do teclado (Shift = 10 px). Pontos cobertos ou incertos podem ficar sem marcação.</p>
           <ul className="space-y-1">
             {template.map((t) => {
               const l = lmById.get(t.id);
               return (
-                <li key={t.id} className={`rounded-lg border p-2 ${active === t.id && tool === "marco" ? "border-[#7ee2c4]" : "border-white/10"}`}>
+                <li key={t.id} className={`rounded-lg border p-2 ${active === t.id && tool === "marco" ? "border-[#EBC886]" : "border-white/10"}`}>
                   <div className="flex items-center justify-between gap-2">
                     <button type="button" onClick={() => { setTool("marco"); setActive(t.id); setSelected(l ? t.id : null); }} className="min-h-[36px] flex-1 text-left text-sm font-semibold">
-                      {t.label} {l ? <span className="text-xs font-normal text-[#7ee2c4]">marcado</span> : <span className="text-xs font-normal text-[#b7c4c9]">sem marcação</span>}
+                      {t.label} {l ? <span className="text-xs font-normal text-[#EBC886]">marcado</span> : <span className="text-xs font-normal text-[#cdcbc6]">sem marcação</span>}
                     </button>
                     {l && (
                       <select aria-label={`Visibilidade de ${t.label}`} value={l.visibility} onChange={(e) => commit({ ...data, landmarks: data.landmarks.map((x) => (x.id === t.id ? { ...x, visibility: e.target.value as Visibility } : x)) })} className="min-h-[36px] rounded-sm border border-white/15 bg-[#0f1418] px-1 text-xs">
@@ -540,7 +540,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
                       </select>
                     )}
                   </div>
-                  <details className="text-xs text-[#b7c4c9]"><summary className="cursor-pointer">Definição</summary>{t.definition}{t.requiresPalpation ? " A identificação deve ser feita e registrada pelo avaliador." : ""}</details>
+                  <details className="text-xs text-[#cdcbc6]"><summary className="cursor-pointer">Definição</summary>{t.definition}{t.requiresPalpation ? " A identificação deve ser feita e registrada pelo avaliador." : ""}</details>
                 </li>
               );
             })}
@@ -554,7 +554,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
 
         <section className="mb-3 space-y-2">
           <h3 className="text-sm font-semibold">Escala das distâncias</h3>
-          <p className="text-xs text-[#b7c4c9]">Com calibração, as distâncias saem em cm. Sem calibração, escolha dois pontos para expressar as distâncias em % desse segmento; sem nenhum dos dois, ficam em pixels.</p>
+          <p className="text-xs text-[#cdcbc6]">Com calibração, as distâncias saem em cm. Sem calibração, escolha dois pontos para expressar as distâncias em % desse segmento; sem nenhum dos dois, ficam em pixels.</p>
           <div className="grid grid-cols-2 gap-2">
             {(["from", "to"] as const).map((k) => (
               <label key={k} className="block text-sm">{k === "from" ? "De" : "Até"}
@@ -593,18 +593,18 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
               <option value="escuro">Linhas escuras</option>
             </select>
           </label>
-          <p className="text-xs text-[#b7c4c9]">A grade ajustada não elimina inclinação da câmera nem distorção de perspectiva.</p>
+          <p className="text-xs text-[#cdcbc6]">A grade ajustada não elimina inclinação da câmera nem distorção de perspectiva.</p>
         </section>
 
         <section className="mb-3 space-y-2" aria-labelledby="medidas-titulo">
           <h3 id="medidas-titulo" className="text-sm font-semibold">Medidas e observações</h3>
-          <p className="text-xs text-[#b7c4c9]">Calibração: {data.calibration && data.calibration.lengthCm > 0 ? `registrada (${data.calibration.lengthCm} cm)` : "não registrada — distâncias em pixels"}.</p>
+          <p className="text-xs text-[#cdcbc6]">Calibração: {data.calibration && data.calibration.lengthCm > 0 ? `registrada (${data.calibration.lengthCm} cm)` : "não registrada — distâncias em pixels"}.</p>
           <ul className="space-y-1.5" aria-live="polite">
             {measurements.map((m) => (
               <li key={m.methodId} className="rounded-lg border border-white/10 p-2 text-sm">
                 <div className="flex justify-between gap-2"><span>{m.label}</span><span className="tabular font-bold">{m.value === null ? "—" : m.short}</span></div>
-                <p className="text-xs text-[#b7c4c9]">{m.missing ?? `Diferença observada: ${m.reading.toLocaleLowerCase("pt-BR")}`}</p>
-                <details className="text-xs text-[#b7c4c9]"><summary className="cursor-pointer">Como é medido</summary>{m.definition}</details>
+                <p className="text-xs text-[#cdcbc6]">{m.missing ?? `Diferença observada: ${m.reading.toLocaleLowerCase("pt-BR")}`}</p>
+                <details className="text-xs text-[#cdcbc6]"><summary className="cursor-pointer">Como é medido</summary>{m.definition}</details>
               </li>
             ))}
           </ul>
@@ -644,7 +644,7 @@ export default function PostureAnnotator({ store, actor, set, photo, url, onClos
         <div className="sticky bottom-0 flex flex-wrap items-center gap-2 bg-[#161d22] pt-2">
           <Button onClick={() => save(baseVersion)} disabled={status === "saving" || !dirty}>{status === "saving" ? "Salvando…" : "Salvar nova versão"}</Button>
           <Button variant="ghost" onClick={() => { if (window.confirm("Limpar todas as marcações desta foto? Você ainda pode desfazer.")) commit(emptyAnnotation()); }}>Limpar</Button>
-          <span className="text-xs text-[#b7c4c9]" role="status">{status === "saved" ? "Salvo." : dirty ? "Alterações não salvas." : versions.length ? `${versions.length} versão(ões) salvas.` : ""}</span>
+          <span className="text-xs text-[#cdcbc6]" role="status">{status === "saved" ? "Salvo." : dirty ? "Alterações não salvas." : versions.length ? `${versions.length} versão(ões) salvas.` : ""}</span>
         </div>
       </aside>
     </div>
@@ -679,7 +679,7 @@ function RefLineSvg({ a, b, color, w, extend, label, px }: { a: Pt; b: Pt; color
       <line x1={a.x - ux * E} y1={a.y - uy * E} x2={b.x + ux * E} y2={b.y + uy * E} stroke={color} strokeWidth={w} strokeDasharray={`${px(10)} ${px(6)}`} />
       <circle cx={a.x} cy={a.y} r={px(4)} fill={color} />
       <circle cx={b.x} cy={b.y} r={px(4)} fill={color} />
-      <text x={b.x + px(8)} y={b.y} fontSize={px(12)} fill={color} paintOrder="stroke" stroke="#0b1620" strokeWidth={px(3)}>{label}</text>
+      <text x={b.x + px(8)} y={b.y} fontSize={px(12)} fill={color} paintOrder="stroke" stroke="#111111" strokeWidth={px(3)}>{label}</text>
     </g>
   );
 }

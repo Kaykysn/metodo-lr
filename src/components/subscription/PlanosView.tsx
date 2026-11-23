@@ -251,7 +251,7 @@ function Recommender() {
   const n = count.trim() === "" ? null : Math.max(0, Math.floor(Number(count)));
   const rec = n === null || Number.isNaN(n) ? null : recommendPlan({ activeTrainees: n, wantsReuse: reuse, wantsAdvanced: advanced });
   return (
-    <section aria-labelledby="ajuda-escolha" className="mt-14 grid gap-6 border-t border-theme-border pt-10 lg:grid-cols-[0.8fr_1.2fr]">
+    <section aria-labelledby="ajuda-escolha" className="mt-14 grid gap-6 border-t border-theme-border pt-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
       <div data-scroll-reveal="left" data-scroll-distance="22">
         <h2 id="ajuda-escolha" className="text-2xl font-bold tracking-tight">Na dúvida, responda duas perguntas</h2>
         <p className="mt-2 text-[15px] text-theme-muted">A sugestão segue só estes critérios. Você pode escolher qualquer plano que comporte seus alunos.</p>
@@ -293,7 +293,7 @@ function Comparison({ supportReady }: { supportReady: boolean }) {
     <section aria-labelledby="comparativo" className="mt-14 border-t border-theme-border pt-10">
       <h2 data-scroll-reveal="up" data-scroll-distance="18" id="comparativo" className="text-2xl font-bold tracking-tight">Comparar recursos</h2>
       <p data-scroll-reveal="fade" className="mt-2 text-[15px] text-theme-muted">As diferenças vêm primeiro. Triagem, segurança e acesso ao próprio histórico estão em todos os planos.</p>
-      <div data-scroll-reveal="up" data-scroll-distance="20" data-scroll-delay="60" className="mt-6 overflow-x-auto rounded-panel border border-theme-border bg-theme-primary">
+      <div data-scroll-reveal="up" data-scroll-distance="20" data-scroll-delay="60" className="mt-6 w-full max-w-full overflow-x-auto rounded-panel border border-theme-border bg-theme-primary">
         <table className="w-full min-w-[620px] text-left text-[15px]">
           <caption className="sr-only">Comparativo dos planos Essencial, Evolução e Completo</caption>
           <thead className="border-b border-theme-border">

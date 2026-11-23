@@ -138,7 +138,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 items-center">
         {/* Silhueta Anatômica Muscular Detalhada */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-center p-3 sm:p-4 bg-[#021226] rounded-xl border border-theme-border shadow-inner">
+        <div className="lg:col-span-5 flex flex-col items-center justify-center p-3 sm:p-4 bg-[#111111] rounded-xl border border-theme-border shadow-inner">
           <div className="relative w-full max-w-[300px] aspect-560/1024">
             {/* SVG Silhueta Anatômica Interativa com pontos clicáveis sobrepostos.
                 A arte oficial é public/images/anatomia-corpo.png (vista anterior à
@@ -162,7 +162,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
               </svg>
 
               {/* Indicadores de lateralidade da pessoa avaliada */}
-              <g aria-hidden="true" style={{ fill: "#76D7BE", opacity: 0.85 }} fontSize={28} fontWeight={800}>
+              <g aria-hidden="true" style={{ fill: "#D5AE62", opacity: 0.85 }} fontSize={28} fontWeight={800}>
                 <text x={26} y={52}>{activeView === "anterior" ? "D" : "E"}</text>
                 <text x={560 - 46} y={52}>{activeView === "anterior" ? "E" : "D"}</text>
               </g>
@@ -198,7 +198,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                       cy={spot.y}
                       r={r + 8}
                       fill="none"
-                      stroke="#76D7BE"
+                      stroke="#D5AE62"
                       strokeWidth="3"
                     />
                     {selected && (
@@ -209,7 +209,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                         cy={spot.y}
                         r={r + 6}
                         fill="none"
-                        stroke="#76D7BE"
+                        stroke="#D5AE62"
                         strokeWidth="3"
                       />
                     )}
@@ -220,17 +220,17 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
                           cx={spot.x}
                           cy={spot.y}
                           r={r}
-                          fill="rgba(118, 215, 190, 0.35)"
-                          stroke="#76D7BE"
+                          fill="rgba(213, 174, 98, 0.35)"
+                          stroke="#D5AE62"
                           strokeWidth="3"
                           strokeDasharray="6 4"
                         />
-                        <circle cx={spot.x} cy={spot.y} r={9} fill="#76D7BE" stroke="#021226" strokeWidth="2.5" />
+                        <circle cx={spot.x} cy={spot.y} r={9} fill="#D5AE62" stroke="#111111" strokeWidth="2.5" />
                       </g>
                     ) : (
                       <g>
-                        <circle cx={spot.x} cy={spot.y} r={r} fill="rgba(255, 255, 255, 0.45)" stroke="#021226" strokeWidth="2" />
-                        <circle cx={spot.x} cy={spot.y} r={4} fill="#021226" />
+                        <circle cx={spot.x} cy={spot.y} r={r} fill="rgba(255, 255, 255, 0.45)" stroke="#111111" strokeWidth="2" />
+                        <circle cx={spot.x} cy={spot.y} r={4} fill="#111111" />
                       </g>
                     )}
                   </g>

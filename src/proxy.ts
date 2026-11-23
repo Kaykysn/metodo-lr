@@ -1,61 +1,11 @@
-// DEPRECADO: a proteção de borda roda em src/middleware.ts (Next.js carrega middleware.ts).
-// Este arquivo é mantido como referência e reutilizável para testes; não é executado pelo Next.
+// Convenção de borda ativa do Next 16: proxy.ts. Não recriar middleware.ts:
+// o Next 16 falha o build se as duas convenções existirem juntas em src/.
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { APP_MODE, SUPABASE_PUBLIC_KEY, SUPABASE_URL } from "@/lib/app-mode";
 import { needsCode } from "@/lib/auth/mfa";
-
-// Rotas públicas que não requerem autenticação
-const PUBLIC_ROUTES = [
-  "/",
-  "/login",
-  "/solicitar-acesso",
-  "/aguardando-aprovacao",
-  "/demo",
-  "/privacidade",
-  "/termos",
-  "/auth/callback",
-  "/auth/reset-password",
-];
-
-// Rotas protegidas que requerem autenticação
-const PROTECTED_ROUTES = [
-  "/app",
-  "/conta",
-];
-
-// Rotas administrativas
-const ADMIN_ROUTES = [
-  "/admin",
-];
-
-/**
- * Verifica se a rota é pública.
- */
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route => 
-    pathname === route || pathname.startsWith(`${route}/`)
-  );
-}
-
-/**
- * Verifica se a rota é protegida.
- */
-function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(route => 
-    pathname.startsWith(route)
-  );
-}
-
-/**
- * Verifica se a rota é administrativa.
- */
-function isAdminRoute(pathname: string): boolean {
-  return ADMIN_ROUTES.some(route => 
-    pathname.startsWith(route)
-  );
-}
+import { isAdminRoute, isProtectedRoute, isPublicRoute, needsActivation } from "@/lib/auth/edge-routes";
 
 /**
  * Valida Origin/Referer para proteção CSRF em mutations.
@@ -142,7 +92,7 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  // Cria cliente Supabase para middleware
+  // Cria cliente Supabase para a borda
   const supabase = createServerClient(
     supabaseUrl,
     supabaseAnonKey,
@@ -186,9 +136,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Área profissional só com a conta ativada (senha criada pelo convite ou Google aprovado).
-  // A RLS e as funções exigem o mesmo; aqui só evita abrir a tela vazia.
-  if (user && (pathname === "/app" || pathname.startsWith("/app/"))) {
+  // Áreas logadas só com a conta ativada (senha criada pelo convite ou Google aprovado).
+  // /conta fica de fora para o administrador poder configurar o segundo fator.
+  if (user && needsActivation(pathname)) {
     const { data: p } = await supabase.from("profiles").select("status, activated_at").eq("id", user.id).maybeSingle();
     if (p && p.status === "active" && !p.activated_at) {
       return NextResponse.redirect(new URL("/aguardando-aprovacao", request.url));

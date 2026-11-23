@@ -14,7 +14,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:domain": "node scripts/run-ts.mjs scripts/test-domain.ts && node scripts/run-ts.mjs scripts/test-redesign.ts && node scripts/run-ts.mjs scripts/test-session.ts && node scripts/run-ts.mjs scripts/test-plans.ts && node scripts/run-ts.mjs scripts/test-plan-save.ts && node scripts/run-ts.mjs scripts/test-perf.ts && node scripts/run-ts.mjs scripts/test-catalog.ts && node scripts/run-ts.mjs scripts/test-posture.ts && node scripts/run-ts.mjs scripts/test-photo-access.ts && node scripts/run-ts.mjs scripts/test-app-mode.ts && node scripts/run-ts.mjs scripts/test-catalog-extended.ts && node scripts/run-ts.mjs scripts/test-hero-xray.ts && node scripts/run-ts.mjs scripts/test-anamnese-map.ts && node scripts/run-ts.mjs scripts/test-mfa.ts && node scripts/run-ts.mjs scripts/test-password.ts && node scripts/run-ts.mjs scripts/test-schedule.ts",
+    "test:domain": "node scripts/run-ts.mjs scripts/test-domain.ts && node scripts/run-ts.mjs scripts/test-redesign.ts && node scripts/run-ts.mjs scripts/test-session.ts && node scripts/run-ts.mjs scripts/test-edge-routes.ts && node scripts/run-ts.mjs scripts/test-plans.ts && node scripts/run-ts.mjs scripts/test-plan-save.ts && node scripts/run-ts.mjs scripts/test-perf.ts && node scripts/run-ts.mjs scripts/test-catalog.ts && node scripts/run-ts.mjs scripts/test-posture.ts && node scripts/run-ts.mjs scripts/test-photo-access.ts && node scripts/run-ts.mjs scripts/test-app-mode.ts && node scripts/run-ts.mjs scripts/test-catalog-extended.ts && node scripts/run-ts.mjs scripts/test-hero-xray.ts && node scripts/run-ts.mjs scripts/test-anamnese-map.ts && node scripts/run-ts.mjs scripts/test-mfa.ts && node scripts/run-ts.mjs scripts/test-password.ts && node scripts/run-ts.mjs scripts/test-schedule.ts",
     "brand": "node scripts/build-logo.mjs",
     "optimize:hero": "node scripts/process-hero-video.mjs"
   },
@@ -24,7 +24,7 @@
     "@supabase/supabase-js": "^2.119.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "gsap": "^3.12.5",
+    "gsap": "^3.15.1",
     "lucide-react": "^0.453.0",
     "next": "^16.4.6",
     "next-themes": "^0.4.6",

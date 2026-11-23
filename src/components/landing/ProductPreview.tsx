@@ -41,7 +41,7 @@ export default function ProductPreview({ demo }: { demo: DemoCase }) {
   };
 
   return (
-    <div className="preview-rim preview-enter rounded-[24px] p-1.5 sm:p-2">
+    <div data-product-preview className="preview-rim preview-enter rounded-[24px] p-1.5 sm:p-2">
       <div className="overflow-hidden rounded-[18px] border border-theme-border bg-theme-primary text-theme-text">
         <div className="flex flex-col gap-3 border-b border-theme-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -179,7 +179,7 @@ function EvolucaoPanel({ data }: { data: DemoCase["evolucao"] }) {
             id="lp-mes"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
-            className="min-h-[44px] w-full rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-theme-teal focus:outline-hidden focus:ring-2 focus:ring-theme-teal/25"
+            className="min-h-[44px] w-full rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] focus:border-[var(--lr-gold-deep)] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--accent-teal)/0.25)]"
           >
             {data.months.map((m) => (
               <option key={m} value={m}>{MONTH_LABEL(m)}</option>

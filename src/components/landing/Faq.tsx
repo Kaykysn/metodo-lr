@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useId, useState } from "react";
-import { ChevronDown } from "lucide-react";
 
 const FAQS = [
   { q: "Para quem é a plataforma?", a: "Para profissionais e estudantes de Educação Física que avaliam, planejam e acompanham treinos. O aluno acompanhado pode ter um acesso próprio, só para ver o treino aprovado e registrar o que fez." },
@@ -12,31 +11,37 @@ const FAQS = [
   { q: "Onde ficam os dados da demonstração?", a: "Só no seu navegador, com dados fictícios e um botão para restaurar tudo. Não use dados reais de alunos na demonstração." },
 ];
 
+/** FAQ em acordeão, com a linguagem visual editorial da referência. */
 export default function Faq() {
   const [open, setOpen] = useState<number | null>(0);
   const base = useId();
   return (
-    <section id="duvidas" data-scroll-sheet className="section-sheet scroll-mt-20">
-      <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:px-8 lg:py-24">
-        <h2 data-scroll-reveal="up" data-scroll-distance="20" className="text-3xl font-bold tracking-tight sm:text-4xl">Perguntas frequentes</h2>
-        <div data-scroll-stagger="0.08" data-scroll-distance="18" className="divide-y divide-theme-border border-y border-theme-border">
+    <section id="duvidas" className="lr-section lr-light scroll-mt-20" aria-labelledby="faq-title">
+      <div className="lr-wrap lr-faq">
+        <div>
+          <p className="lr-eyebrow"><span className="lr-rule" aria-hidden="true" /> Dúvidas frequentes</p>
+          <h2 id="faq-title" className="lr-display lr-display-lg">Perguntas<br /><em>frequentes.</em></h2>
+        </div>
+        <div>
           {FAQS.map((f, i) => {
             const isOpen = open === i;
             const pid = `${base}-p${i}`;
             return (
-              <div key={f.q} data-scroll-item>
-                <h3>
-                  <button type="button" aria-expanded={isOpen} aria-controls={pid} id={`${pid}-b`} onClick={() => setOpen(isOpen ? null : i)} className="flex min-h-[60px] w-full items-center justify-between gap-4 py-4 text-left text-[17px] font-semibold">
-                    {f.q}
-                    <ChevronDown aria-hidden="true" className={`h-5 w-5 shrink-0 text-theme-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                  </button>
-                </h3>
-                <div id={pid} role="region" aria-labelledby={`${pid}-b`} className={`grid transition-[grid-template-rows,opacity,visibility] duration-240 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0"}`}>
-                  <div className="overflow-hidden">
-                    <p className="pb-5 text-[16px] leading-relaxed text-theme-muted">{f.a}</p>
-                  </div>
-                </div>
-              </div>
+              <details key={f.q} open={isOpen} onToggle={(e) => {
+                if (e.currentTarget.open) setOpen(i);
+              }}>
+                <summary
+                  aria-controls={pid}
+                  id={`${pid}-b`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(isOpen ? null : i);
+                  }}
+                >
+                  {f.q}
+                </summary>
+                <p id={pid} role="region" aria-labelledby={`${pid}-b`}>{f.a}</p>
+              </details>
             );
           })}
         </div>

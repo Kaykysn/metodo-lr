@@ -58,7 +58,7 @@ export default function ScrollEffects() {
     const start = async () => {
       // Páginas sem marcações não baixam GSAP/ScrollTrigger.
       const hasMarkers = document.querySelector(
-        "[data-scroll-reveal],[data-scroll-stagger],[data-scroll-line],[data-scroll-parallax],[data-scroll-sheet]"
+        "[data-scroll-reveal],[data-scroll-stagger],[data-scroll-line],[data-scroll-parallax],[data-scroll-sheet],.lr-section,.lr-access"
       );
       if (!hasMarkers) return;
 
@@ -81,11 +81,18 @@ export default function ScrollEffects() {
 
           if (!from) return;
 
+          // Em telas estreitas, deslocamentos horizontais da animação podem criar
+          // rolagem lateral mesmo quando o layout é fluido. Usamos entrada vertical.
+          const safeFrom =
+            window.matchMedia("(max-width: 639px)").matches && "x" in from
+              ? { opacity: 0, y: distance }
+              : from;
+
           const bounds = el.getBoundingClientRect();
           const belowFold = bounds.top > window.innerHeight * 0.9;
 
           gsap.from(el, {
-            ...from,
+            ...safeFrom,
             duration: 0.78,
             delay,
             ease: "power3.out",
@@ -167,6 +174,50 @@ export default function ScrollEffects() {
               },
             }
           );
+        });
+
+        // Coreografia editorial da landing: traço dourado, título e vidro.
+        // Uma vez por seção; a sequência termina em menos de 650 ms.
+        document.querySelectorAll<HTMLElement>(".lr-section, .lr-access").forEach((section) => {
+          if (section.getBoundingClientRect().top <= window.innerHeight * 0.85) return;
+          const rule = section.querySelector<HTMLElement>(".lr-eyebrow .lr-rule");
+          const title = section.querySelector<HTMLElement>("h2.lr-display");
+          const glass = section.querySelector<HTMLElement>(".lr-fluted");
+          if (!rule && !title && !glass) return;
+
+          const timeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: "top 86%",
+              once: true,
+              invalidateOnRefresh: true,
+            },
+          });
+
+          if (rule) {
+            timeline.fromTo(
+              rule,
+              { scaleX: 0, transformOrigin: "left center" },
+              { scaleX: 1, duration: 0.28, ease: "power2.out", clearProps: "transform" },
+              0
+            );
+          }
+          if (title) {
+            timeline.fromTo(
+              title,
+              { y: 22, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", clearProps: "transform,opacity" },
+              0.06
+            );
+          }
+          if (glass) {
+            timeline.fromTo(
+              glass,
+              { y: 20, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.6, ease: "power2.out", clearProps: "transform,opacity" },
+              0.22
+            );
+          }
         });
 
         // Parallax só em telas grandes, com deslocamento pequeno.

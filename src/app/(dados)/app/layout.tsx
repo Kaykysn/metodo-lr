@@ -40,7 +40,7 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
               href={href}
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-[44px] items-center gap-3 rounded-control px-3 text-[15px] font-medium transition-colors ${
+              className={`lr-app-nav-link flex min-h-[44px] items-center gap-3 rounded-control px-3 text-[15px] font-medium transition-colors ${
                 active ? "bg-theme-teal-subtle font-semibold text-theme-text" : "text-theme-muted hover:bg-theme-secondary hover:text-theme-text"
               }`}
             >
@@ -147,17 +147,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         Pular para o conteúdo
       </a>
 
-      <aside className="sticky top-0 hidden h-screen print:hidden! flex-col gap-6 overflow-y-auto border-r border-theme-border bg-theme-primary px-3 py-5 lg:flex">
+      <aside className="lr-app-sidebar sticky top-0 hidden h-screen print:hidden! flex-col gap-6 overflow-y-auto border-r border-theme-border bg-theme-primary px-3 py-5 lg:flex">
         <Link href="/app" className="px-3 text-theme-text" aria-label="Leandro Rangel — visão geral">
           <Logo variant="horizontal" size={34} frame="accent" />
         </Link>
-        <nav aria-label="Área do professor" className="flex-1">
+        <nav aria-label="Área do professor" className="lr-app-nav flex-1">
           <NavList pathname={pathname} />
         </nav>
         <SecondaryArea />
       </aside>
 
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-theme-border bg-theme-primary/95 px-4 backdrop-blur-sm lg:hidden print:hidden">
+      <header className="lr-app-header sticky top-0 z-40 flex h-16 items-center justify-between border-b border-theme-border bg-theme-primary/95 px-4 backdrop-blur-sm lg:hidden print:hidden">
         <Link href="/app" className="text-theme-text" aria-label="Leandro Rangel — visão geral">
           <span className="sm:hidden"><Logo variant="symbol" size={34} frame="accent" /></span>
           <span className="hidden sm:inline"><Logo variant="horizontal" size={32} frame="accent" /></span>
@@ -186,7 +186,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             aria-label="Menu da área do professor"
             className="fixed bottom-0 left-0 top-16 z-50 w-[min(320px,88vw)] overflow-y-auto border-r border-theme-border bg-theme-primary px-3 py-4 motion-safe:animate-drawerIn lg:hidden"
           >
-            <nav aria-label="Área do professor (menu)">
+            <nav aria-label="Área do professor (menu)" className="lr-app-nav">
               <NavList pathname={pathname} onNavigate={() => setOpen(false)} />
             </nav>
             <div className="mt-4">
@@ -197,7 +197,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-col">
-        <div className="border-b border-theme-border bg-theme-primary/70 px-4 py-2 text-sm text-theme-muted print:hidden sm:px-8">
+        <div className="lr-app-context border-b border-theme-border bg-theme-primary/70 px-4 py-2 text-sm text-theme-muted print:hidden sm:px-8">
           Você está como <strong className="font-semibold text-theme-text">{actor.name}</strong> — {ROLE_LABEL[actor.role]}
         </div>
         <TrialBanner />

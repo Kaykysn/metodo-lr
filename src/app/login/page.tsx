@@ -325,7 +325,7 @@ export default function LoginPage() {
 
           <p className="text-center text-xs text-theme-muted">
             Quer conhecer sem cadastro?{" "}
-            <Link href="/demo" className="font-bold text-status-caution-fg hover:underline">
+            <Link href="/#demonstracao" className="font-bold text-status-caution-fg hover:underline">
               Abrir a demonstração
             </Link>
           </p>

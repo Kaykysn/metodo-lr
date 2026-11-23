@@ -65,7 +65,7 @@ export default function AlunoPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-theme-border bg-theme-primary">
+      <header className="lr-app-header border-b border-theme-border bg-theme-primary">
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
           <Link href="/" className="text-theme-text"><Logo variant="horizontal" size={30} frame="accent" /></Link>
           <ThemeSelector compact />
@@ -93,7 +93,7 @@ export default function AlunoPage() {
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h1 className="text-2xl font-bold">Treino de hoje</h1>
+              <h1 className="lr-app-title text-2xl font-bold">Treino de hoje</h1>
               {mode === "demo" && <DemoBadge />}
             </div>
             {view.sessions.length > 1 && (

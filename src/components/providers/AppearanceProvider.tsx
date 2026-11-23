@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import {
   EFFECTS_STORAGE_KEY,
@@ -37,6 +38,7 @@ export function useVisualEffects() {
 }
 
 export function AppearanceProvider({ children }: { children: React.ReactNode }) {
+  const defaultTheme = usePathname() === "/" ? "dark" : "system";
   const [effectsEnabled, setEffectsEnabledState] = useState<boolean>(true);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
   const [slowNet, setSlowNet] = useState(false);
@@ -110,7 +112,8 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
+      key={defaultTheme}
+      defaultTheme={defaultTheme}
       enableSystem
       disableTransitionOnChange
       storageKey={THEME_STORAGE_KEY}

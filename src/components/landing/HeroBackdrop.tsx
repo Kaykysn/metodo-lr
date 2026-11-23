@@ -129,14 +129,14 @@ export default function HeroBackdrop() {
       >
         <defs>
           <linearGradient id="hero-wave-a" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#0e6660" stopOpacity="0.18" />
-            <stop offset="45%" stopColor="#76d7be" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#0e6660" stopOpacity="0.18" />
+            <stop offset="0%" stopColor="#846321" stopOpacity="0.18" />
+            <stop offset="45%" stopColor="#D5AE62" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#846321" stopOpacity="0.18" />
           </linearGradient>
           <linearGradient id="hero-wave-b" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#14a08f" stopOpacity="0.12" />
-            <stop offset="52%" stopColor="#a8e6d4" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#14a08f" stopOpacity="0.12" />
+            <stop offset="0%" stopColor="#b78f45" stopOpacity="0.12" />
+            <stop offset="52%" stopColor="#EBC886" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#b78f45" stopOpacity="0.12" />
           </linearGradient>
         </defs>
         <path
@@ -160,9 +160,9 @@ export default function HeroBackdrop() {
       >
         <defs>
           <linearGradient id="hero-wave-front" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#76d7be" stopOpacity="0.04" />
-            <stop offset="50%" stopColor="#a8e6d4" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#76d7be" stopOpacity="0.22" />
+            <stop offset="0%" stopColor="#D5AE62" stopOpacity="0.04" />
+            <stop offset="50%" stopColor="#EBC886" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#D5AE62" stopOpacity="0.22" />
           </linearGradient>
         </defs>
         <path

@@ -56,18 +56,20 @@ console.log("✓ Coordenadas normalizadas de todas as regiões de BODY_REGIONS_V
 const bodyMapSrc = fs.readFileSync(path.join(root, "src", "components", "assessment", "BodyMap.tsx"), "utf-8");
 assert.ok(bodyMapSrc.includes("anatomia-corpo.png"), "BodyMap deve referenciar a arte oficial anatomia-corpo.png");
 assert.ok(bodyMapSrc.includes("anatomyFigureProps"), "BodyMap deve recortar a vista a partir da arte única");
-assert.ok(bodyMapSrc.includes("bg-[#021226]"), "BodyMap deve possuir o fundo azul-marinho de alto contraste");
+assert.ok(bodyMapSrc.includes("bg-[#111111]"), "BodyMap deve possuir o fundo preto de alto contraste da identidade dourada");
 assert.ok(BODY_REGIONS.length === 20, "BODY_REGIONS deve preservar as 20 regiões corporais da anamnese");
-console.log("✓ BodyMap.tsx integrado à nova ilustração com fundo azul-marinho e regiões preservadas.");
+console.log("✓ BodyMap.tsx integrado à ilustração com fundo preto e regiões preservadas.");
 
 // 5. Verificação da Atualização de Textos e Elementos no Hero.tsx
 const heroSrc = fs.readFileSync(path.join(root, "src", "components", "landing", "Hero.tsx"), "utf-8");
-assert.ok(heroSrc.includes("Entenda o corpo."), "Hero deve conter o título 'Entenda o corpo.'");
-assert.ok(heroSrc.includes("Evolua com precisão."), "Hero deve conter o título 'Evolua com precisão.'");
-assert.ok(heroSrc.includes("Avalie, planeje e acompanhe cada etapa do desenvolvimento físico dos seus alunos."), "Hero deve conter a nova descrição");
-assert.ok(heroSrc.includes("Explore a anatomia. Mova o cursor para revelar."), "Hero deve conter o texto de apoio");
+assert.ok(heroSrc.includes("Da avaliação"), "Hero deve conter o título 'Da avaliação'");
+assert.ok(heroSrc.includes("ao treino."), "Hero deve conter o título 'ao treino.'");
+assert.ok(heroSrc.includes("Avalie o movimento, publique o treino e acompanhe o que cada aluno fez."), "Hero deve conter a nova descrição");
+assert.ok(!heroSrc.includes("Mova o cursor para revelar"), "Hero não deve conter a instrução da lente (movida para #mapa)");
+const mapDemoSrc = fs.readFileSync(path.join(root, "src", "components", "landing", "BodyMapDemo.tsx"), "utf-8");
+assert.ok(mapDemoSrc.includes("Mova o cursor ou toque na imagem para revelar a anatomia."), "A instrução da lente deve viver no mapa corporal");
 assert.ok(heroSrc.includes("href=\"/solicitar-acesso\""), "Hero deve preservar o botão Solicitar acesso");
-assert.ok(heroSrc.includes("href=\"/app\""), "Hero deve preservar o botão Ver demonstração");
+assert.ok(heroSrc.includes("href=\"#demonstracao\""), "Hero deve preservar o botão Ver demonstração");
 assert.ok(heroSrc.includes("Avaliação física individualizada"), "Hero deve conter o elemento complementar 'Avaliação física individualizada'");
 assert.ok(heroSrc.includes("Identificação anatômica"), "Hero deve conter o elemento complementar 'Identificação anatômica'");
 assert.ok(heroSrc.includes("Planejamento de treinamento"), "Hero deve conter o elemento complementar 'Planejamento de treinamento'");

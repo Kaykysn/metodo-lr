@@ -88,7 +88,7 @@ export function RequiredLegend() {
 }
 
 export const inputClass =
-  "w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] text-theme-text placeholder:text-theme-subtle focus:border-theme-teal focus:outline-hidden focus:ring-2 focus:ring-theme-teal/25";
+  "w-full min-h-[44px] rounded-control border border-theme-boundary/70 bg-theme-raised px-3 text-[15px] text-theme-text placeholder:text-theme-subtle focus:border-[var(--lr-gold-deep)] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--accent-teal)/0.25)]";
 
 export function Badge({ tone = "neutral", children }: { tone?: "neutral" | "success" | "caution" | "danger" | "accent"; children: React.ReactNode }) {
   const t = {

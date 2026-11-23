@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -22,8 +22,8 @@ type Palette = {
 };
 
 const FALLBACK_COLORS: Array<[number, number, number]> = [
-  [118, 215, 190],
-  [59, 158, 144],
+  [213, 174, 98],
+  [132, 99, 33],
   [187, 160, 120],
 ];
 
@@ -273,3 +273,4 @@ export default function ParticleField() {
     />
   );
 }
+

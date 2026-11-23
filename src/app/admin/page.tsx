@@ -164,12 +164,12 @@ export default function AdminPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-theme-border gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <span className="w-2.5 h-2.5 rounded-full bg-brand-400" />
               <span className="text-xs font-bold uppercase tracking-wider text-theme-text">
                 Segurança & Governança
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-theme-text mt-1">
+            <h1 className="lr-app-title text-2xl sm:text-3xl font-extrabold text-theme-text mt-1">
               Console de Gestão de Acessos
             </h1>
             <p className="text-xs sm:text-sm text-theme-muted mt-0.5">
@@ -220,7 +220,7 @@ export default function AdminPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nome, e-mail ou instituição"
-              className="w-full pl-9 pr-3 py-2 bg-theme-primary bg-theme-primary border border-theme-boundary/80 rounded-xl text-xs text-theme-text focus:outline-hidden focus:border-theme-teal focus:ring-2 focus:ring-theme-teal/25"
+              className="w-full pl-9 pr-3 py-2 bg-theme-primary border border-theme-boundary/80 rounded-control text-xs text-theme-text focus:outline-hidden focus:border-[var(--lr-gold-deep)] focus:ring-2 focus:ring-[rgb(var(--accent-teal)/0.25)]"
             />
           </div>
 
@@ -312,7 +312,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => handleApprove(user.id)}
-                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold"
+                            className="px-3 py-1.5 bg-action hover:bg-action-hover text-action-text rounded-control font-bold"
                           >
                             Aprovar 30d
                           </button>
@@ -323,21 +323,21 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => handlePause(user.id)}
-                              className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold"
+                              className="px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-control font-semibold"
                             >
                               Pausar
                             </button>
                             <button
                               type="button"
                               onClick={() => handleExtend(user.id, 15)}
-                              className="px-2.5 py-1.5 bg-theme-border hover:bg-theme-boundary/50 text-theme-text rounded-lg font-semibold"
+                              className="px-2.5 py-1.5 bg-theme-border hover:bg-theme-boundary/50 text-theme-text rounded-control font-semibold"
                             >
                               +15d
                             </button>
                             <button
                               type="button"
                               onClick={() => handleRevoke(user.id)}
-                              className="px-2.5 py-1.5 bg-status-danger-bg hover:bg-status-danger-border text-status-danger-fg rounded-lg font-semibold"
+                              className="px-2.5 py-1.5 bg-status-danger-bg hover:bg-status-danger-border text-status-danger-fg rounded-control font-semibold"
                             >
                               Revogar
                             </button>
@@ -348,7 +348,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => handleResume(user.id)}
-                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold"
+                            className="px-3 py-1.5 bg-action hover:bg-action-hover text-action-text rounded-control font-bold"
                           >
                             Retomar Acesso
                           </button>

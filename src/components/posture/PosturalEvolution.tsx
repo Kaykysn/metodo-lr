@@ -446,9 +446,9 @@ function PhotoWithOverlay({ side, view, overlay, zoom, center, transparent = fal
         <g>
           {data.horizontal && <line x1={data.horizontal.a.x * W} y1={data.horizontal.a.y * H} x2={data.horizontal.b.x * W} y2={data.horizontal.b.y * H} stroke="#ffd36f" strokeWidth={2 * s} strokeDasharray={`${10 * s} ${6 * s}`} />}
           {data.vertical && <line x1={data.vertical.a.x * W} y1={data.vertical.a.y * H} x2={data.vertical.b.x * W} y2={data.vertical.b.y * H} stroke="#6fd3ff" strokeWidth={2 * s} strokeDasharray={`${10 * s} ${6 * s}`} />}
-          {data.landmarks.filter((l) => l.visibility !== "não visível").map((l) => <circle key={l.id} cx={l.x * W} cy={l.y * H} r={5 * s} fill="#7ee2c4" stroke="#0b1620" strokeWidth={2 * s} />)}
+          {data.landmarks.filter((l) => l.visibility !== "não visível").map((l) => <circle key={l.id} cx={l.x * W} cy={l.y * H} r={5 * s} fill="#EBC886" stroke="#111111" strokeWidth={2 * s} />)}
           {stackLabels(ms).map(({ m, row }) => (
-            <text key={m.methodId} x={m.anchor!.x + 10 * s} y={m.anchor!.y - 10 * s + row * 18 * s} fontSize={13 * s} fontWeight={700} fill="#fff" paintOrder="stroke" stroke="#0b1620" strokeWidth={3.5 * s}>{m.short}</text>
+            <text key={m.methodId} x={m.anchor!.x + 10 * s} y={m.anchor!.y - 10 * s + row * 18 * s} fontSize={13 * s} fontWeight={700} fill="#fff" paintOrder="stroke" stroke="#111111" strokeWidth={3.5 * s}>{m.short}</text>
           ))}
         </g>
       )}

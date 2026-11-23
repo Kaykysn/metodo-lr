@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
   <defs>
     <!-- Fundo de Raio-X Escuro com matriz ciano -->
     <linearGradient id="xray-bg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -9,10 +9,10 @@
 
     <!-- Gradiente de Osso / Tecido Iluminado por Raio-X -->
     <linearGradient id="bone-glow" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#e6faf5" />
-      <stop offset="40%" stop-color="#76d7be" />
-      <stop offset="80%" stop-color="#3b9e90" />
-      <stop offset="100%" stop-color="#116c65" />
+      <stop offset="0%" stop-color="#F6F5F2" />
+      <stop offset="40%" stop-color="#D5AE62" />
+      <stop offset="80%" stop-color="#846321" />
+      <stop offset="100%" stop-color="#624915" />
     </linearGradient>
 
     <!-- Gradiente de Tecido Muscular Profundo -->
@@ -41,7 +41,7 @@
 
     <pattern id="xray-grid" width="40" height="40" patternUnits="userSpaceOnUse">
       <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#25756c" stroke-width="0.6" stroke-opacity="0.3" />
-      <circle cx="20" cy="20" r="0.8" fill="#76d7be" fill-opacity="0.4" />
+      <circle cx="20" cy="20" r="0.8" fill="#D5AE62" fill-opacity="0.4" />
     </pattern>
   </defs>
 
@@ -50,10 +50,10 @@
   <rect width="800" height="1000" fill="url(#xray-grid)" />
 
   <!-- Eixo Gravitacional Sagittal e Calibração Métrica -->
-  <line x1="400" y1="40" x2="400" y2="960" stroke="#76d7be" stroke-width="1.2" stroke-dasharray="5 3" stroke-opacity="0.7" />
+  <line x1="400" y1="40" x2="400" y2="960" stroke="#D5AE62" stroke-width="1.2" stroke-dasharray="5 3" stroke-opacity="0.7" />
   
   <!-- Marcadores de Escala Lateral Radiológica -->
-  <g stroke="#3b9e90" stroke-width="1" stroke-opacity="0.6">
+  <g stroke="#846321" stroke-width="1" stroke-opacity="0.6">
     <line x1="120" y1="135" x2="140" y2="135" />
     <line x1="120" y1="265" x2="145" y2="265" />
     <line x1="120" y1="375" x2="140" y2="375" />
@@ -62,15 +62,15 @@
     <line x1="120" y1="935" x2="140" y2="935" />
     <line x1="130" y1="135" x2="130" y2="935" />
   </g>
-  <text x="110" y="270" text-anchor="end" fill="#76d7be" font-family="monospace" font-size="10" opacity="0.8">C7-T1</text>
-  <text x="110" y="380" text-anchor="end" fill="#76d7be" font-family="monospace" font-size="10" opacity="0.8">T12-L1</text>
-  <text x="110" y="535" text-anchor="end" fill="#76d7be" font-family="monospace" font-size="10" opacity="0.8">L5-S1</text>
-  <text x="110" y="735" text-anchor="end" fill="#76d7be" font-family="monospace" font-size="10" opacity="0.8">PATELLA</text>
+  <text x="110" y="270" text-anchor="end" fill="#D5AE62" font-family="monospace" font-size="10" opacity="0.8">C7-T1</text>
+  <text x="110" y="380" text-anchor="end" fill="#D5AE62" font-family="monospace" font-size="10" opacity="0.8">T12-L1</text>
+  <text x="110" y="535" text-anchor="end" fill="#D5AE62" font-family="monospace" font-size="10" opacity="0.8">L5-S1</text>
+  <text x="110" y="735" text-anchor="end" fill="#D5AE62" font-family="monospace" font-size="10" opacity="0.8">PATELLA</text>
 
   <!-- Silhueta Translúcida Externa de Conexão com a Camada 1 -->
   <g opacity="0.25">
-    <ellipse cx="400" cy="135" rx="55" ry="70" fill="none" stroke="#76d7be" stroke-width="1.2" stroke-dasharray="4 4" />
-    <path d="M 280 265 C 265 290, 260 330, 275 390 C 285 430, 310 470, 325 520 L 475 520 C 490 470, 515 430, 525 390 C 540 330, 535 290, 520 265 Z" fill="none" stroke="#76d7be" stroke-width="1.2" stroke-dasharray="4 4" />
+    <ellipse cx="400" cy="135" rx="55" ry="70" fill="none" stroke="#D5AE62" stroke-width="1.2" stroke-dasharray="4 4" />
+    <path d="M 280 265 C 265 290, 260 330, 275 390 C 285 430, 310 470, 325 520 L 475 520 C 490 470, 515 430, 525 390 C 540 330, 535 290, 520 265 Z" fill="none" stroke="#D5AE62" stroke-width="1.2" stroke-dasharray="4 4" />
   </g>
 
   <!-- Camadas Musculares Profundas (Tecido Mole com Luminescência) -->
@@ -84,26 +84,26 @@
     <path d="M 465 600 C 470 650, 460 700, 445 720 C 430 700, 420 650, 425 600 Z" fill="url(#muscle-deep)" opacity="0.6" />
   </g>
 
-  <!-- SISTEMA ESQUELÉTICO COMPLETO (GLOW CIANO RAIO-X) -->
+  <!-- SISTEMA ESQUELÃ‰TICO COMPLETO (GLOW CIANO RAIO-X) -->
   <g id="skeleton" filter="url(#xray-glow)">
 
     <!-- 1. Crânio e Mandíbula -->
-    <g id="skull" stroke="#76d7be" fill="none" stroke-width="2">
+    <g id="skull" stroke="#D5AE62" fill="none" stroke-width="2">
       <!-- Calvária (Caixa Craniana) -->
-      <path d="M 360 135 C 360 90, 440 90, 440 135 C 440 160, 430 175, 420 185 L 380 185 C 370 175, 360 160, 360 135 Z" fill="#0d3f38" fill-opacity="0.4" stroke-width="2.2" />
-      <!-- Órbitas Oculares Radiológicas -->
-      <ellipse cx="382" cy="132" rx="10" ry="12" fill="#021422" stroke="#a6e6d4" stroke-width="1.8" />
-      <ellipse cx="418" cy="132" rx="10" ry="12" fill="#021422" stroke="#a6e6d4" stroke-width="1.8" />
+      <path d="M 360 135 C 360 90, 440 90, 440 135 C 440 160, 430 175, 420 185 L 380 185 C 370 175, 360 160, 360 135 Z" fill="#1B1B1B" fill-opacity="0.4" stroke-width="2.2" />
+      <!-- Ã“rbitas Oculares Radiológicas -->
+      <ellipse cx="382" cy="132" rx="10" ry="12" fill="#021422" stroke="#EBC886" stroke-width="1.8" />
+      <ellipse cx="418" cy="132" rx="10" ry="12" fill="#021422" stroke="#EBC886" stroke-width="1.8" />
       <!-- Cavidade Nasal e Arco Zigomático -->
-      <polygon points="400,145 394,158 406,158" fill="#a6e6d4" fill-opacity="0.8" />
-      <path d="M 370 152 C 380 165, 400 165, 400 165 C 400 165, 420 165, 430 152" stroke="#76d7be" stroke-width="1.5" />
+      <polygon points="400,145 394,158 406,158" fill="#EBC886" fill-opacity="0.8" />
+      <path d="M 370 152 C 380 165, 400 165, 400 165 C 400 165, 420 165, 430 152" stroke="#D5AE62" stroke-width="1.5" />
       <!-- Mandíbula e Maxilar com Dentes Esquemáticos -->
-      <path d="M 378 178 L 422 178 L 415 198 L 385 198 Z" fill="#0d3f38" fill-opacity="0.5" stroke="#a6e6d4" stroke-width="1.8" />
-      <line x1="388" y1="188" x2="412" y2="188" stroke="#e6faf5" stroke-width="1.2" />
+      <path d="M 378 178 L 422 178 L 415 198 L 385 198 Z" fill="#1B1B1B" fill-opacity="0.5" stroke="#EBC886" stroke-width="1.8" />
+      <line x1="388" y1="188" x2="412" y2="188" stroke="#F6F5F2" stroke-width="1.2" />
     </g>
 
     <!-- 2. Coluna Cervical (C1 - C7) -->
-    <g id="cervical-spine" fill="#a6e6d4" stroke="#76d7be" stroke-width="1.2">
+    <g id="cervical-spine" fill="#EBC886" stroke="#D5AE62" stroke-width="1.2">
       <rect x="393" y="202" width="14" height="4" rx="1.5" />
       <rect x="392" y="209" width="16" height="4" rx="1.5" />
       <rect x="391" y="216" width="18" height="4" rx="1.5" />
@@ -114,24 +114,24 @@
     </g>
 
     <!-- 3. Cintura Escapular (Clavículas e Escápulas) -->
-    <g id="shoulder-girdle" stroke="#a6e6d4" fill="none" stroke-width="2.5">
+    <g id="shoulder-girdle" stroke="#EBC886" fill="none" stroke-width="2.5">
       <!-- Clavículas em S Itálico -->
       <path d="M 390 255 C 355 248, 320 258, 280 265" stroke-linecap="round" />
       <path d="M 410 255 C 445 248, 480 258, 520 265" stroke-linecap="round" />
-      <!-- Articulação Acromioclavicular e Cabeça do Úmero -->
-      <circle cx="278" cy="268" r="9" fill="#0d3f38" stroke="#e6faf5" stroke-width="2" />
-      <circle cx="522" cy="268" r="9" fill="#0d3f38" stroke="#e6faf5" stroke-width="2" />
-      <!-- Escápulas (Sombras Ósseas) -->
-      <path d="M 305 275 L 290 340 L 335 320 Z" fill="#116c65" fill-opacity="0.3" stroke="#3b9e90" stroke-width="1.5" />
-      <path d="M 495 275 L 510 340 L 465 320 Z" fill="#116c65" fill-opacity="0.3" stroke="#3b9e90" stroke-width="1.5" />
+      <!-- Articulação Acromioclavicular e Cabeça do Ãšmero -->
+      <circle cx="278" cy="268" r="9" fill="#1B1B1B" stroke="#F6F5F2" stroke-width="2" />
+      <circle cx="522" cy="268" r="9" fill="#1B1B1B" stroke="#F6F5F2" stroke-width="2" />
+      <!-- Escápulas (Sombras Ã“sseas) -->
+      <path d="M 305 275 L 290 340 L 335 320 Z" fill="#624915" fill-opacity="0.3" stroke="#846321" stroke-width="1.5" />
+      <path d="M 495 275 L 510 340 L 465 320 Z" fill="#624915" fill-opacity="0.3" stroke="#846321" stroke-width="1.5" />
     </g>
 
     <!-- 4. Caixa Torácica (Costelas e Esterno) -->
-    <g id="ribcage" stroke="#76d7be" fill="none">
+    <g id="ribcage" stroke="#D5AE62" fill="none">
       <!-- Esterno Central (Manúbrio, Corpo e Xifoide) -->
-      <path d="M 396 254 L 404 254 L 406 270 L 394 270 Z" fill="#e6faf5" stroke="#ffffff" stroke-width="1.2" />
-      <path d="M 395 272 L 405 272 L 403 345 L 397 345 Z" fill="#a6e6d4" stroke="#76d7be" stroke-width="1.5" />
-      <polygon points="400,348 397,358 403,358" fill="#e6faf5" />
+      <path d="M 396 254 L 404 254 L 406 270 L 394 270 Z" fill="#F6F5F2" stroke="#ffffff" stroke-width="1.2" />
+      <path d="M 395 272 L 405 272 L 403 345 L 397 345 Z" fill="#EBC886" stroke="#D5AE62" stroke-width="1.5" />
+      <polygon points="400,348 397,358 403,358" fill="#F6F5F2" />
 
       <!-- Pares de Costelas (12 Arcos Costais Bilaterais) -->
       <!-- Par 1 -->
@@ -161,54 +161,54 @@
     </g>
 
     <!-- 5. Coluna Torácica e Lombar (T1 - T12 e L1 - L5 com Discos) -->
-    <g id="spine-vertebrae" fill="#e6faf5" stroke="#116c65" stroke-width="1">
+    <g id="spine-vertebrae" fill="#F6F5F2" stroke="#624915" stroke-width="1">
       <!-- Vértebras Torácicas -->
-      <rect x="389" y="255" width="22" height="6" rx="2" fill="#a6e6d4" />
-      <rect x="388" y="265" width="24" height="6.5" rx="2" fill="#a6e6d4" />
-      <rect x="387" y="276" width="26" height="7" rx="2" fill="#a6e6d4" />
-      <rect x="386" y="287" width="28" height="7.5" rx="2" fill="#a6e6d4" />
-      <rect x="385" y="299" width="30" height="8" rx="2" fill="#a6e6d4" />
-      <rect x="384" y="311" width="32" height="8.5" rx="2" fill="#a6e6d4" />
-      <rect x="384" y="324" width="32" height="9" rx="2" fill="#a6e6d4" />
-      <rect x="383" y="337" width="34" height="9.5" rx="2" fill="#a6e6d4" />
-      <rect x="383" y="351" width="34" height="10" rx="2" fill="#a6e6d4" />
-      <rect x="382" y="365" width="36" height="10.5" rx="2" fill="#a6e6d4" />
+      <rect x="389" y="255" width="22" height="6" rx="2" fill="#EBC886" />
+      <rect x="388" y="265" width="24" height="6.5" rx="2" fill="#EBC886" />
+      <rect x="387" y="276" width="26" height="7" rx="2" fill="#EBC886" />
+      <rect x="386" y="287" width="28" height="7.5" rx="2" fill="#EBC886" />
+      <rect x="385" y="299" width="30" height="8" rx="2" fill="#EBC886" />
+      <rect x="384" y="311" width="32" height="8.5" rx="2" fill="#EBC886" />
+      <rect x="384" y="324" width="32" height="9" rx="2" fill="#EBC886" />
+      <rect x="383" y="337" width="34" height="9.5" rx="2" fill="#EBC886" />
+      <rect x="383" y="351" width="34" height="10" rx="2" fill="#EBC886" />
+      <rect x="382" y="365" width="36" height="10.5" rx="2" fill="#EBC886" />
 
       <!-- Vértebras Lombares L1 - L5 (Mais robustas para carga) -->
-      <rect x="381" y="380" width="38" height="12" rx="2.5" fill="#e6faf5" stroke="#76d7be" stroke-width="1.5" />
-      <line x1="384" y1="394" x2="416" y2="394" stroke="#76d7be" stroke-width="2" />
-      <rect x="380" y="397" width="40" height="13" rx="2.5" fill="#e6faf5" stroke="#76d7be" stroke-width="1.5" />
-      <line x1="383" y1="412" x2="417" y2="412" stroke="#76d7be" stroke-width="2" />
-      <rect x="379" y="415" width="42" height="14" rx="2.5" fill="#e6faf5" stroke="#76d7be" stroke-width="1.5" />
-      <line x1="382" y1="431" x2="418" y2="431" stroke="#76d7be" stroke-width="2" />
-      <rect x="378" y="434" width="44" height="15" rx="2.5" fill="#e6faf5" stroke="#76d7be" stroke-width="1.5" />
-      <line x1="381" y1="451" x2="419" y2="451" stroke="#76d7be" stroke-width="2" />
-      <rect x="377" y="454" width="46" height="16" rx="2.5" fill="#e6faf5" stroke="#76d7be" stroke-width="1.5" />
+      <rect x="381" y="380" width="38" height="12" rx="2.5" fill="#F6F5F2" stroke="#D5AE62" stroke-width="1.5" />
+      <line x1="384" y1="394" x2="416" y2="394" stroke="#D5AE62" stroke-width="2" />
+      <rect x="380" y="397" width="40" height="13" rx="2.5" fill="#F6F5F2" stroke="#D5AE62" stroke-width="1.5" />
+      <line x1="383" y1="412" x2="417" y2="412" stroke="#D5AE62" stroke-width="2" />
+      <rect x="379" y="415" width="42" height="14" rx="2.5" fill="#F6F5F2" stroke="#D5AE62" stroke-width="1.5" />
+      <line x1="382" y1="431" x2="418" y2="431" stroke="#D5AE62" stroke-width="2" />
+      <rect x="378" y="434" width="44" height="15" rx="2.5" fill="#F6F5F2" stroke="#D5AE62" stroke-width="1.5" />
+      <line x1="381" y1="451" x2="419" y2="451" stroke="#D5AE62" stroke-width="2" />
+      <rect x="377" y="454" width="46" height="16" rx="2.5" fill="#F6F5F2" stroke="#D5AE62" stroke-width="1.5" />
     </g>
 
-    <!-- 6. Pélvis e Sacro (Ilíaco, Púbis e Ísquio) -->
-    <g id="pelvis" stroke="#a6e6d4" stroke-width="2.2" fill="#0d3f38" fill-opacity="0.35">
+    <!-- 6. Pélvis e Sacro (Ilíaco, Púbis e Ãsquio) -->
+    <g id="pelvis" stroke="#EBC886" stroke-width="2.2" fill="#1B1B1B" fill-opacity="0.35">
       <!-- Sacro e Cóccix Central -->
-      <polygon points="400,472 382,475 385,520 400,535 415,520 418,475" fill="#76d7be" fill-opacity="0.6" stroke="#e6faf5" stroke-width="1.5" />
+      <polygon points="400,472 382,475 385,520 400,535 415,520 418,475" fill="#D5AE62" fill-opacity="0.6" stroke="#F6F5F2" stroke-width="1.5" />
       <!-- Asas Ilíacas (Cristas Ilíacas Direita e Esquerda) -->
       <path d="M 382 475 C 330 460, 310 500, 315 540 C 320 560, 340 575, 365 570 C 375 565, 385 540, 385 520 Z" />
       <path d="M 418 475 C 470 460, 490 500, 485 540 C 480 560, 460 575, 435 570 C 425 565, 415 540, 415 520 Z" />
       <!-- Forame Obturador e Arco Púbico -->
-      <ellipse cx="360" cy="550" rx="10" ry="14" fill="#021422" stroke="#76d7be" stroke-width="1.8" />
-      <ellipse cx="440" cy="550" rx="10" ry="14" fill="#021422" stroke="#76d7be" stroke-width="1.8" />
-      <path d="M 370 565 C 390 580, 410 580, 430 565" fill="none" stroke="#e6faf5" stroke-width="2.5" />
+      <ellipse cx="360" cy="550" rx="10" ry="14" fill="#021422" stroke="#D5AE62" stroke-width="1.8" />
+      <ellipse cx="440" cy="550" rx="10" ry="14" fill="#021422" stroke="#D5AE62" stroke-width="1.8" />
+      <path d="M 370 565 C 390 580, 410 580, 430 565" fill="none" stroke="#F6F5F2" stroke-width="2.5" />
     </g>
 
-    <!-- 7. Membros Superiores (Úmero, Rádio e Ulna) -->
-    <g id="upper-limbs" stroke="#a6e6d4" stroke-width="3" fill="#0d3f38">
+    <!-- 7. Membros Superiores (Ãšmero, Rádio e Ulna) -->
+    <g id="upper-limbs" stroke="#EBC886" stroke-width="3" fill="#1B1B1B">
       <!-- Braço Esquerdo -->
       <line x1="278" y1="275" x2="245" y2="420" stroke-linecap="round" />
-      <circle cx="245" cy="420" r="7" fill="#e6faf5" stroke="#76d7be" stroke-width="1.5" />
+      <circle cx="245" cy="420" r="7" fill="#F6F5F2" stroke="#D5AE62" stroke-width="1.5" />
       <line x1="243" y1="428" x2="225" y2="540" stroke-width="2" />
       <line x1="247" y1="428" x2="231" y2="540" stroke-width="1.8" />
       <!-- Braço Direito -->
       <line x1="522" y1="275" x2="555" y2="420" stroke-linecap="round" />
-      <circle cx="555" cy="420" r="7" fill="#e6faf5" stroke="#76d7be" stroke-width="1.5" />
+      <circle cx="555" cy="420" r="7" fill="#F6F5F2" stroke="#D5AE62" stroke-width="1.5" />
       <line x1="557" y1="428" x2="575" y2="540" stroke-width="2" />
       <line x1="553" y1="428" x2="569" y2="540" stroke-width="1.8" />
     </g>
@@ -216,71 +216,71 @@
     <!-- 8. Membros Inferiores (Fêmur, Patela, Tíbia e Fíbula) -->
     <g id="lower-limbs">
       <!-- Articulação Coxofemoral (Cabeça do Fêmur no Acetábulo) -->
-      <circle cx="330" cy="540" r="10" fill="#0d3f38" stroke="#e6faf5" stroke-width="2" />
-      <circle cx="470" cy="540" r="10" fill="#0d3f38" stroke="#e6faf5" stroke-width="2" />
+      <circle cx="330" cy="540" r="10" fill="#1B1B1B" stroke="#F6F5F2" stroke-width="2" />
+      <circle cx="470" cy="540" r="10" fill="#1B1B1B" stroke="#F6F5F2" stroke-width="2" />
 
       <!-- Fêmur Esquerdo e Direito (Diáfise e Côndilos) -->
-      <path d="M 330 548 L 350 715" stroke="#a6e6d4" stroke-width="4.5" stroke-linecap="round" />
-      <path d="M 470 548 L 450 715" stroke="#a6e6d4" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M 330 548 L 350 715" stroke="#EBC886" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M 470 548 L 450 715" stroke="#EBC886" stroke-width="4.5" stroke-linecap="round" />
 
       <!-- Articulação do Joelho e Patela Fluorescente -->
       <g id="knee-joints">
         <!-- Côndilos Femorais -->
-        <ellipse cx="352" cy="718" rx="15" ry="8" fill="#116c65" stroke="#76d7be" stroke-width="2" />
-        <ellipse cx="448" cy="718" rx="15" ry="8" fill="#116c65" stroke="#76d7be" stroke-width="2" />
+        <ellipse cx="352" cy="718" rx="15" ry="8" fill="#624915" stroke="#D5AE62" stroke-width="2" />
+        <ellipse cx="448" cy="718" rx="15" ry="8" fill="#624915" stroke="#D5AE62" stroke-width="2" />
         <!-- Patela Radiológica em Alto Contraste -->
-        <circle cx="355" cy="728" r="9" fill="#e6faf5" stroke="#ffffff" stroke-width="2" />
-        <circle cx="445" cy="728" r="9" fill="#e6faf5" stroke="#ffffff" stroke-width="2" />
-        <line x1="345" y1="728" x2="365" y2="728" stroke="#116c65" stroke-width="1.5" />
-        <line x1="435" y1="728" x2="455" y2="728" stroke="#116c65" stroke-width="1.5" />
+        <circle cx="355" cy="728" r="9" fill="#F6F5F2" stroke="#ffffff" stroke-width="2" />
+        <circle cx="445" cy="728" r="9" fill="#F6F5F2" stroke="#ffffff" stroke-width="2" />
+        <line x1="345" y1="728" x2="365" y2="728" stroke="#624915" stroke-width="1.5" />
+        <line x1="435" y1="728" x2="455" y2="728" stroke="#624915" stroke-width="1.5" />
       </g>
 
       <!-- Tíbia e Fíbula (Pernas) -->
       <!-- Perna Esquerda -->
-      <path d="M 353 738 L 362 925" stroke="#a6e6d4" stroke-width="4" stroke-linecap="round" />
-      <path d="M 364 742 L 372 920" stroke="#76d7be" stroke-width="2" stroke-linecap="round" stroke-dasharray="8 3" />
+      <path d="M 353 738 L 362 925" stroke="#EBC886" stroke-width="4" stroke-linecap="round" />
+      <path d="M 364 742 L 372 920" stroke="#D5AE62" stroke-width="2" stroke-linecap="round" stroke-dasharray="8 3" />
       <!-- Perna Direita -->
-      <path d="M 447 738 L 438 925" stroke="#a6e6d4" stroke-width="4" stroke-linecap="round" />
-      <path d="M 436 742 L 428 920" stroke="#76d7be" stroke-width="2" stroke-linecap="round" stroke-dasharray="8 3" />
+      <path d="M 447 738 L 438 925" stroke="#EBC886" stroke-width="4" stroke-linecap="round" />
+      <path d="M 436 742 L 428 920" stroke="#D5AE62" stroke-width="2" stroke-linecap="round" stroke-dasharray="8 3" />
 
       <!-- Articulação do Tornozelo (Maléolos Medial e Lateral) -->
-      <ellipse cx="362" cy="932" rx="11" ry="6" fill="#116c65" stroke="#e6faf5" stroke-width="2" />
-      <ellipse cx="438" cy="932" rx="11" ry="6" fill="#116c65" stroke="#e6faf5" stroke-width="2" />
+      <ellipse cx="362" cy="932" rx="11" ry="6" fill="#624915" stroke="#F6F5F2" stroke-width="2" />
+      <ellipse cx="438" cy="932" rx="11" ry="6" fill="#624915" stroke="#F6F5F2" stroke-width="2" />
     </g>
   </g>
 
-  <!-- Miras Ópticas e Marcadores Biomecânicos de Calibração -->
-  <g stroke="#76d7be" stroke-width="1.2" opacity="0.8">
+  <!-- Miras Ã“pticas e Marcadores Biomecânicos de Calibração -->
+  <g stroke="#D5AE62" stroke-width="1.2" opacity="0.8">
     <!-- Mira L5-S1 -->
     <circle cx="400" cy="460" r="14" fill="none" stroke-dasharray="3 3" />
     <line x1="380" y1="460" x2="420" y2="460" />
     <line x1="400" y1="440" x2="400" y2="480" />
-    <text x="425" y="464" fill="#a6e6d4" font-family="monospace" font-size="11" font-weight="bold">L5-S1 ALINHADO</text>
+    <text x="425" y="464" fill="#EBC886" font-family="monospace" font-size="11" font-weight="bold">L5-S1 ALINHADO</text>
 
     <!-- Mira Joelho Esquerdo -->
-    <circle cx="355" cy="728" r="18" fill="none" stroke="#76d7be" stroke-width="1.2" stroke-dasharray="4 2" />
+    <circle cx="355" cy="728" r="18" fill="none" stroke="#D5AE62" stroke-width="1.2" stroke-dasharray="4 2" />
     <!-- Mira Joelho Direito -->
-    <circle cx="445" cy="728" r="18" fill="none" stroke="#76d7be" stroke-width="1.2" stroke-dasharray="4 2" />
+    <circle cx="445" cy="728" r="18" fill="none" stroke="#D5AE62" stroke-width="1.2" stroke-dasharray="4 2" />
   </g>
 
   <!-- Selos de Identificação e Orientação -->
   <!-- Header Card Superior -->
   <g transform="translate(40, 35)">
-    <rect width="720" height="42" rx="10" fill="url(#xray-badge-bg)" stroke="#3b9e90" stroke-width="1.5" />
-    <circle cx="24" cy="21" r="5" fill="#76d7be" filter="url(#xray-glow)" />
-    <text x="40" y="26" fill="#e6faf5" font-family="system-ui, sans-serif" font-size="12" font-weight="700" letter-spacing="1.2">
-      MÉTODO LR · CAMADA 2: RAIO-X &amp; ESTRUTURA ANATÔMICA PROFUNDA
+    <rect width="720" height="42" rx="10" fill="url(#xray-badge-bg)" stroke="#846321" stroke-width="1.5" />
+    <circle cx="24" cy="21" r="5" fill="#D5AE62" filter="url(#xray-glow)" />
+    <text x="40" y="26" fill="#F6F5F2" font-family="system-ui, sans-serif" font-size="12" font-weight="700" letter-spacing="1.2">
+      MÃ‰TODO LR · CAMADA 2: RAIO-X &amp; ESTRUTURA ANATÃ”MICA PROFUNDA
     </text>
-    <text x="690" y="26" text-anchor="end" fill="#76d7be" font-family="system-ui, sans-serif" font-size="11" font-weight="600">
+    <text x="690" y="26" text-anchor="end" fill="#D5AE62" font-family="system-ui, sans-serif" font-size="11" font-weight="600">
       RAIO-X ATIVO
     </text>
   </g>
 
   <!-- Badge Inferior Informativo -->
   <g transform="translate(160, 955)">
-    <rect width="480" height="30" rx="8" fill="#04201c" stroke="#3b9e90" stroke-width="1.2" opacity="0.95" />
-    <text x="240" y="20" text-anchor="middle" fill="#76d7be" font-family="system-ui, sans-serif" font-size="11" font-weight="600" letter-spacing="0.5">
-      ESTRUTURA ÓSSEA E BIOMECÂNICA REVELADA PELA LANTERNA CIANO
+    <rect width="480" height="30" rx="8" fill="#111111" stroke="#846321" stroke-width="1.2" opacity="0.95" />
+    <text x="240" y="20" text-anchor="middle" fill="#D5AE62" font-family="system-ui, sans-serif" font-size="11" font-weight="600" letter-spacing="0.5">
+      ESTRUTURA Ã“SSEA E BIOMECÃ‚NICA REVELADA PELA LANTERNA CIANO
     </text>
   </g>
 </svg>

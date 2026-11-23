@@ -16,7 +16,7 @@ export default function HeroSocialProof() {
     <ul className="hero-social-proof mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
       {items.map((item) => (
         <li key={item.label} className="flex items-center gap-1.5">
-          <BadgeCheck className="h-4 w-4 text-[rgb(var(--hero-jade))]" aria-hidden="true" />
+          <BadgeCheck className="h-4 w-4 text-[var(--lr-gold)]" aria-hidden="true" />
           <span>{item.label}</span>
         </li>
       ))}

@@ -221,15 +221,19 @@ assert.ok(mp4Size < 4 * 1024 * 1024, "O MP4 do hero deve ficar abaixo de 4 MB");
 
 const heroPath = path.join(root, "src", "components", "landing", "Hero.tsx");
 const heroSrc = fs.readFileSync(heroPath, "utf-8");
-assert.ok(heroSrc.includes("HeroShowcase"), "Hero.tsx deve integrar o HeroShowcase");
-assert.ok(heroSrc.includes("HeroBackdrop"), "Hero.tsx deve integrar o HeroBackdrop");
-assert.ok(heroSrc.includes("hero-model"), "Hero.tsx deve usar o wrapper único .hero-model");
+assert.ok(!heroSrc.includes("HeroShowcase"), "Hero.tsx não deve integrar o HeroShowcase");
+assert.ok(heroSrc.includes("lr-hero-art"), "Hero.tsx deve integrar a arte editorial da referência");
+assert.ok(heroSrc.includes("EDITORIAL_SCENES.hero"), "Hero.tsx deve usar a cena hero do mapa editorial");
+assert.ok(heroSrc.includes('from "@/lib/landing/editorial-media"'), "Hero.tsx deve importar o mapa editorial único");
+assert.ok(!heroSrc.includes("hero-model"), "Hero.tsx não deve renderizar o modelo sobreposto");
+assert.ok(!heroSrc.includes("HeroShowcase"), "Hero.tsx não deve importar o raio-X");
+assert.ok(!heroSrc.includes("lr-anatomy-marker"), "Hero.tsx não deve renderizar o marcador Deltoide fora do ombro do atleta");
+assert.ok(!heroSrc.includes("Mova o cursor para revelar"), "Hero.tsx não deve mostrar a instrução da lente");
 assert.ok(!heroSrc.includes("mesh-hero"), "Hero.tsx não deve referenciar a arte antiga");
-assert.ok(heroSrc.includes("Explore a anatomia. Mova o cursor para revelar."), "Hero.tsx deve conter o texto de apoio");
-assert.ok(heroSrc.includes('id="demonstracao"'), "Hero.tsx deve preservar o identificador da seção");
+assert.ok(heroSrc.includes('id="inicio"'), "Hero.tsx deve preservar o identificador da seção");
 assert.ok(heroSrc.includes('id="hero-titulo"'), "Hero.tsx deve preservar o título original");
 assert.ok(heroSrc.includes('href="/solicitar-acesso"'), "Hero.tsx deve preservar os botões de ação e links");
-assert.ok(heroSrc.includes('href="/app"'), "Hero.tsx deve preservar o link de demonstração");
+assert.ok(heroSrc.includes('href="#demonstracao"'), "Hero.tsx deve preservar o link de demonstração");
 
 // Arte oficial em WebP (via next/image), mesmo canvas nas duas versões
 for (const asset of [
@@ -241,24 +245,21 @@ for (const asset of [
   const stat = fs.statSync(p);
   assert.ok(stat.size > 40000, `Arte do Hero suspeita (arquivo muito pequeno): ${asset}`);
 }
+const showcaseSrc = fs.readFileSync(heroShowcasePath, "utf-8");
 assert.ok(heroXRaySrc.includes("hero-body-base.webp"), "A base deve usar o asset WebP");
 assert.ok(heroXRaySrc.includes("hero-body-xray.webp"), "O raio-X deve usar o asset WebP");
+assert.ok(showcaseSrc.includes("/media/hero-body-base.webp"), "O modelo original de pele deve ser passado explicitamente");
+assert.ok(showcaseSrc.includes("/media/hero-body-xray.webp"), "O modelo original de musculatura deve ser passado explicitamente");
 
 // Ilha escura: o hero é idêntico nos dois temas
 assert.ok(heroSrc.includes('data-theme="dark"'), "O hero deve ser uma ilha escura (data-theme=dark)");
 
-// Transição hero → próxima seção e indicador de rolagem no Hero
-assert.ok(heroSrc.includes("hero-section-fade"), "Hero.tsx deve renderizar a faixa de transição");
-assert.ok(heroSrc.includes("hero-scroll-cue"), "Hero.tsx deve renderizar o indicador de rolagem");
-assert.ok(heroSrc.includes("hero-next-bg") || globalsCss.includes("--hero-next-bg"), "A faixa deve mirar a cor da próxima seção");
-
-// Botão "Ver demonstração": abre um diálogo acessível
-assert.ok(heroSrc.includes("Ver demonstração"), "Hero.tsx deve manter o botão Ver demonstração");
-assert.ok(heroSrc.includes('role="dialog"'), "O modal deve ter role=dialog");
-assert.ok(heroSrc.includes('aria-modal="true"'), "O modal deve ter aria-modal=true");
-assert.ok(heroSrc.includes("Escape"), "O modal deve fechar com Esc");
-assert.ok(heroSrc.includes("focusables"), "O modal deve prender o foco (focus trap)");
-assert.ok(heroSrc.includes("TODO"), "O modal deve manter um TODO do vídeo oficial");
+// A demonstração pública é uma seção da própria landing.
+const landingSrc = fs.readFileSync(path.join(root, "src/app/page.tsx"), "utf-8");
+assert.ok(landingSrc.includes('id="demonstracao"'));
+assert.ok(landingSrc.includes("<ProductPreview demo={demo}"));
+assert.ok(heroSrc.includes("Ver demonstração"));
+assert.ok(heroSrc.includes('href="#percurso"'));
 
 // Prova de confiança opcional, alimentada por configuração
 assert.ok(heroSrc.includes("HeroSocialProof"), "Hero.tsx deve incluir a prova de confiança opcional");
@@ -268,15 +269,44 @@ const socialSrc = fs.readFileSync(socialPath, "utf-8");
 assert.ok(socialSrc.includes("return null"), "Sem dados reais a prova de confiança não deve renderizar nada");
 assert.ok(socialSrc.includes("HERO_SOCIAL_PROOF"), "A prova de confiança deve vir de constantes de configuração");
 
-// Header: variante escura sobre o hero, trocada por IntersectionObserver
+// Header: identidade preta/dourada, com navegação e seletor de tema preservados
 const headerPath = path.join(root, "src", "components", "landing", "Header.tsx");
 const headerSrc = fs.readFileSync(headerPath, "utf-8");
-assert.ok(hasClass("site-header-over-hero"), "O header deve ter a variante escura .site-header-over-hero");
-assert.ok(headerSrc.includes("IntersectionObserver"), "A troca do header deve usar IntersectionObserver (não scroll)");
-assert.ok(headerSrc.includes("rootMargin"), "O observador do header deve recuar o topo pela altura do header");
+assert.ok(headerSrc.includes("lr-header"), "O header deve usar a identidade preta .lr-header");
+assert.ok(headerSrc.includes("MethodBrand"), "O header deve usar o monograma oficial dourado");
+assert.ok(headerSrc.includes("lr-button--gold"), "O CTA do header deve ser dourado");
 assert.ok(headerSrc.includes("ThemeSelector"), "O header deve manter o seletor de tema");
 assert.ok(!headerSrc.includes("VisualEffectsToggle"), "O header deve ter apenas UM controle de tema (sem toggle extra)");
-assert.ok(headerSrc.includes("site-header-cta"), "O CTA do header deve ser secundário (site-header-cta)");
+
+// Modelo anatômico transferido para "Por baixo da pele" (#mapa)
+const bodyMapDemoPath = path.join(root, "src", "components", "landing", "BodyMapDemo.tsx");
+const bodyMapDemoSrc = fs.readFileSync(bodyMapDemoPath, "utf-8");
+assert.ok(bodyMapDemoSrc.includes("HeroXRay"), "O visor do mapa deve reaproveitar a lógica da lente do HeroXRay");
+assert.ok(bodyMapDemoSrc.includes("/media/hero-body-base.webp"), "A pele no mapa deve usar o modelo do hero");
+assert.ok(bodyMapDemoSrc.includes("/media/hero-body-xray.webp"), "A anatomia no mapa deve usar a camada laranja do hero");
+assert.ok(bodyMapDemoSrc.includes("lr-skin-grayscale"), "Somente a pele recebe grayscale; a anatomia preserva o laranja");
+assert.ok(bodyMapDemoSrc.includes("autoSweep={false}"), "No mapa a lente é controlada pelo ponteiro, teclado e regiões");
+assert.ok(bodyMapDemoSrc.includes("aspectRatio=\"896 / 1114\""), "As duas camadas compartilham a mesma proporção no mapa");
+const mapCss = fs.readFileSync(path.join(root, "src", "styles", "metodo-lr.css"), "utf-8");
+assert.ok(mapCss.includes(".lr-skin-grayscale img {"), "O CSS deve aplicar grayscale apenas à pele");
+assert.ok(mapCss.includes("touch-action: pan-y"), "O visor deve manter touch-action: pan-y");
+assert.ok(mapCss.includes(".lr-map-copy {"), "O parágrafo do mapa deve usar cinza-claro legível");
+console.log("✓ Modelo anatômico e lente transferidos para a seção #mapa.");
+
+// Reavaliação: foto local no lugar do player
+const sectionsSrc = fs.readFileSync(path.join(root, "src", "components", "landing", "LandingSections.tsx"), "utf-8");
+assert.ok(sectionsSrc.includes("ReavaliacaoPhoto"), "A seção de percurso deve usar a foto de reavaliação");
+assert.ok(!sectionsSrc.includes("SceneVideo"), "O player de vídeo deve sair da seção de percurso");
+assert.ok(sectionsSrc.includes("Reavaliar não sobrescreve o treino em uso"), "O texto sobre reavaliação deve ser preservado");
+const photoPath = path.join(root, "src", "components", "landing", "ReavaliacaoPhoto.tsx");
+const photoSrc = fs.readFileSync(photoPath, "utf-8");
+assert.ok(photoSrc.includes("EDITORIAL_SCENES.reavaliacao"), "A cena reavaliacao deve vir do mapa editorial");
+assert.ok(photoSrc.includes('from "@/lib/landing/editorial-media"'), "A reavaliação deve usar o mapa editorial único");
+assert.ok(photoSrc.includes("aspect-[3/2]"), "A foto deve preservar a proporção original 3:2");
+for (const suffix of ["", "-pb", "-dither"]) {
+  assert.ok(fs.existsSync(path.join(root, "public/images/lr-pb", `reavaliacao-mobilidade${suffix}.webp`)));
+}
+console.log("✓ Reavaliação exibida como fotografia local, sem player.");
 console.log("✓ Integração não destrutiva no Hero validada com sucesso.");
 
 console.log("\n=== TODOS OS CRITÉRIOS DO NOVO HERO FORAM APROVADOS! ===");
