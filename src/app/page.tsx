@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
 import {
@@ -16,6 +17,8 @@ import Footer from "@/components/landing/Footer";
 import GoldRibbon from "@/components/landing/GoldRibbon";
 import ProductPreview from "@/components/landing/ProductPreview";
 import { buildDemoCase } from "@/lib/landing/demo-case";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function LandingPage() {
   // Caso fictício montado no servidor; a landing não depende de cadastro nem de sessão.

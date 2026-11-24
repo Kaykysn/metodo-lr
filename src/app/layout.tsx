@@ -8,6 +8,7 @@ import ParticleField from "@/components/effects/ParticleField";
 import LayeredBackdrop from "@/components/effects/LayeredBackdrop";
 import ClickEffects from "@/components/effects/ClickEffects";
 import ScrollEffects from "@/components/motion/ScrollEffects";
+import { siteOrigin } from "@/lib/site/origin";
 
 // Manrope (OFL) hospedada localmente: src/fonts/OFL.txt
 const manrope = localFont({
@@ -31,19 +32,6 @@ const barlow = localFont({
   display: "swap",
   fallback: ["Arial Narrow", "Impact", "sans-serif"],
 });
-
-/**
- * Endereço absoluto das imagens de compartilhamento. Na Vercel vem do domínio de produção
- * informado no build (acompanha o domínio próprio quando for ligado); fora dela, da URL do
- * site, ignorando localhost, que não serve para quem recebe o link.
- */
-function siteOrigin(): URL {
-  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (vercel) return new URL(`https://${vercel}`);
-  const site = process.env.NEXT_PUBLIC_SITE_URL;
-  if (site && !/localhost|127\.0\.0\.1/.test(site)) return new URL(site);
-  return new URL("https://metodolr.vercel.app");
-}
 
 const SITE_DESCRIPTION =
   "Plataforma para profissionais e estudantes de Educação Física organizarem avaliações, montarem treinos individualizados e acompanharem a evolução dos alunos.";

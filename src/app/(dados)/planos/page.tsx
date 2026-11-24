@@ -6,6 +6,7 @@ import { readSupportConfig } from "@/lib/subscription/billing";
 
 export const metadata: Metadata = {
   title: "Planos",
+  alternates: { canonical: "/planos" },
   description: "Três planos mensais para profissionais de Educação Física: Essencial, Evolução e Completo. Comece com 30 dias grátis.",
 };
 

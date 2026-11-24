@@ -15,7 +15,7 @@ export default function Footer() {
           Ferramenta de apoio ao planejamento. Não substitui avaliação individual nem julgamento profissional.
         </p>
         <nav aria-label="Plataforma" className="flex flex-wrap gap-x-5 gap-y-2">
-          <Link href="#demonstracao" className="lr-foot-link">Demonstração</Link>
+          <Link href="/#demonstracao" className="lr-foot-link">Demonstração</Link>
           <Link href="/planos" className="lr-foot-link">Planos</Link>
           <Link href="/solicitar-acesso" className="lr-foot-link">Solicitar acesso</Link>
           <Link href="/login" className="lr-foot-link">Entrar</Link>

@@ -57,10 +57,10 @@ export default function AguardandoAprovacaoPage() {
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/demo"
+              href="/#demonstracao"
               className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-inverse hover:bg-inverse-hover text-inverse-fg text-xs font-bold transition-colors flex items-center justify-center gap-2"
             >
-              <span>Explorar Demonstração Interativa</span>
+              <span>Ver a demonstração</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
