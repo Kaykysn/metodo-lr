@@ -6,6 +6,7 @@ import AppearanceBar from "@/components/appearance/AppearanceBar";
 import { isSupabaseConfigured, getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { assurance, needsCode, safeNext, verifyCode } from "@/lib/auth/mfa";
 import CodeForm from "@/components/auth/CodeForm";
+import { destinationFor } from "@/lib/auth/home";
 import { ShieldCheck, Mail, Lock, ArrowRight, AlertCircle, Check } from "lucide-react";
 
 // Mensagens fixas: nada vindo do provedor vai para a tela, e nenhuma delas revela se o e-mail tem conta.
@@ -30,12 +31,14 @@ function loginErrorMessage(error: { status?: number; code?: string }): string {
 
 /** Encaminha pelo status real do perfil (a RLS só devolve o próprio perfil). */
 async function finishLogin(supabase: NonNullable<ReturnType<typeof getSupabaseBrowserClient>>, userId: string) {
-  const { data: profile } = await supabase.from("profiles").select("status, activated_at").eq("id", userId).maybeSingle();
-  const status = (profile as { status?: string } | null)?.status;
-  const activated = !!(profile as { activated_at?: string | null } | null)?.activated_at;
+  const { data: profile } = await supabase.from("profiles").select("status, activated_at, role").eq("id", userId).maybeSingle();
+  const p = profile as { status?: string; activated_at?: string | null; role?: string } | null;
+  const status = p?.status;
+  const activated = !!p?.activated_at;
   const next = safeNext(new URLSearchParams(window.location.search).get("redirect"));
+  // Aluno vai direto para o próprio treino; profissional, para a área profissional.
   // Navegação completa de propósito: o proxy relê os cookies da sessão recém-criada.
-  window.location.href = !status || status === "pending" || !activated ? "/aguardando-aprovacao" : status === "active" ? (next ?? "/app") : "/conta/acesso";
+  window.location.href = !status || status === "pending" || !activated ? "/aguardando-aprovacao" : status === "active" ? destinationFor(p?.role, next) : "/conta/acesso";
 }
 
 export default function LoginPage() {
@@ -252,7 +255,7 @@ export default function LoginPage() {
                 <span>Solicitar acesso</span>
                 <ArrowRight className="w-4 h-4" aria-hidden />
               </Link>
-              <p className="text-center text-[12px] text-theme-muted">Só com nome e e-mail. Depois da aprovação, chega um convite para criar a senha.</p>
+              <p className="text-center text-[12px] text-theme-muted">Para professores: só com nome e e-mail. Depois da aprovação, chega um convite para criar a senha.</p>
             </div>
           ) : (
           /* Login de quem já ativou a conta */
@@ -320,7 +323,8 @@ export default function LoginPage() {
               <ShieldCheck className="w-4 h-4 text-brand-500" aria-hidden />
               <span>Como o acesso é liberado</span>
             </div>
-            <p>Cada pedido é aprovado pela equipe. Com e-mail e senha, você entra depois de criar a senha pelo convite; com Google, depois da aprovação.</p>
+            <p><strong className="text-theme-text">Professor:</strong> cada pedido é aprovado pela equipe. Com e-mail e senha, você entra depois de criar a senha pelo convite; com Google, depois da aprovação.</p>
+            <p><strong className="text-theme-text">Aluno:</strong> não precisa pedir acesso. O seu professor envia o convite para o seu e-mail; crie a senha pelo link e depois entre aqui com e-mail e senha, ou com o Google do mesmo e-mail. O login leva direto ao seu treino.</p>
           </div>
 
           <p className="text-center text-xs text-theme-muted">

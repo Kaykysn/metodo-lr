@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ClipboardList, Dumbbell, Users } from "lucide-react";
 import { useAsync, useData } from "@/components/providers/DataProvider";
 import { ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading, PageHeader, Panel, formatDateBR, Badge } from "@/components/ui/primitives";
@@ -14,6 +15,11 @@ export default function OverviewPage() {
     const [trainees, assessments, plans] = await Promise.all([repo.listTrainees(actor), repo.listAssessments(actor), repo.listPlans(actor)]);
     return { trainees, assessments, plans };
   }, [repo, actor, revision]);
+  const router = useRouter();
+  // Aluno não usa a área profissional: vai direto para o próprio treino
+  useEffect(() => {
+    if (actor.role === "practitioner") router.replace("/aluno");
+  }, [actor.role, router]);
 
   if (actor.role === "practitioner") {
     return (

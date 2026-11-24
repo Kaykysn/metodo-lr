@@ -11,11 +11,12 @@ import { canPerform, hasFeature } from "@/lib/subscription/entitlements";
 import { ARCHIVED_MESSAGE } from "@/lib/data/repository";
 import FollowUpPanel from "@/components/followup/FollowUpPanel";
 import TraineePhotos from "@/components/posture/TraineePhotos";
+import PractitionerAccessPanel from "@/components/trainee/PractitionerAccessPanel";
 
 export default function AlunoDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { repo, actor, revision, bump, commercial } = useData();
+  const { repo, actor, revision, bump, commercial, mode } = useData();
   const [err, setErr] = useState<string | null>(null);
   const data = useAsync(async () => {
     const trainee = await repo.getTrainee(actor, id);
@@ -115,6 +116,10 @@ export default function AlunoDetailPage() {
           )}
         </Panel>
       </div>
+      {/* Só o professor responsável dá acesso ao aluno (estudante trabalha com casos didáticos) */}
+      {can(actor.role, "plan.publish") && trainee.ownerId === actor.id && (
+        <PractitionerAccessPanel traineeId={trainee.id} demo={mode !== "supabase"} archived={archived} />
+      )}
       {can(actor.role, "trainee.read") && <FollowUpPanel trainee={trainee} canWrite={canCreate("trainee.write")} />}
       {can(actor.role, "trainee.read") && <TraineePhotos trainee={trainee} />}
     </div>

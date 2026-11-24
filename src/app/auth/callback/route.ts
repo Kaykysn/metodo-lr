@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createRouteClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { needsCode } from "@/lib/auth/mfa";
+import { homeFor } from "@/lib/auth/home";
 
 const go = (origin: string, path: string) => NextResponse.redirect(new URL(path, origin));
 
@@ -24,11 +25,12 @@ export async function GET(request: NextRequest) {
     // Conta com autenticador: o Google sozinho não basta, o login pede o código
     const { data: lv } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (lv && needsCode(lv.currentLevel, lv.nextLevel)) return go(origin, "/login?etapa=codigo");
-    const { data: profile } = await supabase.from("profiles").select("status, activated_at").eq("id", data.user.id).maybeSingle();
+    const { data: profile } = await supabase.from("profiles").select("status, activated_at, role").eq("id", data.user.id).maybeSingle();
     const status = (profile as { status?: string } | null)?.status;
     const activated = !!(profile as { activated_at?: string | null } | null)?.activated_at;
     if (!status || status === "pending" || !activated) return go(origin, "/aguardando-aprovacao");
-    if (status === "active") return go(origin, "/app");
+    // Aluno vai direto para o próprio treino; profissional, para a área profissional
+    if (status === "active") return go(origin, homeFor((profile as { role?: string } | null)?.role));
     return go(origin, "/conta/acesso");
   } catch {
     return go(origin, "/login?erro=interno");

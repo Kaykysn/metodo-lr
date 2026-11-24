@@ -12,6 +12,7 @@ import AppearanceBar from "@/components/appearance/AppearanceBar";
 import PasswordFields, { passwordReady } from "@/components/auth/PasswordFields";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { savePassword } from "@/lib/auth/account-password";
+import { homeFor } from "@/lib/auth/home";
 import { AlertCircle, CheckCircle2, KeyRound } from "lucide-react";
 
 type Stage = "intro" | "checking" | "form" | "saving" | "done" | "invalid" | "unavailable";
@@ -43,6 +44,8 @@ function PrimeiroAcesso() {
   const [error, setError] = useState<string | null>(null);
   const [invalid, setInvalid] = useState<Invalid>("used");
   const [mode, setMode] = useState<"activate" | "reset">("activate");
+  // Aluno vai para o próprio treino; profissional, para a área profissional
+  const [home, setHome] = useState<"/aluno" | "/app">("/app");
 
   // Lê o código do link e tira da barra de endereço (não fica no histórico nem em capturas)
   useEffect(() => {
@@ -70,15 +73,15 @@ function PrimeiroAcesso() {
         setInvalid("used");
         return setStage("invalid");
       }
-      const { data: p } = await db.from("profiles").select("full_name, email, activated_at").eq("id", data.session.user.id).maybeSingle();
+      const { data: p } = await db.from("profiles").select("full_name, email, activated_at, role").eq("id", data.session.user.id).maybeSingle();
+      setHome(homeFor(p?.role));
       if (p?.activated_at && link.type === "recovery") {
         // Conta já ativada com link de nova senha: cria a senha nova aqui
         setMode("reset");
       } else if (p?.activated_at) {
-        // Já ativada: o link serviu só para entrar; segue para a área profissional
+        // Já ativada: o link serviu só para entrar; segue para a área da conta
         // (navegação completa de propósito: o proxy relê os cookies da sessão recém-criada)
-        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-        window.location.href = "/app";
+        window.location.href = homeFor(p?.role);
         return;
       }
       setFullName(p?.full_name ?? "");
@@ -105,10 +108,9 @@ function PrimeiroAcesso() {
       return setStage("form");
     }
     setStage("done");
-    // Navegação completa: a área profissional relê a sessão já com a conta ativada
+    // Navegação completa: a área da conta relê a sessão já com a conta ativada
     window.setTimeout(() => {
-      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-      window.location.href = "/app";
+      window.location.href = home;
     }, 1200);
   };
 

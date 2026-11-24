@@ -37,6 +37,13 @@ export default function AguardandoAprovacaoPage() {
             </p>
           </div>
 
+          <div className="p-4 bg-theme-teal-subtle border border-theme-teal/40 rounded-xl text-left text-xs space-y-1 text-theme-text">
+            <p className="font-bold">É aluno?</p>
+            <p className="text-theme-muted leading-relaxed">
+              O acesso de aluno vem do seu professor. Abra o convite que ele enviou para o seu e-mail e crie a senha pelo link. Depois disso, o login leva direto ao seu treino. Se o link venceu, peça um novo ao professor.
+            </p>
+          </div>
+
           {/* Garantia dos 30 dias */}
           <div className="p-4 bg-theme-secondary/70 border border-theme-border rounded-xl text-left text-xs space-y-2 text-theme-text">
             <div className="flex items-center gap-2 font-bold text-theme-text">

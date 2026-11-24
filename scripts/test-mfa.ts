@@ -3,6 +3,7 @@
    NÃO testa o Supabase Auth; a exigência no banco está em backend/tests/db.test.mjs. */
 import assert from "node:assert/strict";
 import { CODE_INVALID, codeErrorMessage, needsCode, normalizeCode, safeNext } from "../src/lib/auth/mfa";
+import { destinationFor, homeFor } from "../src/lib/auth/home";
 
 let n = 0;
 const ok = (msg: string) => {
@@ -35,5 +36,16 @@ assert.equal(codeErrorMessage({ code: "mfa_verification_failed", status: 422 }),
 assert.match(codeErrorMessage({ status: 429 }), /Muitas tentativas/);
 assert.doesNotMatch(codeErrorMessage({ status: 500, code: "unexpected_failure" }), /unexpected/);
 ok("Mensagens fixas: nada do provedor vai para a tela");
+
+assert.equal(homeFor("practitioner"), "/aluno");
+for (const r of ["teacher", "pe_student", "admin", "physiotherapist", undefined, null]) assert.equal(homeFor(r), "/app");
+assert.equal(destinationFor("practitioner", null), "/aluno");
+assert.equal(destinationFor("practitioner", "/app/alunos"), "/aluno", "aluno não vai para a área profissional");
+assert.equal(destinationFor("practitioner", "/aluno"), "/aluno");
+assert.equal(destinationFor("practitioner", "/conta/acesso"), "/conta/acesso");
+assert.equal(destinationFor("teacher", "/aluno"), "/app", "professor não cai na tela do aluno");
+assert.equal(destinationFor("teacher", "/app/treinos"), "/app/treinos");
+assert.equal(destinationFor("teacher", null), "/app");
+ok("Depois do login, aluno vai para o próprio treino e profissional para a área profissional");
 
 console.log(`\n${n} grupos de testes passaram.`);
