@@ -1,10 +1,11 @@
 import React from "react";
 import Link from "next/link";
 import MethodBrand from "@/components/brand/MethodBrand";
+import { LEGAL, controllerLabel } from "@/lib/legal";
 
 /** Rodapé preto da referência, com monograma dourado e links preservados. */
 export default function Footer() {
-  const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+  const email = LEGAL.contactEmail;
   return (
     <footer className="lr-foot">
       <div className="lr-wrap lr-foot-inner">
@@ -31,7 +32,8 @@ export default function Footer() {
         </nav>
       </div>
       <div className="lr-wrap mt-6 border-t border-[#3a3a3a] pt-5 text-sm text-[#969696]">
-        © {new Date().getFullYear()} Leandro Rangel
+        <p>© {new Date().getFullYear()} {LEGAL.platform} · {controllerLabel()}</p>
+        <p className="mt-1">{LEGAL.address}</p>
       </div>
     </footer>
   );

@@ -3,10 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import AppearanceBar from "@/components/appearance/AppearanceBar";
+import { LEGAL } from "@/lib/legal";
 import { Clock, CheckCircle2, ArrowRight, ShieldCheck, Mail } from "lucide-react";
 
 export default function AguardandoAprovacaoPage() {
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+  const contactEmail = LEGAL.contactEmail;
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">

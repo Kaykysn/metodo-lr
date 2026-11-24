@@ -3,6 +3,7 @@ import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import PlanosView from "@/components/subscription/PlanosView";
 import { readSupportConfig } from "@/lib/subscription/billing";
+import { LEGAL } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Planos",
@@ -16,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 export default function PlanosPage() {
   const support = readSupportConfig(process.env);
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || null;
+  const contactEmail = LEGAL.contactEmail;
   return (
     <div className="flex min-h-screen flex-1 flex-col">
       <Header />
