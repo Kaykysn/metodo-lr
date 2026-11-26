@@ -34,12 +34,13 @@ export function appModeProblems(env = process.env) {
 
 const isDev = (phase) => phase === PHASE_DEVELOPMENT_SERVER;
 
-// Domínios da verificação de segurança do login (src/lib/auth/captcha.ts), só quando configurada.
+// Domínios da verificação de segurança do login (src/lib/auth/captcha.ts).
 const CAPTCHA_ORIGINS = {
   turnstile: "https://challenges.cloudflare.com",
   hcaptcha: "https://hcaptcha.com https://*.hcaptcha.com",
 };
-const captchaOrigins = CAPTCHA_ORIGINS[(process.env.NEXT_PUBLIC_CAPTCHA_PROVIDER ?? "").trim().toLowerCase()] ?? "";
+// Mesmo padrão de src/lib/auth/captcha.ts (Turnstile quando nada for definido)
+const captchaOrigins = CAPTCHA_ORIGINS[(process.env.NEXT_PUBLIC_CAPTCHA_PROVIDER || "turnstile").trim().toLowerCase()] ?? "";
 const withCaptcha = (directive) => (captchaOrigins ? `${directive} ${captchaOrigins}` : directive);
 
 /** @type {(phase: string) => import('next').NextConfig} */

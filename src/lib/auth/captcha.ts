@@ -1,8 +1,12 @@
 // Verificação de segurança (CAPTCHA) exigida pelo Supabase Auth no login por senha e no
 // "Esqueci minha senha". O segredo fica só no painel do Supabase (Authentication → Attack
 // Protection); aqui entra apenas a chave pública do site, que é feita para ir ao navegador.
+// Padrão: Cloudflare Turnstile com a chave do site do Método LR. Para trocar, defina na hospedagem:
 //   NEXT_PUBLIC_CAPTCHA_PROVIDER = "turnstile" (Cloudflare) ou "hcaptcha"
 //   NEXT_PUBLIC_CAPTCHA_SITE_KEY = chave do site no mesmo serviço escolhido no painel
+// O widget só funciona nos domínios cadastrados no Cloudflare (Turnstile → o site → Hostnames).
+export const DEFAULT_CAPTCHA_PROVIDER = "turnstile";
+export const DEFAULT_CAPTCHA_SITE_KEY = "0x4AAAAAAGFk-Ky-syEJCAWt";
 
 export type CaptchaProvider = "turnstile" | "hcaptcha";
 
@@ -18,7 +22,10 @@ export function readCaptchaConfig(provider: string | undefined, siteKey: string 
   return { provider: p, siteKey: k };
 }
 
-export const CAPTCHA = readCaptchaConfig(process.env.NEXT_PUBLIC_CAPTCHA_PROVIDER, process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY);
+export const CAPTCHA = readCaptchaConfig(
+  process.env.NEXT_PUBLIC_CAPTCHA_PROVIDER || DEFAULT_CAPTCHA_PROVIDER,
+  process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || DEFAULT_CAPTCHA_SITE_KEY
+);
 
 export const CAPTCHA_SCRIPT: Record<CaptchaProvider, string> = {
   turnstile: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
