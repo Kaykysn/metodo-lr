@@ -1,13 +1,17 @@
 "use client";
 
 // Pedido de acesso: só nome e e-mail. Não cria conta, não pede senha e não usa Google.
-// O pedido fica pendente na fila do admin (função request_access no banco). Depois da aprovação,
+// O pedido passa pela função access-request do servidor, que confere a verificação do Cloudflare
+// (Turnstile) e limita por endereço de rede antes de gravar na fila do admin. Depois da aprovação,
 // a pessoa recebe um convite de uso único para criar a senha (/auth/primeiro-acesso).
 // Repetir o pedido não duplica nada, e a resposta é sempre a mesma (não revela se o e-mail já tem conta).
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import AppearanceBar from "@/components/appearance/AppearanceBar";
-import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
+import { CAPTCHA, CAPTCHA_MESSAGES } from "@/lib/auth/captcha";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { callPublicFunction, FunctionError } from "@/lib/supabase/functions";
 import { ArrowRight, CheckCircle2, Clock } from "lucide-react";
 
 const inputClass =
@@ -18,6 +22,8 @@ export default function SolicitarAcessoPage() {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ kind: "sent" | "demo" | "error"; text: string } | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captcha = useRef<CaptchaHandle>(null);
   const inFlight = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,26 +37,26 @@ export default function SolicitarAcessoPage() {
       // Sem servidor: nada é enviado. Dizemos isso em vez de simular sucesso.
       return setResult({ kind: "demo", text: "Este ambiente ainda não tem servidor configurado, então o pedido não foi enviado. Use a demonstração para conhecer a plataforma." });
     }
+    if (!CAPTCHA) return setResult({ kind: "error", text: "A verificação de segurança não está disponível agora. Tente de novo mais tarde." });
+    if (!captchaToken) return setResult({ kind: "error", text: CAPTCHA_MESSAGES.pending });
     inFlight.current = true;
     setSending(true);
     setResult(null);
     try {
-      const db = getSupabaseBrowserClient();
-      if (!db) throw new Error("indisponivel");
-      const { error } = await db.rpc("request_access", { p_name: name, p_email: mail });
-      if (error) throw error;
+      await callPublicFunction("access-request", "", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email: mail, captchaToken }),
+      });
       setResult({ kind: "sent", text: "Solicitação recebida. Acompanhe seu e-mail para saber os próximos passos." });
     } catch (err) {
-      const code = (err as { code?: string }).code;
+      // A função já responde em português (campo inválido, verificação recusada, limite atingido)
+      const status = err instanceof FunctionError ? err.status : 0;
       setResult({
         kind: "error",
-        text:
-          code === "53400"
-            ? "Recebemos muitos pedidos agora. Tente de novo em alguns minutos."
-            : code === "22023"
-              ? "Confira o nome e o e-mail e tente de novo."
-              : "Não foi possível enviar o pedido agora. Tente de novo em instantes.",
+        text: err instanceof FunctionError && status >= 400 && status < 500 ? err.message : "Não foi possível enviar o pedido agora. Tente de novo em instantes.",
       });
+      captcha.current?.reset(); // cada token vale para um envio
     } finally {
       inFlight.current = false;
       setSending(false);
@@ -98,6 +104,7 @@ export default function SolicitarAcessoPage() {
                 <label htmlFor="email" className="block text-xs font-bold text-theme-text mb-1">E-mail</label>
                 <input id="email" type="email" autoComplete="email" inputMode="email" required maxLength={320} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@email.com" className={inputClass} />
               </div>
+              <Captcha ref={captcha} onToken={setCaptchaToken} onUnavailable={() => setResult({ kind: "error", text: "A verificação de segurança não carregou. Recarregue a página e tente de novo." })} />
               <button type="submit" disabled={sending} aria-busy={sending} className="w-full py-3.5 rounded-xl bg-cta hover:bg-cta-hover text-cta-text font-bold text-sm shadow-elevated transition-all flex items-center justify-center gap-2 disabled:opacity-70">
                 <span>{sending ? "Enviando…" : "Solicitar acesso"}</span>
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />

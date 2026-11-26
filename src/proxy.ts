@@ -6,10 +6,19 @@ import { NextResponse, type NextRequest } from "next/server";
 import { APP_MODE, SUPABASE_PUBLIC_KEY, SUPABASE_URL } from "@/lib/app-mode";
 import { needsCode } from "@/lib/auth/mfa";
 import { isAdminRoute, isBlockedPath, isProtectedRoute, isPublicRoute, needsActivation } from "@/lib/auth/edge-routes";
+import { buildCsp, captchaOriginsFor, newNonce } from "@/lib/security/csp";
 
-/** Responde com a página "não encontrada" (status 404), sem revelar se o endereço existe. */
-function notFound(request: NextRequest) {
-  return NextResponse.rewrite(new URL("/404", request.url), { status: 404 });
+const CAPTCHA_ORIGINS = captchaOriginsFor(process.env.NEXT_PUBLIC_CAPTCHA_PROVIDER);
+
+/**
+ * Cabeçalhos do pedido repassados ao Next com o nonce: o Next aplica o nonce nos próprios scripts
+ * e o layout raiz o lê de x-nonce. Copiados na hora de responder, para levar cookies renovados.
+ */
+function withNonce(request: NextRequest, nonce: string, csp: string): Headers {
+  const h = new Headers(request.headers);
+  h.set("x-nonce", nonce);
+  h.set("Content-Security-Policy", csp);
+  return h;
 }
 
 /**
@@ -57,10 +66,21 @@ function validateOrigin(request: NextRequest): boolean {
 }
 
 export async function proxy(request: NextRequest) {
+  const nonce = newNonce();
+  const csp = buildCsp(nonce, { dev: process.env.NODE_ENV === "development", captchaOrigins: CAPTCHA_ORIGINS });
+  const res = await route(request, nonce, csp);
+  res.headers.set("Content-Security-Policy", csp);
+  return res;
+}
+
+async function route(request: NextRequest, nonce: string, csp: string): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
+  const next = () => NextResponse.next({ request: { headers: withNonce(request, nonce, csp) } });
+  /** Responde com a página "não encontrada" (status 404), sem revelar se o endereço existe. */
+  const notFound = () => NextResponse.rewrite(new URL("/404", request.url), { status: 404, request: { headers: withNonce(request, nonce, csp) } });
 
   // Endereços que nunca são públicos (arquivos de configuração, pastas internas, sondagens comuns)
-  if (isBlockedPath(pathname)) return notFound(request);
+  if (isBlockedPath(pathname)) return notFound();
 
   // Validação CSRF para mutations
   if (!validateOrigin(request)) {
@@ -75,12 +95,12 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/api") ||
     pathname.includes(".")
   ) {
-    return NextResponse.next();
+    return next();
   }
 
   // Para rotas públicas, continua sem verificação de sessão
   if (isPublicRoute(pathname)) {
-    return NextResponse.next();
+    return next();
   }
 
   // Para rotas protegidas, verifica sessão
@@ -91,14 +111,10 @@ export async function proxy(request: NextRequest) {
   // fictícios guardados só no navegador; não há sessão nem dado real a proteger. O modo é explícito
   // e o build de produção falha sem ele (next.config.mjs), então não há queda silenciosa para cá.
   if (APP_MODE !== "supabase" || !supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.next();
+    return next();
   }
 
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  let response = next();
 
   // Cria cliente Supabase para a borda
   const supabase = createServerClient(
@@ -113,9 +129,7 @@ export async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
-          response = NextResponse.next({
-            request,
-          });
+          response = next(); // cabeçalhos copiados agora: já com os cookies renovados
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options);
           });
@@ -130,9 +144,9 @@ export async function proxy(request: NextRequest) {
   // Administração: para quem não é administrador ativo, o endereço simplesmente não existe
   // (sem redirecionar para o login, o que confirmaria que há uma área ali).
   if (isAdminRoute(pathname)) {
-    if (!user) return notFound(request);
+    if (!user) return notFound();
     const { data: profile } = await supabase.from("profiles").select("role, status").eq("id", user.id).maybeSingle();
-    if (!profile || profile.role !== "admin" || profile.status !== "active") return notFound(request);
+    if (!profile || profile.role !== "admin" || profile.status !== "active") return notFound();
   }
 
   // Se não há usuário e está tentando acessar rota protegida

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import { AppearanceProvider } from "@/components/providers/AppearanceProvider";
@@ -64,15 +65,18 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Nonce do pedido (src/proxy.ts): só scripts com ele rodam. Ler os cabeçalhos também faz cada
+  // página ser renderizada no pedido, condição para o Next aplicar o nonce nos próprios scripts.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="pt-BR" suppressHydrationWarning className={`${manrope.variable} ${barlow.variable}`}>
       <head>
         {/* Antes da pintura: marca "js" e classifica o aparelho (design completo ou leve) */}
-        <script dangerouslySetInnerHTML={{ __html: PERF_BOOT_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: PERF_BOOT_SCRIPT }} />
       </head>
       <body className="min-h-screen flex flex-col bg-theme-page text-theme-text antialiased selection:bg-brand-200 selection:text-ink-950">
-        <AppearanceProvider>
+        <AppearanceProvider nonce={nonce}>
           <AmbientBackground />
           <ParticleField />
           <LayeredBackdrop />

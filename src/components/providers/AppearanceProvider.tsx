@@ -37,7 +37,8 @@ export function useVisualEffects() {
   return useContext(EffectsContext);
 }
 
-export function AppearanceProvider({ children }: { children: React.ReactNode }) {
+/** nonce: o do pedido (src/proxy.ts), para o script do tema rodar sob a CSP. */
+export function AppearanceProvider({ children, nonce }: { children: React.ReactNode; nonce?: string }) {
   const defaultTheme = usePathname() === "/" ? "dark" : "system";
   const [effectsEnabled, setEffectsEnabledState] = useState<boolean>(true);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
@@ -117,6 +118,7 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
       enableSystem
       disableTransitionOnChange
       storageKey={THEME_STORAGE_KEY}
+      nonce={nonce}
     >
       <EffectsContext.Provider value={value}>{children}</EffectsContext.Provider>
     </NextThemesProvider>

@@ -1,7 +1,7 @@
 // Acesso ao catálogo ampliado. Modo real: Supabase (RLS decide o que cada professor vê e altera).
 // Demonstração: amostra real do wger embutida + cadastros só neste navegador.
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { callFunction } from "@/lib/supabase/functions";
+import { callFunction, FunctionError } from "@/lib/supabase/functions";
 import demo from "./demo-catalog.json";
 import {
   VIDEO_MAX_BYTES,
@@ -207,6 +207,7 @@ export class SupabaseCatalogRepo implements CatalogRepo {
   }
   async requestShare(kind: "exercise" | "media", id: string, on: boolean) {
     const table = kind === "exercise" ? "exercise_catalog" : "exercise_media";
+    if (kind === "media" && on) await this.verifyVideo(id); // vídeo que ficou sem conferência (queda de rede no envio)
     this.must(await this.db.from(table).update({ share_requested: on }).eq("id", id).select("id").single());
     this.cache.delete(id);
   }
@@ -231,7 +232,18 @@ export class SupabaseCatalogRepo implements CatalogRepo {
       await this.db.storage.from("exercise-media").remove([path, ...(thumbPath ? [thumbPath] : [])]);
       throw new CatalogError("O vídeo foi enviado, mas não pôde ser registrado. Nada ficou salvo; tente de novo.");
     }
+    await this.verifyVideo((ins.data as CatalogMedia).id);
     return ins.data as CatalogMedia;
+  }
+  /** O servidor confere os primeiros bytes do arquivo; se não for vídeo, ele apaga tudo e responde 415. */
+  private async verifyVideo(id: string) {
+    try {
+      await callFunction("exercise-media", "/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    } catch (e) {
+      if (e instanceof FunctionError && (e.status === 415 || e.status === 404)) throw new CatalogError(e.message);
+      // Falha de rede ou do servidor: o vídeo fica salvo só para você (sem conferência ninguém mais o vê)
+      // e a conferência é refeita quando você pedir o compartilhamento.
+    }
   }
   async deleteMedia(m: CatalogMedia) {
     if (m.source !== "upload") throw new CatalogError("Mídias da fonte não podem ser excluídas.");

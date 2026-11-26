@@ -4,7 +4,9 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
+import { readFileSync } from "node:fs";
 import { appModeProblems, resolveAppMode } from "../src/lib/app-mode";
+import { buildCsp, captchaOriginsFor, newNonce } from "../src/lib/security/csp";
 
 const E = (o: Record<string, string>) => o as unknown as NodeJS.ProcessEnv;
 let n = 0;
@@ -62,10 +64,18 @@ const devOut = execFileSync(process.execPath, ["--input-type=module", "-e", `imp
 assert.equal(JSON.parse(devOut).ignoreBuildErrors, false);
 ok("Desenvolvimento sem modo só avisa; erros de tipo barram o build");
 
-const cspOf = (phase: string) =>
-  execFileSync(process.execPath, ["--input-type=module", "-e", `import(${JSON.stringify("file:///" + path.join(process.cwd(), "next.config.mjs").replace(/\\/g, "/"))}).then(async (m) => { const h = await m.default(${JSON.stringify(phase)}).headers(); process.stdout.write(h[0].headers.find((x) => x.key === "Content-Security-Policy").value); });`], { env: E({ PATH: process.env.PATH ?? "", NEXT_PUBLIC_APP_MODE: "demo" }), encoding: "utf8" });
-assert.doesNotMatch(cspOf("phase-production-build"), /unsafe-eval/, "produção não pode liberar eval");
-assert.match(cspOf("phase-development-server"), /unsafe-eval/);
-ok("CSP de produção sem 'unsafe-eval' (só o servidor de desenvolvimento libera)");
+const scriptSrc = (csp: string) => csp.split("; ").find((d) => d.startsWith("script-src ")) ?? "";
+const prodCsp = buildCsp("abc123==", { dev: false, captchaOrigins: captchaOriginsFor(undefined) });
+assert.doesNotMatch(prodCsp, /unsafe-eval/, "produção não pode liberar eval");
+assert.match(buildCsp("abc123==", { dev: true, captchaOrigins: "" }), /unsafe-eval/);
+assert.doesNotMatch(scriptSrc(prodCsp), /unsafe-inline/, "script sem nonce não roda");
+assert.match(scriptSrc(prodCsp), /'nonce-abc123==' 'strict-dynamic'/);
+assert.match(scriptSrc(prodCsp), /challenges\.cloudflare\.com/);
+assert.match(prodCsp, /object-src 'none'/);
+const n1 = newNonce(), n2 = newNonce();
+assert.ok(n1 !== n2 && /^[A-Za-z0-9+/]{22}==$/.test(n1), "nonce novo a cada pedido, 128 bits");
+const nextCfg = readFileSync(path.join(process.cwd(), "next.config.mjs"), "utf8");
+assert.doesNotMatch(nextCfg, /key: "Content-Security-Policy"/, "a CSP sai só da borda, para não somar com uma fixa");
+ok("CSP com nonce por pedido: script-src sem 'unsafe-inline', 'unsafe-eval' só em desenvolvimento");
 
 console.log(`\n${n} testes do modo do site passaram.`);

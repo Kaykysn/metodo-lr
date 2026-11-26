@@ -34,15 +34,6 @@ export function appModeProblems(env = process.env) {
 
 const isDev = (phase) => phase === PHASE_DEVELOPMENT_SERVER;
 
-// Domínios da verificação de segurança do login (src/lib/auth/captcha.ts).
-const CAPTCHA_ORIGINS = {
-  turnstile: "https://challenges.cloudflare.com",
-  hcaptcha: "https://hcaptcha.com https://*.hcaptcha.com",
-};
-// Mesmo padrão de src/lib/auth/captcha.ts (Turnstile quando nada for definido)
-const captchaOrigins = CAPTCHA_ORIGINS[(process.env.NEXT_PUBLIC_CAPTCHA_PROVIDER || "turnstile").trim().toLowerCase()] ?? "";
-const withCaptcha = (directive) => (captchaOrigins ? `${directive} ${captchaOrigins}` : directive);
-
 /** @type {(phase: string) => import('next').NextConfig} */
 const config = (phase) => {
   const problems = appModeProblems();
@@ -96,24 +87,7 @@ const nextConfig = (phase) => ({
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
-          // Content Security Policy (configuração inicial - ajustar conforme necessário)
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              // unsafe-eval só no servidor de desenvolvimento (recarga do Next); nunca em produção
-              withCaptcha(`script-src 'self' 'unsafe-inline'${isDev(phase) ? " 'unsafe-eval'" : ""}`),
-              withCaptcha("style-src 'self' 'unsafe-inline'"), // unsafe-inline necessário para Tailwind
-              "img-src 'self' data: blob: https:", // blob: = fotos posturais locais (modo demonstração)
-              "font-src 'self' data:",
-              withCaptcha("connect-src 'self' https://*.supabase.co wss://*.supabase.co"),
-              withCaptcha("frame-src 'self'"),
-              "media-src 'self' blob: https://wger.de https://*.supabase.co", // vídeos do wger (exibidos da fonte) e vídeos próprios (link assinado)
-              "frame-ancestors 'self'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join("; "),
-          },
+          // Content-Security-Policy: montada a cada pedido em src/proxy.ts (com nonce; src/lib/security/csp.ts)
         ],
       },
     ];
