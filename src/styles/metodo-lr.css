@@ -1096,6 +1096,104 @@
 .lr-app-context .text-theme-text {
   color: var(--lr-paper);
 }
+
+/* Barras da área logada (lateral, gaveta do celular, cabeçalho e faixa de contexto): a superfície
+   é sempre o oposto do tema (--lr-ink), então dentro delas valem os tokens do tema oposto. As
+   variáveis derivadas do Tailwind são redeclaradas aqui para lerem esses tokens locais; sem isso
+   elas guardam o valor calculado na raiz e o texto some no fundo. */
+:is(.lr-app-sidebar, .lr-app-header, .lr-app-context) {
+  --color-theme-primary: rgb(var(--surface-primary));
+  --color-theme-secondary: rgb(var(--surface-secondary));
+  --color-theme-raised: rgb(var(--surface-raised));
+  --color-theme-text: rgb(var(--text-primary));
+  --color-theme-muted: rgb(var(--text-secondary));
+  --color-theme-subtle: rgb(var(--text-subtle));
+  --color-theme-border: rgb(var(--border-decorative));
+  --color-theme-boundary: rgb(var(--border-control));
+  --color-theme-teal: rgb(var(--accent-teal));
+  --color-theme-teal-subtle: rgb(var(--accent-teal-subtle));
+  --color-inverse: rgb(var(--inverse-bg));
+  --color-inverse-hover: rgb(var(--inverse-hover));
+  --color-inverse-fg: rgb(var(--inverse-fg));
+  --color-status-caution-fg: rgb(var(--status-caution-fg));
+  --color-status-caution-bg: rgb(var(--status-caution-bg));
+  --color-status-caution-border: rgb(var(--status-caution-border));
+  --color-status-danger-fg: rgb(var(--status-danger-fg));
+  --color-status-danger-bg: rgb(var(--status-danger-bg));
+  --color-status-danger-border: rgb(var(--status-danger-border));
+}
+/* Tema claro: barras escuras → tokens do tema escuro */
+html:not(.dark) :is(.lr-app-sidebar, .lr-app-header, .lr-app-context) {
+  color-scheme: dark;
+  --surface-primary: 24 22 18;
+  --surface-secondary: 35 32 27;
+  --surface-raised: 45 41 34;
+  --text-primary: 247 242 232;
+  --text-secondary: 205 198 185;
+  --text-subtle: 190 183 170;
+  --border-decorative: 82 82 82;
+  --border-control: 140 138 132;
+  --accent-teal: 225 189 117;
+  --accent-teal-subtle: 58 46 28;
+  --inverse-bg: 246 245 242;
+  --inverse-hover: 232 230 224;
+  --inverse-fg: 17 17 17;
+  --status-caution-fg: 236 196 112;
+  --status-caution-bg: 46 36 14;
+  --status-caution-border: 90 70 26;
+  --status-danger-fg: 255 150 140;
+  --status-danger-bg: 52 20 20;
+  --status-danger-border: 104 36 34;
+}
+/* Tema escuro: --lr-ink vira creme → tokens do tema claro e links em marrom quente (contraste
+   acima de 7:1 sobre o creme), com o item ativo em ouro envelhecido como no tema claro. */
+.dark :is(.lr-app-sidebar, .lr-app-header, .lr-app-context),
+[data-theme="dark"] :is(.lr-app-sidebar, .lr-app-header, .lr-app-context) {
+  color-scheme: light;
+  --surface-primary: 255 253 248;
+  --surface-secondary: 238 232 219;
+  --surface-raised: 255 253 248;
+  --text-primary: 24 22 18;
+  --text-secondary: 74 68 59;
+  --text-subtle: 74 68 59;
+  --border-decorative: 217 207 189;
+  --border-control: 105 103 97;
+  --accent-teal: 122 90 34;
+  --accent-teal-subtle: 246 237 216;
+  --inverse-bg: 17 17 17;
+  --inverse-hover: 27 27 27;
+  --inverse-fg: 246 245 242;
+  --status-caution-fg: 132 82 6;
+  --status-caution-bg: 252 244 225;
+  --status-caution-border: 236 210 150;
+  --status-danger-fg: 178 34 34;
+  --status-danger-bg: 252 238 236;
+  --status-danger-border: 240 190 184;
+  border-color: #d9cfbd;
+}
+.dark .lr-app-context,
+[data-theme="dark"] .lr-app-context {
+  color: #4a443b;
+}
+.dark .lr-app-sidebar .lr-app-nav a,
+[data-theme="dark"] .lr-app-sidebar .lr-app-nav a {
+  color: #3d372e;
+}
+.dark .lr-app-sidebar .lr-app-nav a:hover,
+[data-theme="dark"] .lr-app-sidebar .lr-app-nav a:hover {
+  background: #ebe3d3;
+  color: #181612;
+}
+.dark .lr-app-sidebar .lr-app-nav a[aria-current="page"],
+[data-theme="dark"] .lr-app-sidebar .lr-app-nav a[aria-current="page"] {
+  background: #efe2c4;
+  color: #181612;
+  box-shadow: inset 3px 0 0 #7a5a22;
+}
+.dark .lr-app-sidebar .lr-app-nav a[aria-current="page"] svg,
+[data-theme="dark"] .lr-app-sidebar .lr-app-nav a[aria-current="page"] svg {
+  color: #7a5a22;
+}
 .lr-app-title {
   font-family: var(--lr-display);
   font-weight: 800;

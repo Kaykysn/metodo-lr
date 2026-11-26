@@ -184,7 +184,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             role="dialog"
             aria-modal="true"
             aria-label="Menu da área do professor"
-            className="fixed bottom-0 left-0 top-16 z-50 w-[min(320px,88vw)] overflow-y-auto border-r border-theme-border bg-theme-primary px-3 py-4 motion-safe:animate-drawerIn lg:hidden"
+            className="lr-app-sidebar fixed bottom-0 left-0 top-16 z-50 w-[min(320px,88vw)] overflow-y-auto border-r border-theme-border bg-theme-primary px-3 py-4 motion-safe:animate-drawerIn lg:hidden"
           >
             <nav aria-label="Área do professor (menu)" className="lr-app-nav">
               <NavList pathname={pathname} onNavigate={() => setOpen(false)} />
