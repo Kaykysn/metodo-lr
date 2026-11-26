@@ -27,7 +27,7 @@ export default function AlunoDetailPage() {
 
   if (data.status === "loading") return <Loading />;
   if (data.status === "error") return <ErrorNote>{data.error}</ErrorNote>;
-  if (!data.data) return <EmptyState title="Aluno não encontrado" action={<ButtonLink href="/app/alunos" variant="secondary">Voltar para alunos</ButtonLink>}>Ele não existe ou está sob responsabilidade de outro profissional.</EmptyState>;
+  if (!data.data) return <EmptyState title="Aluno não encontrado" action={<ButtonLink href="/app/alunos" variant="secondary">Voltar para alunos</ButtonLink>}>Confira o endereço ou volte à lista.</EmptyState>;
 
   const { trainee, assessments, plans } = data.data;
   const newAssessment = async () => {

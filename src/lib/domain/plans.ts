@@ -126,12 +126,12 @@ export function createDraftFromAssessment(args: {
 
 function assertOwner(actor: Actor, plan: TrainingPlan) {
   const owner = actor.id === plan.ownerId || (actor.role === "teacher" && actor.id === plan.ownerId);
-  if (!owner) throw new PermissionError("plan.approve", "Este treino pertence a outro profissional.");
+  if (!owner) throw new PermissionError("plan.approve", "Treino não encontrado.");
 }
 
 export function updateDraft(plan: TrainingPlan, actor: Actor, sessions: TrainingSession[], note?: string): TrainingPlan {
   if (!can(actor.role, "plan.draft")) throw new PermissionError("plan.draft", "Seu perfil não pode editar treinos.");
-  if (actor.id !== plan.ownerId && actor.supervisorId !== plan.ownerId) throw new PermissionError("plan.draft", "Este treino pertence a outro profissional.");
+  if (actor.id !== plan.ownerId && actor.supervisorId !== plan.ownerId) throw new PermissionError("plan.draft", "Treino não encontrado.");
   const v = latest(plan);
   if (v.status !== "draft") throw new Error("Só rascunhos podem ser editados. Crie uma nova versão.");
   return { ...plan, versions: [...plan.versions.slice(0, -1), { ...v, sessions, changeNote: note ?? v.changeNote }] };
@@ -199,7 +199,7 @@ export function reuseAsDraft(args: {
   const { actor, source, targetAssessment } = args;
   if (!can(actor.role, "plan.draft")) throw new PermissionError("plan.draft", "Seu perfil não pode criar rascunhos de treino.");
   if (source.ownerId !== actor.id) throw new PermissionError("plan.draft", "Só é possível reaproveitar treinos que você criou.");
-  if (targetAssessment.ownerId !== actor.id) throw new PermissionError("plan.draft", "A avaliação de destino pertence a outro profissional.");
+  if (targetAssessment.ownerId !== actor.id) throw new PermissionError("plan.draft", "Avaliação de destino não encontrada.");
   const base = published(source) ?? latest(source);
   const planId = newId("pl");
   const sessions: TrainingSession[] = base.sessions.map((s) => ({

@@ -82,7 +82,7 @@ export default function TreinoDetailPage() {
 
   if (data.status === "loading") return <Loading />;
   if (data.status === "error") return <ErrorNote>{data.error}</ErrorNote>;
-  if (!data.data) return <EmptyState title="Treino não encontrado" action={<ButtonLink href="/app/treinos" variant="secondary">Voltar</ButtonLink>}>Ele não existe ou pertence a outro profissional.</EmptyState>;
+  if (!data.data) return <EmptyState title="Treino não encontrado" action={<ButtonLink href="/app/treinos" variant="secondary">Voltar</ButtonLink>}>Confira o endereço ou volte à lista.</EmptyState>;
 
   const { plan, trainee } = data.data;
   const l = latest(plan);

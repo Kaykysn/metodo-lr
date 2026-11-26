@@ -34,7 +34,7 @@ function Comparar() {
 
   if (data.status === "loading") return <Loading />;
   if (data.status === "error") return <ErrorNote>{data.error}</ErrorNote>;
-  if (!data.data) return <EmptyState title="Aluno não encontrado">Ele não existe ou está sob responsabilidade de outro profissional.</EmptyState>;
+  if (!data.data) return <EmptyState title="Aluno não encontrado">Confira o endereço ou volte à lista.</EmptyState>;
 
   const { trainee, list } = data.data;
   const aId = ids.a || list[list.length - 2]?.id || "";

@@ -85,7 +85,7 @@ function NovoTreino() {
       />
       {data.status === "loading" && <Loading />}
       {data.status === "error" && <ErrorNote>{data.error}</ErrorNote>}
-      {data.status === "ready" && originId && !source && <ErrorNote>O treino de origem não foi encontrado ou pertence a outro profissional.</ErrorNote>}
+      {data.status === "ready" && originId && !source && <ErrorNote>O treino de origem não foi encontrado.</ErrorNote>}
       {data.status === "ready" && originId && source && !reuseOn && commercial.access && <FeatureLock feature="plan_reuse" />}
       {data.status === "ready" && createBlock && <InfoNote tone="caution">{createBlock}</InfoNote>}
       {data.status === "ready" && (!originId || (source && reuseOn)) && (

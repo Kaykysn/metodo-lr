@@ -22,7 +22,7 @@ export default function EditarTreinoPage() {
   if (data.status === "loading") return <Loading />;
   if (data.status === "error") return <ErrorNote>{data.error}</ErrorNote>;
   if (!data.data || !can(actor.role, "plan.draft"))
-    return <EmptyState title="Treino indisponível" action={<ButtonLink href="/app/treinos" variant="secondary">Voltar</ButtonLink>}>Ele não existe, pertence a outro profissional ou seu perfil não edita treinos.</EmptyState>;
+    return <EmptyState title="Treino não encontrado" action={<ButtonLink href="/app/treinos" variant="secondary">Voltar</ButtonLink>}>Confira o endereço ou volte à lista.</EmptyState>;
 
   return (
     <div className="space-y-4">

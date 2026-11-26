@@ -215,7 +215,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "trainee.write")) deny("trainee.write", "Seu perfil não pode alterar alunos.");
     const s = this.load();
     const t = s.trainees.find((x) => x.id === id);
-    if (!t || !canAccessTrainee(actor, t)) deny("trainee.write", "Aluno não encontrado ou fora da sua responsabilidade.");
+    if (!t || !canAccessTrainee(actor, t)) deny("trainee.write", "Aluno não encontrado.");
     if (!archived && t.archivedAt) {
       this.assertCanCreate("trainee.write");
       this.assertActivation(s, t.ownerId);
@@ -239,7 +239,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "assessment.write")) deny("assessment.write", "Seu perfil não pode criar avaliações.");
     this.assertCanCreate("assessment.write");
     const t = await this.getTrainee(actor, traineeId);
-    if (!t) deny("assessment.write", "Aluno não encontrado ou fora da sua responsabilidade.");
+    if (!t) deny("assessment.write", "Aluno não encontrado.");
     this.assertNotArchived(t, "assessment.write");
     const s = this.load();
     const prev = s.assessments.filter((a) => a.traineeId === traineeId);
@@ -262,7 +262,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "assessment.write")) deny("assessment.write", "Seu perfil não pode editar avaliações.");
     const s = this.load();
     const t = s.trainees.find((x) => x.id === a.traineeId);
-    if (!t || !canAccessTrainee(actor, t)) deny("assessment.write", "Avaliação fora da sua responsabilidade.");
+    if (!t || !canAccessTrainee(actor, t)) deny("assessment.write", "Avaliação não encontrada.");
     this.assertNotArchived(t, "assessment.write");
     const i = s.assessments.findIndex((x) => x.id === a.id);
     if (i < 0) deny("assessment.write", "Avaliação inexistente.");
@@ -287,7 +287,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "plan.draft")) deny("plan.draft", "Seu perfil não pode salvar treinos.");
     const s = this.load();
     const t = s.trainees.find((x) => x.id === plan.traineeId);
-    if (!t || !canAccessTrainee(actor, t)) deny("plan.draft", "Aluno fora da sua responsabilidade.");
+    if (!t || !canAccessTrainee(actor, t)) deny("plan.draft", "Aluno não encontrado.");
     this.assertNotArchived(t, "plan.draft");
     const i = s.plans.findIndex((p) => p.id === plan.id);
     const prev = i >= 0 ? s.plans[i] : null;
@@ -329,7 +329,7 @@ export class DemoRepository implements Repository {
     const s = this.load();
     for (const l of logs) {
       const t = s.trainees.find((x) => x.id === l.traineeId);
-      if (!t || !canAccessTrainee(actor, t)) deny("execution.log", "Registro fora da sua responsabilidade.");
+      if (!t || !canAccessTrainee(actor, t)) deny("execution.log", "Registro não encontrado.");
       this.assertNotArchived(t, "execution.log");
       const plan = s.plans.find((p) => p.versions.some((v) => v.id === l.planVersionId));
       const v = plan?.versions.find((x) => x.id === l.planVersionId);
@@ -342,7 +342,7 @@ export class DemoRepository implements Repository {
   // ---------- Acompanhamento ----------
   private followUpTrainee(s: DemoState, actor: Actor, traineeId: string, write: boolean) {
     const t = s.trainees.find((x) => x.id === traineeId);
-    if (!t || !canAccessTrainee(actor, t) || !can(actor.role, write ? "trainee.write" : "trainee.read")) deny("trainee.read", "Aluno fora da sua responsabilidade.");
+    if (!t || !canAccessTrainee(actor, t) || !can(actor.role, write ? "trainee.write" : "trainee.read")) deny("trainee.read", "Aluno não encontrado.");
     if (write) {
       this.assertNotArchived(t, "trainee.write");
       this.assertCanCreate("trainee.write");

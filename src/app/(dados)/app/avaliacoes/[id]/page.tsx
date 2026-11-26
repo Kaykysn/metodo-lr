@@ -23,7 +23,7 @@ export default function AvaliacaoPage() {
   if (!data.data)
     return (
       <EmptyState title="Avaliação não encontrada" action={<ButtonLink href="/app/avaliacoes" variant="secondary">Voltar</ButtonLink>}>
-        Ela não existe ou pertence a outro profissional.
+        Confira o endereço ou volte à lista.
       </EmptyState>
     );
 

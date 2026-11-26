@@ -83,7 +83,7 @@ export class SupabaseRepository implements Repository {
   }
   async createAssessment(actor: Actor, traineeId: string) {
     const t = await this.getTrainee(actor, traineeId);
-    if (!t) throw new Error("Aluno não encontrado ou fora da sua responsabilidade.");
+    if (!t) throw new Error("Aluno não encontrado.");
     const prev = await this.listAssessments(actor, traineeId);
     const blocks = { ...emptyBlocks(), essentials: { ...emptyBlocks().essentials, goal: t.goal, experience: t.experience } };
     const r = must(
