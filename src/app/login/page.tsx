@@ -6,7 +6,7 @@ import AppearanceBar from "@/components/appearance/AppearanceBar";
 import { isSupabaseConfigured, getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { assurance, needsCode, safeNext, verifyCode } from "@/lib/auth/mfa";
 import CodeForm from "@/components/auth/CodeForm";
-import { destinationFor } from "@/lib/auth/home";
+import { LOGIN_EMAIL_KEY, destinationFor } from "@/lib/auth/home";
 import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
 import { CAPTCHA, CAPTCHA_MESSAGES, isCaptchaError } from "@/lib/auth/captcha";
 import { ShieldCheck, Mail, Lock, ArrowRight, AlertCircle, Check } from "lucide-react";
@@ -21,6 +21,7 @@ const CALLBACK_ERRORS: Record<string, string> = {
 };
 const NOTICES: Record<string, string> = {
   senha: "Senha alterada. Entre com a nova senha.",
+  ativada: "Senha criada. Entre com o seu e-mail e a nova senha para abrir a sua área.",
 };
 const UNAVAILABLE = "O login ainda não está disponível neste ambiente. Use a demonstração para conhecer a plataforma.";
 
@@ -71,6 +72,17 @@ export default function LoginPage() {
     if (erro && CALLBACK_ERRORS[erro]) setErrorMessage(CALLBACK_ERRORS[erro]);
     const aviso = q.get("aviso");
     if (aviso && NOTICES[aviso]) setNotice(NOTICES[aviso]);
+    // Vindo do primeiro acesso: formulário de senha aberto e e-mail preenchido
+    if (aviso === "ativada" || aviso === "senha") {
+      setEmailOpen(true);
+      try {
+        const saved = sessionStorage.getItem(LOGIN_EMAIL_KEY);
+        if (saved) setEmail(saved);
+        sessionStorage.removeItem(LOGIN_EMAIL_KEY);
+      } catch {
+        // sem armazenamento: o campo fica vazio
+      }
+    }
     // Vindo do Google ou do proxy com a sessão ainda sem o código: retoma na segunda etapa
     if (q.get("etapa") === "codigo") {
       const supabase = getSupabaseBrowserClient();

@@ -12,7 +12,7 @@ import AppearanceBar from "@/components/appearance/AppearanceBar";
 import PasswordFields, { passwordReady } from "@/components/auth/PasswordFields";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { savePassword } from "@/lib/auth/account-password";
-import { homeFor } from "@/lib/auth/home";
+import { LOGIN_EMAIL_KEY, homeFor } from "@/lib/auth/home";
 import { AlertCircle, CheckCircle2, KeyRound } from "lucide-react";
 
 type Stage = "intro" | "checking" | "form" | "saving" | "done" | "invalid" | "unavailable";
@@ -108,9 +108,19 @@ function PrimeiroAcesso() {
       return setStage("form");
     }
     setStage("done");
-    // Navegação completa: a área da conta relê a sessão já com a conta ativada
+    // Gravar a senha encerra as sessões da conta (inclusive a aberta pelo link), e o login por
+    // senha exige a verificação de segurança: a pessoa entra uma vez com a senha nova, com o
+    // e-mail já preenchido, e o login a leva direto para a área dela.
+    try {
+      sessionStorage.setItem(LOGIN_EMAIL_KEY, email);
+    } catch {
+      // sem armazenamento: o login só não vem preenchido
+    }
+    await getSupabaseBrowserClient()?.auth.signOut({ scope: "local" });
+    const loginUrl = new URL(`/login?aviso=ativada&redirect=${encodeURIComponent(home)}`, window.location.origin).href;
+    // Navegação completa de propósito: o proxy relê os cookies já sem a sessão encerrada
     window.setTimeout(() => {
-      window.location.href = home;
+      window.location.href = loginUrl;
     }, 1200);
   };
 
@@ -180,7 +190,7 @@ function PrimeiroAcesso() {
 
           {stage === "done" && (
             <p role="status" className="flex items-center justify-center gap-2 text-sm text-status-success-fg">
-              <CheckCircle2 className="h-5 w-5" aria-hidden /> Senha criada. Abrindo a sua área…
+              <CheckCircle2 className="h-5 w-5" aria-hidden /> Senha criada. Agora entre com o seu e-mail e a nova senha…
             </p>
           )}
         </div>
