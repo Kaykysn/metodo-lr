@@ -15,4 +15,6 @@ export function siteOrigin(): URL {
 /** Páginas abertas ao público, na ordem do sitemap. As áreas logadas ficam fora da busca. */
 export const PUBLIC_PAGES = ["/", "/planos", "/solicitar-acesso", "/login", "/privacidade", "/termos"] as const;
 
-export const PRIVATE_PREFIXES = ["/app", "/aluno", "/admin", "/conta", "/auth", "/aguardando-aprovacao", "/demo"] as const;
+// A administração fica de fora de propósito: listá-la no robots.txt anunciaria que ela existe.
+// Para quem não é administrador, /admin responde 404 (src/proxy.ts).
+export const PRIVATE_PREFIXES = ["/app", "/aluno", "/conta", "/auth", "/aguardando-aprovacao", "/demo"] as const;

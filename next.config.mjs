@@ -34,6 +34,14 @@ export function appModeProblems(env = process.env) {
 
 const isDev = (phase) => phase === PHASE_DEVELOPMENT_SERVER;
 
+// Domínios da verificação de segurança do login (src/lib/auth/captcha.ts), só quando configurada.
+const CAPTCHA_ORIGINS = {
+  turnstile: "https://challenges.cloudflare.com",
+  hcaptcha: "https://hcaptcha.com https://*.hcaptcha.com",
+};
+const captchaOrigins = CAPTCHA_ORIGINS[(process.env.NEXT_PUBLIC_CAPTCHA_PROVIDER ?? "").trim().toLowerCase()] ?? "";
+const withCaptcha = (directive) => (captchaOrigins ? `${directive} ${captchaOrigins}` : directive);
+
 /** @type {(phase: string) => import('next').NextConfig} */
 const config = (phase) => {
   const problems = appModeProblems();
@@ -93,11 +101,12 @@ const nextConfig = (phase) => ({
             value: [
               "default-src 'self'",
               // unsafe-eval só no servidor de desenvolvimento (recarga do Next); nunca em produção
-              `script-src 'self' 'unsafe-inline'${isDev(phase) ? " 'unsafe-eval'" : ""}`,
-              "style-src 'self' 'unsafe-inline'", // unsafe-inline necessário para Tailwind
+              withCaptcha(`script-src 'self' 'unsafe-inline'${isDev(phase) ? " 'unsafe-eval'" : ""}`),
+              withCaptcha("style-src 'self' 'unsafe-inline'"), // unsafe-inline necessário para Tailwind
               "img-src 'self' data: blob: https:", // blob: = fotos posturais locais (modo demonstração)
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+              withCaptcha("connect-src 'self' https://*.supabase.co wss://*.supabase.co"),
+              withCaptcha("frame-src 'self'"),
               "media-src 'self' blob: https://wger.de https://*.supabase.co", // vídeos do wger (exibidos da fonte) e vídeos próprios (link assinado)
               "frame-ancestors 'self'",
               "base-uri 'self'",

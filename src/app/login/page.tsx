@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import AppearanceBar from "@/components/appearance/AppearanceBar";
 import { isSupabaseConfigured, getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { assurance, needsCode, safeNext, verifyCode } from "@/lib/auth/mfa";
 import CodeForm from "@/components/auth/CodeForm";
 import { destinationFor } from "@/lib/auth/home";
+import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
+import { CAPTCHA, CAPTCHA_MESSAGES, isCaptchaError } from "@/lib/auth/captcha";
 import { ShieldCheck, Mail, Lock, ArrowRight, AlertCircle, Check } from "lucide-react";
 
 // Mensagens fixas: nada vindo do provedor vai para a tela, e nenhuma delas revela se o e-mail tem conta.
@@ -22,7 +24,9 @@ const NOTICES: Record<string, string> = {
 };
 const UNAVAILABLE = "O login ainda não está disponível neste ambiente. Use a demonstração para conhecer a plataforma.";
 
-function loginErrorMessage(error: { status?: number; code?: string }): string {
+function loginErrorMessage(error: { status?: number; code?: string; message?: string }): string {
+  // Recusa da verificação de segurança: acontece antes de a senha ser conferida
+  if (isCaptchaError(error)) return CAPTCHA ? CAPTCHA_MESSAGES.failed : CAPTCHA_MESSAGES.missing;
   if (error.status === 429 || error.code === "over_request_rate_limit") return "Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.";
   // Só aparece com a senha certa, então não revela a existência da conta a quem não a conhece.
   if (error.code === "email_not_confirmed") return "Confirme seu e-mail pelo link que enviamos antes de entrar.";
@@ -54,6 +58,12 @@ export default function LoginPage() {
   const [codeStep, setCodeStep] = useState(false);
   // Formulário de e-mail e senha aberto (as três opções de entrada ficam na tela inicial)
   const [emailOpen, setEmailOpen] = useState(false);
+  // Verificação de segurança (quando ligada no Supabase): um token por tentativa
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [recoveryToken, setRecoveryToken] = useState<string | null>(null);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const loginCaptcha = useRef<CaptchaHandle>(null);
+  const recoveryCaptcha = useRef<CaptchaHandle>(null);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -94,6 +104,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (CAPTCHA && !captchaToken) {
+      setErrorMessage(CAPTCHA_MESSAGES.pending);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const supabase = getSupabaseBrowserClient();
@@ -102,7 +117,10 @@ export default function LoginPage() {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
+        options: captchaToken ? { captchaToken } : undefined,
       });
+      // O token já foi usado: a próxima tentativa precisa de outro
+      loginCaptcha.current?.reset();
 
       if (error || !data.user) {
         setErrorMessage(loginErrorMessage(error ?? {}));
@@ -150,19 +168,32 @@ export default function LoginPage() {
   const handlePasswordRecovery = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!recoveryEmail) return;
+    setRecoveryError(null);
 
     if (!isSupabaseConfigured) {
       setRecoverySent(true);
       return;
     }
 
+    if (CAPTCHA && !recoveryToken) {
+      setRecoveryError(CAPTCHA_MESSAGES.pending);
+      return;
+    }
+
     try {
       const supabase = getSupabaseBrowserClient();
       if (supabase) {
-        // Resposta igual exista a conta ou não (sem enumeração de e-mails).
-        await supabase.auth.resetPasswordForEmail(recoveryEmail.trim(), {
+        // Resposta igual exista a conta ou não (sem enumeração de e-mails). Só a recusa da
+        // verificação de segurança aparece, porque ela não depende de a conta existir.
+        const { error } = await supabase.auth.resetPasswordForEmail(recoveryEmail.trim(), {
           redirectTo: `${window.location.origin}/auth/reset-password`,
+          captchaToken: recoveryToken ?? undefined,
         });
+        recoveryCaptcha.current?.reset();
+        if (isCaptchaError(error)) {
+          setRecoveryError(CAPTCHA ? CAPTCHA_MESSAGES.failed : CAPTCHA_MESSAGES.missing);
+          return;
+        }
       }
       setRecoverySent(true);
     } catch {
@@ -302,6 +333,8 @@ export default function LoginPage() {
               </div>
             </div>
 
+            <Captcha ref={loginCaptcha} onToken={setCaptchaToken} onUnavailable={() => setErrorMessage(CAPTCHA_MESSAGES.missing)} />
+
             <button
               type="submit"
               disabled={isLoading}
@@ -378,6 +411,12 @@ export default function LoginPage() {
                     className="w-full px-3.5 py-2 rounded-xl border border-theme-boundary/50 text-xs"
                   />
                 </div>
+                <Captcha ref={recoveryCaptcha} onToken={setRecoveryToken} onUnavailable={() => setRecoveryError(CAPTCHA_MESSAGES.missing)} />
+                {recoveryError && (
+                  <p role="alert" className="text-xs text-status-danger-fg">
+                    {recoveryError}
+                  </p>
+                )}
                 <div className="flex items-center justify-end gap-2 pt-2">
                   <button
                     type="button"

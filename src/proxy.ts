@@ -5,7 +5,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { APP_MODE, SUPABASE_PUBLIC_KEY, SUPABASE_URL } from "@/lib/app-mode";
 import { needsCode } from "@/lib/auth/mfa";
-import { isAdminRoute, isProtectedRoute, isPublicRoute, needsActivation } from "@/lib/auth/edge-routes";
+import { isAdminRoute, isBlockedPath, isProtectedRoute, isPublicRoute, needsActivation } from "@/lib/auth/edge-routes";
+
+/** Responde com a página "não encontrada" (status 404), sem revelar se o endereço existe. */
+function notFound(request: NextRequest) {
+  return NextResponse.rewrite(new URL("/404", request.url), { status: 404 });
+}
 
 /**
  * Valida Origin/Referer para proteção CSRF em mutations.
@@ -53,6 +58,9 @@ function validateOrigin(request: NextRequest): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Endereços que nunca são públicos (arquivos de configuração, pastas internas, sondagens comuns)
+  if (isBlockedPath(pathname)) return notFound(request);
 
   // Validação CSRF para mutations
   if (!validateOrigin(request)) {
@@ -119,8 +127,16 @@ export async function proxy(request: NextRequest) {
   // Verifica sessão
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Administração: para quem não é administrador ativo, o endereço simplesmente não existe
+  // (sem redirecionar para o login, o que confirmaria que há uma área ali).
+  if (isAdminRoute(pathname)) {
+    if (!user) return notFound(request);
+    const { data: profile } = await supabase.from("profiles").select("role, status").eq("id", user.id).maybeSingle();
+    if (!profile || profile.role !== "admin" || profile.status !== "active") return notFound(request);
+  }
+
   // Se não há usuário e está tentando acessar rota protegida
-  if (!user && (isProtectedRoute(pathname) || isAdminRoute(pathname))) {
+  if (!user && isProtectedRoute(pathname)) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(redirectUrl);
@@ -145,19 +161,9 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Se há usuário mas está tentando acessar admin, verifica role
+  // Administrador confirmado acima: a administração ainda exige o segundo fator
+  // (o banco também exige: is_admin() só vale em aal2)
   if (user && isAdminRoute(pathname)) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role, status")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile || profile.role !== "admin" || profile.status !== "active") {
-      return NextResponse.redirect(new URL("/app", request.url));
-    }
-
-    // Administração exige o segundo fator (o banco também exige: is_admin() só vale em aal2)
     if (lv?.currentLevel !== "aal2") {
       const setup = new URL("/conta/seguranca", request.url);
       setup.searchParams.set("redirect", "/admin");
