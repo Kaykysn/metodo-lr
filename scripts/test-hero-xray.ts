@@ -284,6 +284,16 @@ const bodyMapDemoSrc = fs.readFileSync(bodyMapDemoPath, "utf-8");
 assert.ok(bodyMapDemoSrc.includes("HeroXRay"), "O visor do mapa deve reaproveitar a lógica da lente do HeroXRay");
 assert.ok(bodyMapDemoSrc.includes("/media/hero-body-base.webp"), "A pele no mapa deve usar o modelo do hero");
 assert.ok(bodyMapDemoSrc.includes("/media/hero-body-xray.webp"), "A anatomia no mapa deve usar a camada laranja do hero");
+assert.ok(bodyMapDemoSrc.includes("/media/hero-body-back-base.webp"), "Costas: a pele usa a imagem posterior");
+assert.ok(bodyMapDemoSrc.includes("/media/hero-body-back-xray.webp"), "Costas: a anatomia usa a radiografia posterior");
+assert.ok(bodyMapDemoSrc.includes("baseImage={current.base}") && bodyMapDemoSrc.includes("xrayImage={current.xray}"), "As duas camadas trocam juntas com a vista");
+assert.ok(!bodyMapDemoSrc.includes("is-flipped") && !/scaleX\(-1\)/.test(fs.readFileSync(path.join(root, "src", "styles", "metodo-lr.css"), "utf-8")), "Costas nunca é a frente espelhada");
+for (const f of ["hero-body-back-base.webp", "hero-body-back-xray.webp"]) {
+  const buf = fs.readFileSync(path.join(root, "public", "media", f));
+  assert.equal(buf.toString("ascii", 12, 16), "VP8X", `${f}: WebP com canal alfa (fundo transparente)`);
+  assert.equal(1 + buf.readUIntLE(24, 3), 896, `${f}: mesma largura das camadas frontais`);
+  assert.equal(1 + buf.readUIntLE(27, 3), 1114, `${f}: mesma altura das camadas frontais`);
+}
 assert.ok(bodyMapDemoSrc.includes("lr-skin-grayscale"), "Somente a pele recebe grayscale; a anatomia preserva o laranja");
 assert.ok(bodyMapDemoSrc.includes("autoSweep={false}"), "No mapa a lente é controlada pelo ponteiro, teclado e regiões");
 assert.ok(bodyMapDemoSrc.includes("aspectRatio=\"896 / 1114\""), "As duas camadas compartilham a mesma proporção no mapa");
