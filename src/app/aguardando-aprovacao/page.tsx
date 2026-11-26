@@ -31,10 +31,10 @@ export default function AguardandoAprovacaoPage() {
 
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-theme-text">
-              Solicitação em Análise
+              Pedido em análise
             </h1>
             <p className="text-xs sm:text-sm text-theme-muted leading-relaxed sm:leading-5">
-              A equipe analisa cada pedido. Com a aprovação, enviamos ao seu e-mail um convite para criar a senha. Se já recebeu o convite, abra o link dele para concluir a ativação. Seus 30 dias só começam no primeiro acesso depois disso.
+              A equipe analisa cada pedido. Com a aprovação, enviamos ao seu e-mail um convite para criar a senha. Se já recebeu o convite, abra o link dele para concluir a ativação.
             </p>
           </div>
 
@@ -49,10 +49,10 @@ export default function AguardandoAprovacaoPage() {
           <div className="p-4 bg-theme-secondary/70 border border-theme-border rounded-xl text-left text-xs space-y-2 text-theme-text">
             <div className="flex items-center gap-2 font-bold text-theme-text">
               <ShieldCheck className="w-4 h-4 text-status-success-fg" />
-              <span>Seus 30 dias estão preservados:</span>
+              <span>Seus 30 dias ainda não começaram</span>
             </div>
             <p className="text-theme-muted leading-relaxed">
-              O seu período de 30 dias de teste gratuito <strong>não está correndo</strong> enquanto sua solicitação é analisada. O cronômetro só é acionado no momento em que você faz o primeiro login após a aprovação formal.
+              O teste gratuito de 30 dias <strong>só começa no primeiro acesso</strong> depois da aprovação. Enquanto o pedido está em análise, nenhum dia é contado.
             </p>
           </div>
 
@@ -69,13 +69,13 @@ export default function AguardandoAprovacaoPage() {
               href="/"
               className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-theme-boundary/50 text-theme-text text-xs font-semibold hover:bg-theme-secondary transition-colors"
             >
-              Voltar à Página Inicial
+              Voltar ao início
             </Link>
           </div>
 
           {contactEmail && (
             <div className="pt-4 border-t border-theme-border text-xs text-theme-muted">
-              Dúvidas sobre o status da aprovação? Entre em contato pelo e-mail:{" "}
+              Dúvidas sobre o pedido? Escreva para{" "}
               <a href={`mailto:${contactEmail}`} className="font-semibold text-theme-text underline">
                 {contactEmail}
               </a>

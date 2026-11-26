@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAsync, useData } from "@/components/providers/DataProvider";
 import PlanEditor from "@/components/training/PlanEditor";
-import { ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading, PageHeader } from "@/components/ui/primitives";
+import { ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { latest } from "@/lib/domain/plans";
 import { can } from "@/lib/domain/roles";
 

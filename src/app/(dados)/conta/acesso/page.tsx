@@ -207,7 +207,11 @@ function Conteudo() {
   );
 }
 
-/** Assinatura viva no Asaas: paga, em atraso ou agendada para o fim do teste. */
+/**
+ * Assinatura viva no Asaas: paga, em atraso ou agendada para o fim do teste. A agendada ainda
+ * não tem cobrança (status "none", sem período pago) e precisa continuar cancelável antes da
+ * primeira cobrança; a função billing do servidor usa a mesma regra para não abrir uma segunda.
+ */
 function renewing(sub: SubscriptionRecord | null): boolean {
   return !!sub?.providerSubscriptionId && !sub.cancelAtPeriodEnd && sub.billingStatus !== "canceled";
 }

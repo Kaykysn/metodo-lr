@@ -6,7 +6,8 @@ import { useParams } from "next/navigation";
 import { useAsync, useData } from "@/components/providers/DataProvider";
 import AssessmentFlow from "@/components/assessment/flow/AssessmentFlow";
 import { AssessmentPhotos } from "@/components/posture/PhotoSetPanel";
-import { ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading, PageHeader } from "@/components/ui/primitives";
+import { ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function AvaliacaoPage() {
   const { id } = useParams<{ id: string }>();

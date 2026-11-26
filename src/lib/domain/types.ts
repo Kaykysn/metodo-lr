@@ -40,6 +40,10 @@ export interface Trainee {
   /** Arquivado: não conta no limite de ativos, continua consultável e não recebe novos registros. */
   archivedAt?: ISODateTime | null;
   isDemo: boolean;
+  // Novos campos para Método LR
+  teacherPlanId?: string | null;
+  paymentDueDay?: number | null;
+  currentCompetence?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -249,4 +253,136 @@ export interface SuggestionTrace {
   ruleVersion: string;
   findingsUsed: string[];
   generatedAt: ISODateTime;
+}
+
+// ---- Novos tipos para Método LR ----
+
+export interface TeacherPlan {
+  id: string;
+  ownerId: string;
+  name: string;
+  monthlyValueCents: number;
+  weeklyFrequency: number;
+  isActive: boolean;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeacherPixKey {
+  ownerId: string;
+  pixKey: string;
+  pixKeyType: "cpf" | "cnpj" | "email" | "phone" | "evp" | "aleatoria";
+  holderName: string;
+  holderDocument: string | null;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+export interface StudentMonthlyPayment {
+  id: string;
+  traineeId: string;
+  ownerId: string;
+  teacherPlanId: string;
+  competence: string; // YYYY-MM-DD
+  dueDate: string;
+  valueCents: number;
+  status: "pendente" | "pago" | "parcial" | "isento" | "cancelado";
+  paidAt: string | null;
+  paidValueCents: number | null;
+  paymentMethod: string | null;
+  notedBy: string | null;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeacherAvailability {
+  id: string;
+  ownerId: string;
+  weekday: number; // 0=dom ... 6=sab
+  startTime: string; // HH:MM
+  durationMin: number;
+  capacity: number;
+  gymName: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface StudentSchedule {
+  id: string;
+  traineeId: string;
+  ownerId: string;
+  teacherPlanId: string;
+  teacherAvailabilityId: string;
+  weekday: number;
+  startTime: string;
+  durationMin: number;
+  gymName: string | null;
+  status: "ativo" | "pausado" | "cancelado";
+  weekStart: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScheduleOccurrence {
+  id: string;
+  studentScheduleId: string;
+  traineeId: string;
+  ownerId: string;
+  weekStart: string;
+  scheduledAt: string; // ISO timestamp
+  durationMin: number;
+  gymName: string | null;
+  status: "agendada" | "realizada" | "cancelada" | "remarcada" | "perdida" | "reposicao";
+  originalScheduledAt: string | null;
+  changeReason: string | null;
+  changedBy: string | null;
+  changedAt: string | null;
+  createdAt: string;
+}
+
+export interface WeeklyReplacementBalance {
+  id: string;
+  traineeId: string;
+  ownerId: string;
+  weekStart: string;
+  balance: number;
+  updatedAt: string;
+}
+
+export interface StudentExerciseFeedback {
+  id: string;
+  occurrenceId: string;
+  planVersionId: string;
+  traineeId: string;
+  ownerId: string;
+  sessionId: string;
+  prescribedId: string;
+  exerciseName: string;
+  prescribedDose: any;
+  prescribedResistance: any;
+  prescribedEffort: any | null;
+  performedDose: any | null;
+  performedResistance: any | null;
+  performedEffort: any | null;
+  discomfortLevel: number | null;
+  discomfortNote: string | null;
+  studentReport: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeacherNotification {
+  id: string;
+  ownerId: string;
+  traineeId: string | null;
+  studentUserId: string | null;
+  type: "link_request" | "schedule_choice" | "gym_change" | "reschedule" | "cancellation" | "late_cancellation" | "feedback_edit" | "payment_recorded";
+  title: string;
+  summary: string;
+  referenceId: string | null;
+  referenceType: "trainee" | "occurrence" | "payment" | "link_request" | "feedback" | null;
+  readAt: string | null;
+  createdAt: string;
 }

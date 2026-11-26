@@ -6,7 +6,7 @@
 // ==============================================================================
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Actor, Assessment, ExecutionLog, Trainee, TrainingPlan, PlanVersion } from "@/lib/domain/types";
-import { followUpProblem, type NoteInput, type Repository, type SaveReceipt, type SessionChangeInput, type SlotInput } from "./repository";
+import { followUpProblem, type NoteInput, type Repository, type SaveReceipt, type SessionChangeInput, type SlotInput, type TeacherPlan, type TeacherPlanInput, type TeacherPixKey, type TeacherPixKeyInput, type StudentMonthlyPayment, type TeacherAvailability, type TeacherAvailabilityInput, type StudentSchedule, type StudentScheduleInput, type ScheduleOccurrence, type WeeklyReplacementBalance, type StudentExerciseFeedback, type StudentExerciseFeedbackInput, type TeacherNotification, type CancelOccurrenceResult } from "./repository";
 import type { FollowUpData, FollowUpNote, SessionChange, WeeklySlot } from "@/lib/domain/schedule";
 import { emptyBlocks } from "./seed";
 import { migrateLegacyRegions } from "@/lib/domain/body-regions";
@@ -231,5 +231,555 @@ export class SupabaseRepository implements Repository {
     // Autor e nome do autor são definidos pelo banco a partir da sessão
     else must(await this.db.from("trainee_feedback").insert({ ...row, trainee_id: n.traineeId, owner_id: actor.id }));
     return receipt();
+  }
+
+  // ---------- Planos do professor ----------
+  async listTeacherPlans(_actor: Actor): Promise<TeacherPlan[]> {
+    const { data, error } = await this.db
+      .from("teacher_plans")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      ownerId: r.owner_id,
+      name: r.name,
+      monthlyValueCents: r.monthly_value_cents,
+      weeklyFrequency: r.weekly_frequency,
+      isActive: r.is_active,
+      archivedAt: r.archived_at,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }));
+  }
+
+  async createTeacherPlan(_actor: Actor, input: TeacherPlanInput): Promise<TeacherPlan> {
+    const { data, error } = await this.db
+      .from("teacher_plans")
+      .insert({
+        owner_id: (await this.db.auth.getUser()).data.user?.id,
+        name: input.name,
+        monthly_value_cents: input.monthlyValueCents,
+        weekly_frequency: input.weeklyFrequency,
+        is_active: input.isActive ?? true,
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id,
+      ownerId: data.owner_id,
+      name: data.name,
+      monthlyValueCents: data.monthly_value_cents,
+      weeklyFrequency: data.weekly_frequency,
+      isActive: data.is_active,
+      archivedAt: data.archived_at,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  async updateTeacherPlan(_actor: Actor, id: string, input: Partial<TeacherPlanInput>): Promise<TeacherPlan> {
+    const update: any = {};
+    if (input.name !== undefined) update.name = input.name;
+    if (input.monthlyValueCents !== undefined) update.monthly_value_cents = input.monthlyValueCents;
+    if (input.weeklyFrequency !== undefined) update.weekly_frequency = input.weeklyFrequency;
+    if (input.isActive !== undefined) update.is_active = input.isActive;
+    update.updated_at = new Date().toISOString();
+
+    const { data, error } = await this.db
+      .from("teacher_plans")
+      .update(update)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id,
+      ownerId: data.owner_id,
+      name: data.name,
+      monthlyValueCents: data.monthly_value_cents,
+      weeklyFrequency: data.weekly_frequency,
+      isActive: data.is_active,
+      archivedAt: data.archived_at,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  async archiveTeacherPlan(_actor: Actor, id: string): Promise<TeacherPlan> {
+    return this.updateTeacherPlan(_actor, id, { isActive: false });
+  }
+
+  // ---------- Chave Pix do professor ----------
+  async getTeacherPixKey(_actor: Actor): Promise<TeacherPixKey | null> {
+    const { data, error } = await this.db
+      .from("teacher_pix_keys")
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    return {
+      ownerId: data.owner_id,
+      pixKey: data.pix_key,
+      pixKeyType: data.pix_key_type,
+      holderName: data.holder_name,
+      holderDocument: data.holder_document,
+      updatedAt: data.updated_at,
+      updatedBy: data.updated_by,
+    };
+  }
+
+  async upsertTeacherPixKey(_actor: Actor, input: TeacherPixKeyInput): Promise<TeacherPixKey> {
+    const user = (await this.db.auth.getUser()).data.user;
+    if (!user) throw new Error("Autenticação necessária.");
+    const { data, error } = await this.db
+      .from("teacher_pix_keys")
+      .upsert({
+        owner_id: user.id,
+        pix_key: input.pixKey,
+        pix_key_type: input.pixKeyType,
+        holder_name: input.holderName,
+        holder_document: input.holderDocument ?? null,
+        updated_by: user.id,
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      ownerId: data.owner_id,
+      pixKey: data.pix_key,
+      pixKeyType: data.pix_key_type,
+      holderName: data.holder_name,
+      holderDocument: data.holder_document,
+      updatedAt: data.updated_at,
+      updatedBy: data.updated_by,
+    };
+  }
+
+  // ---------- Mensalidades do aluno ----------
+  async listStudentMonthlyPayments(_actor: Actor, traineeId?: string): Promise<StudentMonthlyPayment[]> {
+    let q = this.db.from("student_monthly_payments").select("*").order("competence", { ascending: false });
+    if (traineeId) q = q.eq("trainee_id", traineeId);
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      traineeId: r.trainee_id,
+      ownerId: r.owner_id,
+      teacherPlanId: r.teacher_plan_id,
+      competence: r.competence,
+      dueDate: r.due_date,
+      valueCents: r.value_cents,
+      status: r.status,
+      paidAt: r.paid_at,
+      paidValueCents: r.paid_value_cents,
+      paymentMethod: r.payment_method,
+      notedBy: r.noted_by,
+      note: r.note,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }));
+  }
+
+  async generateMonthlyPayments(_actor: Actor, competence: string): Promise<number> {
+    const { data, error } = await this.db.rpc("generate_monthly_payments", { p_competence: competence });
+    if (error) throw new Error(error.message);
+    return data as number;
+  }
+
+  async recordPayment(_actor: Actor, paymentId: string, paidValueCents: number, method: string, note?: string): Promise<StudentMonthlyPayment> {
+    const { data, error } = await this.db.rpc("record_payment", { p_payment_id: paymentId, p_paid_value_cents: paidValueCents, p_method: method, p_note: note ?? null });
+    if (error) throw new Error(error.message);
+    return data as StudentMonthlyPayment;
+  }
+
+  // ---------- Disponibilidade do professor ----------
+  async listTeacherAvailability(_actor: Actor): Promise<TeacherAvailability[]> {
+    const { data, error } = await this.db
+      .from("teacher_availability")
+      .select("*")
+      .order("weekday")
+      .order("start_time");
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      ownerId: r.owner_id,
+      weekday: r.weekday,
+      startTime: String(r.start_time).slice(0, 5),
+      durationMin: r.duration_min,
+      capacity: r.capacity,
+      gymName: r.gym_name,
+      isActive: r.is_active,
+      createdAt: r.created_at,
+    }));
+  }
+
+  async createTeacherAvailability(_actor: Actor, input: TeacherAvailabilityInput): Promise<TeacherAvailability> {
+    const user = (await this.db.auth.getUser()).data.user;
+    if (!user) throw new Error("Autenticação necessária.");
+    const { data, error } = await this.db
+      .from("teacher_availability")
+      .insert({
+        owner_id: user.id,
+        weekday: input.weekday,
+        start_time: input.startTime,
+        duration_min: input.durationMin,
+        capacity: input.capacity ?? 1,
+        gym_name: input.gymName ?? null,
+        is_active: input.isActive ?? true,
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id,
+      ownerId: data.owner_id,
+      weekday: data.weekday,
+      startTime: String(data.start_time).slice(0, 5),
+      durationMin: data.duration_min,
+      capacity: data.capacity,
+      gymName: data.gym_name,
+      isActive: data.is_active,
+      createdAt: data.created_at,
+    };
+  }
+
+  async updateTeacherAvailability(_actor: Actor, id: string, input: Partial<TeacherAvailabilityInput>): Promise<TeacherAvailability> {
+    const update: any = {};
+    if (input.weekday !== undefined) update.weekday = input.weekday;
+    if (input.startTime !== undefined) update.start_time = input.startTime;
+    if (input.durationMin !== undefined) update.duration_min = input.durationMin;
+    if (input.capacity !== undefined) update.capacity = input.capacity;
+    if (input.gymName !== undefined) update.gym_name = input.gymName;
+    if (input.isActive !== undefined) update.is_active = input.isActive;
+
+    const { data, error } = await this.db
+      .from("teacher_availability")
+      .update(update)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id,
+      ownerId: data.owner_id,
+      weekday: data.weekday,
+      startTime: String(data.start_time).slice(0, 5),
+      durationMin: data.duration_min,
+      capacity: data.capacity,
+      gymName: data.gym_name,
+      isActive: data.is_active,
+      createdAt: data.created_at,
+    };
+  }
+
+  async deleteTeacherAvailability(_actor: Actor, id: string): Promise<void> {
+    const { error } = await this.db.from("teacher_availability").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  }
+
+  // ---------- Agendamento fixo do aluno ----------
+  async listStudentSchedules(_actor: Actor, traineeId?: string): Promise<StudentSchedule[]> {
+    let q = this.db.from("student_schedules").select("*").order("created_at", { ascending: false });
+    if (traineeId) q = q.eq("trainee_id", traineeId);
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      traineeId: r.trainee_id,
+      ownerId: r.owner_id,
+      teacherPlanId: r.teacher_plan_id,
+      teacherAvailabilityId: r.teacher_availability_id,
+      weekday: r.weekday,
+      startTime: String(r.start_time).slice(0, 5),
+      durationMin: r.duration_min,
+      gymName: r.gym_name,
+      status: r.status,
+      weekStart: r.week_start,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }));
+  }
+
+  async createStudentSchedule(_actor: Actor, input: StudentScheduleInput): Promise<StudentSchedule> {
+    const user = (await this.db.auth.getUser()).data.user;
+    if (!user) throw new Error("Autenticação necessária.");
+    const { data, error } = await this.db
+      .from("student_schedules")
+      .insert({
+        trainee_id: input.traineeId,
+        owner_id: user.id,
+        teacher_plan_id: input.teacherPlanId,
+        teacher_availability_id: input.teacherAvailabilityId,
+        weekday: input.weekday,
+        start_time: input.startTime,
+        duration_min: input.durationMin,
+        gym_name: input.gymName ?? null,
+        status: input.status ?? "ativo",
+        week_start: input.weekStart,
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id,
+      traineeId: data.trainee_id,
+      ownerId: data.owner_id,
+      teacherPlanId: data.teacher_plan_id,
+      teacherAvailabilityId: data.teacher_availability_id,
+      weekday: data.weekday,
+      startTime: String(data.start_time).slice(0, 5),
+      durationMin: data.duration_min,
+      gymName: data.gym_name,
+      status: data.status,
+      weekStart: data.week_start,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  async updateStudentSchedule(_actor: Actor, id: string, input: Partial<StudentScheduleInput>): Promise<StudentSchedule> {
+    const update: any = {};
+    if (input.teacherPlanId !== undefined) update.teacher_plan_id = input.teacherPlanId;
+    if (input.teacherAvailabilityId !== undefined) update.teacher_availability_id = input.teacherAvailabilityId;
+    if (input.weekday !== undefined) update.weekday = input.weekday;
+    if (input.startTime !== undefined) update.start_time = input.startTime;
+    if (input.durationMin !== undefined) update.duration_min = input.durationMin;
+    if (input.gymName !== undefined) update.gym_name = input.gymName;
+    if (input.status !== undefined) update.status = input.status;
+    if (input.weekStart !== undefined) update.week_start = input.weekStart;
+    update.updated_at = new Date().toISOString();
+
+    const { data, error } = await this.db
+      .from("student_schedules")
+      .update(update)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id,
+      traineeId: data.trainee_id,
+      ownerId: data.owner_id,
+      teacherPlanId: data.teacher_plan_id,
+      teacherAvailabilityId: data.teacher_availability_id,
+      weekday: data.weekday,
+      startTime: String(data.start_time).slice(0, 5),
+      durationMin: data.duration_min,
+      gymName: data.gym_name,
+      status: data.status,
+      weekStart: data.week_start,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  async deleteStudentSchedule(_actor: Actor, id: string): Promise<void> {
+    const { error } = await this.db.from("student_schedules").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  }
+
+  // ---------- Ocorrências semanais ----------
+  async listScheduleOccurrences(_actor: Actor, traineeId?: string, weekStart?: string): Promise<ScheduleOccurrence[]> {
+    let q = this.db.from("schedule_occurrences").select("*").order("week_start", { ascending: false }).order("scheduled_at");
+    if (traineeId) q = q.eq("trainee_id", traineeId);
+    if (weekStart) q = q.eq("week_start", weekStart);
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      studentScheduleId: r.student_schedule_id,
+      traineeId: r.trainee_id,
+      ownerId: r.owner_id,
+      weekStart: r.week_start,
+      scheduledAt: r.scheduled_at,
+      durationMin: r.duration_min,
+      gymName: r.gym_name,
+      status: r.status,
+      originalScheduledAt: r.original_scheduled_at,
+      changeReason: r.change_reason,
+      changedBy: r.changed_by,
+      changedAt: r.changed_at,
+      createdAt: r.created_at,
+    }));
+  }
+
+  async cancelOccurrence(_actor: Actor, occurrenceId: string, reason?: string): Promise<CancelOccurrenceResult> {
+    // Os minutos de antecedência são calculados no servidor; o navegador não informa.
+    const { data, error } = await this.db.rpc("cancel_occurrence", { p_occurrence_id: occurrenceId, p_reason: reason ?? null });
+    if (error) throw new Error(error.message);
+    const r = (data ?? {}) as any;
+    return { status: r.status, message: r.message, weekStart: r.week_start, minutesBefore: r.minutes_before, balance: r.balance };
+  }
+
+  async chooseStudentSchedule(_actor: Actor, input: { traineeId: string; availabilityId: string; gymName?: string; scheduleId?: string }): Promise<StudentSchedule> {
+    const { data, error } = await this.db.rpc("student_choose_schedule", {
+      p_trainee_id: input.traineeId,
+      p_availability_id: input.availabilityId,
+      p_gym_name: input.gymName?.trim() || null,
+      p_schedule_id: input.scheduleId ?? null,
+    });
+    if (error) throw new Error(error.message);
+    const r = data as any;
+    return {
+      id: r.id, traineeId: r.trainee_id, ownerId: r.owner_id, teacherPlanId: r.teacher_plan_id,
+      teacherAvailabilityId: r.teacher_availability_id, weekday: r.weekday, startTime: String(r.start_time).slice(0, 5),
+      durationMin: r.duration_min, gymName: r.gym_name, status: r.status, weekStart: r.week_start,
+      createdAt: r.created_at, updatedAt: r.updated_at,
+    } as StudentSchedule;
+  }
+
+  async rescheduleOccurrence(_actor: Actor, occurrenceId: string, newAvailabilityId: string, newGymName?: string, isReplacement?: boolean) {
+    const { data, error } = await this.db.rpc("reschedule_occurrence", {
+      p_occurrence_id: occurrenceId,
+      p_new_availability_id: newAvailabilityId,
+      p_new_gym_name: newGymName ?? null,
+      p_is_replacement: isReplacement ?? false,
+    });
+    if (error) throw new Error(error.message);
+    const r = (data ?? {}) as any;
+    return { status: r.status, newOccurrenceId: r.new_occurrence_id, message: r.message };
+  }
+
+  async generateWeeklyOccurrences(_actor: Actor, weekStart: string): Promise<number> {
+    const { data, error } = await this.db.rpc("generate_weekly_occurrences", { p_week_start: weekStart });
+    if (error) throw new Error(error.message);
+    return data as number;
+  }
+
+  async initWeeklyReplacementBalance(_actor: Actor, traineeId: string, weekStart: string): Promise<WeeklyReplacementBalance> {
+    const { data, error } = await this.db.rpc("init_weekly_replacement_balance", { p_trainee_id: traineeId, p_week_start: weekStart });
+    if (error) throw new Error(error.message);
+    return data as WeeklyReplacementBalance;
+  }
+
+  // ---------- Feedback do aluno ----------
+  async listStudentExerciseFeedback(_actor: Actor, occurrenceId: string): Promise<StudentExerciseFeedback[]> {
+    const { data, error } = await this.db
+      .from("student_exercise_feedback")
+      .select("*")
+      .eq("occurrence_id", occurrenceId)
+      .order("created_at");
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      occurrenceId: r.occurrence_id,
+      planVersionId: r.plan_version_id,
+      traineeId: r.trainee_id,
+      ownerId: r.owner_id,
+      sessionId: r.session_id,
+      prescribedId: r.prescribed_id,
+      exerciseName: r.exercise_name,
+      prescribedDose: r.prescribed_dose,
+      prescribedResistance: r.prescribed_resistance,
+      prescribedEffort: r.prescribed_effort,
+      performedDose: r.performed_dose,
+      performedResistance: r.performed_resistance,
+      performedEffort: r.performed_effort,
+      discomfortLevel: r.discomfort_level,
+      discomfortNote: r.discomfort_note,
+      studentReport: r.student_report,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }));
+  }
+
+  async upsertStudentExerciseFeedback(_actor: Actor, input: StudentExerciseFeedbackInput): Promise<StudentExerciseFeedback> {
+    const user = (await this.db.auth.getUser()).data.user;
+    if (!user) throw new Error("Autenticação necessária.");
+    const { data, error } = await this.db
+      .from("student_exercise_feedback")
+      .upsert({
+        occurrence_id: input.occurrenceId,
+        plan_version_id: input.planVersionId,
+        trainee_id: input.traineeId,
+        owner_id: user.id, // será validado pelo RLS
+        session_id: input.sessionId,
+        prescribed_id: input.prescribedId,
+        exercise_name: input.exerciseName,
+        prescribed_dose: input.prescribedDose,
+        prescribed_resistance: input.prescribedResistance,
+        prescribed_effort: input.prescribedEffort ?? null,
+        performed_dose: input.performedDose ?? null,
+        performed_resistance: input.performedResistance ?? null,
+        performed_effort: input.performedEffort ?? null,
+        discomfort_level: input.discomfortLevel ?? null,
+        discomfort_note: input.discomfortNote ?? null,
+        student_report: input.studentReport ?? null,
+      }, { onConflict: "occurrence_id,prescribed_id" })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id,
+      occurrenceId: data.occurrence_id,
+      planVersionId: data.plan_version_id,
+      traineeId: data.trainee_id,
+      ownerId: data.owner_id,
+      sessionId: data.session_id,
+      prescribedId: data.prescribed_id,
+      exerciseName: data.exercise_name,
+      prescribedDose: data.prescribed_dose,
+      prescribedResistance: data.prescribed_resistance,
+      prescribedEffort: data.prescribed_effort,
+      performedDose: data.performed_dose,
+      performedResistance: data.performed_resistance,
+      performedEffort: data.performed_effort,
+      discomfortLevel: data.discomfort_level,
+      discomfortNote: data.discomfort_note,
+      studentReport: data.student_report,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  // ---------- Notificações do professor ----------
+  async listTeacherNotifications(_actor: Actor, unreadOnly?: boolean): Promise<TeacherNotification[]> {
+    let q = this.db
+      .from("teacher_notifications")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (unreadOnly) q = q.is("read_at", null);
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      ownerId: r.owner_id,
+      traineeId: r.trainee_id,
+      studentUserId: r.student_user_id,
+      type: r.type,
+      title: r.title,
+      summary: r.summary,
+      referenceId: r.reference_id,
+      referenceType: r.reference_type,
+      readAt: r.read_at,
+      createdAt: r.created_at,
+    }));
+  }
+
+  async markNotificationRead(_actor: Actor, notificationId: string): Promise<void> {
+    const { error } = await this.db
+      .from("teacher_notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("id", notificationId);
+    if (error) throw new Error(error.message);
+  }
+
+  // ---------- Meus professores (para aluno) ----------
+  async listMyTeachers(_actor: Actor): Promise<{ id: string; teacherUserId: string; traineeId: string; fullName: string; institution: string | null }[]> {
+    const { data, error } = await this.db
+      .from("my_teachers")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      teacherUserId: r.teacher_user_id,
+      traineeId: r.trainee_id,
+      fullName: r.teacher_full_name ?? "",
+      institution: r.institution ?? null,
+    }));
   }
 }

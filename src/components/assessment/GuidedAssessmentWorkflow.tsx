@@ -172,7 +172,7 @@ export default function GuidedAssessmentWorkflow({
         >
           <ShieldAlert className="w-5 h-5 text-status-danger-fg shrink-0 mt-0.5" />
           <div>
-            <strong className="block font-bold">Atenção Clínica Prioritária: Suspeita de Red Flag</strong>
+            <strong className="block font-bold">Atenção clínica prioritária: Suspeita de sinal de alerta (red flag)</strong>
             <p className="text-xs text-status-danger-fg mt-0.5">
               Há indícios que demandam investigação médica e interrupção de manobras de sobrecarga física até liberação formal.
             </p>
@@ -190,7 +190,7 @@ export default function GuidedAssessmentWorkflow({
             <div className="p-4 rounded-xl bg-theme-secondary/70 border border-theme-border flex items-start gap-3">
               <HelpCircle className="w-5 h-5 text-theme-text shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-theme-text">
-                <strong>Orientações Pedagógicas de Uso:</strong>
+                <strong>Como usar este módulo:</strong>
                 <p className="mt-1 text-theme-muted">
                   Esta plataforma não diagnostica patologias nosológicas nem prescreve tratamentos automatizados. O objetivo é exercitar o raciocínio clínico da triagem de segurança à prescrição de movimento.
                 </p>
@@ -199,7 +199,7 @@ export default function GuidedAssessmentWorkflow({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-5 rounded-xl bg-theme-primary border border-theme-border space-y-3">
-                <h4 className="text-sm font-bold text-theme-text">Resumo da Avaliação Atual</h4>
+                <h4 className="text-sm font-bold text-theme-text">Resumo da avaliação</h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between py-1 border-b border-theme-border">
                     <span className="text-theme-muted">Identificador:</span>
@@ -210,18 +210,18 @@ export default function GuidedAssessmentWorkflow({
                     <span className="font-semibold text-theme-text">{assessment.patientInitials}</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-theme-border">
-                    <span className="text-theme-muted">Data da Avaliação:</span>
+                    <span className="text-theme-muted">Data da avaliação:</span>
                     <span className="font-semibold text-theme-text">{assessment.assessmentDate}</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-theme-border">
-                    <span className="text-theme-muted">Região Principal:</span>
+                    <span className="text-theme-muted">Região principal:</span>
                     <span className="font-semibold text-theme-text">{assessment.painRegion}</span>
                   </div>
                 </div>
               </div>
 
               <div className="p-5 rounded-xl bg-theme-primary border border-theme-border space-y-3">
-                <h4 className="text-sm font-bold text-theme-text">Slot de Vídeo / Aula Introdutória</h4>
+                <h4 className="text-sm font-bold text-theme-text">Espaço para vídeo / Aula introdutória</h4>
                 <div className="aspect-video bg-ink-950/90 rounded-lg flex flex-col items-center justify-center p-4 text-center text-slate-300 border border-slate-800">
                   <Video className="w-8 h-8 text-slate-400 mb-2" />
                   <span className="text-xs font-semibold text-slate-200">
@@ -331,7 +331,7 @@ export default function GuidedAssessmentWorkflow({
         {currentStageIndex === 2 && (
           <div className="space-y-6">
             <div className="p-4 bg-theme-secondary border border-theme-border rounded-xl text-xs text-theme-muted leading-relaxed">
-              <strong>Atenção Metodológica:</strong> O Studio Leandro Rangel não inventa algoritmos de pontuação de risco. A triagem abaixo organiza a checagem manual de condições graves recomendadas em diretrizes internacionais.
+              <strong>Atenção ao método:</strong> O Studio Leandro Rangel não inventa algoritmos de pontuação de risco. A triagem abaixo organiza a checagem manual de condições graves recomendadas em diretrizes internacionais.
             </div>
 
             <div className="space-y-4">
@@ -376,7 +376,7 @@ export default function GuidedAssessmentWorkflow({
                     }
                     className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
-                  <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
+                  <span className="text-xs font-bold text-theme-text">Sintoma presente</span>
                 </label>
               </div>
 
@@ -421,7 +421,7 @@ export default function GuidedAssessmentWorkflow({
                     }
                     className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
-                  <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
+                  <span className="text-xs font-bold text-theme-text">Sintoma presente</span>
                 </label>
               </div>
 
@@ -466,7 +466,7 @@ export default function GuidedAssessmentWorkflow({
                     }
                     className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
-                  <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
+                  <span className="text-xs font-bold text-theme-text">Sintoma presente</span>
                 </label>
               </div>
 
@@ -511,7 +511,7 @@ export default function GuidedAssessmentWorkflow({
                     }
                     className="w-4 h-4 text-status-danger-fg rounded-sm border-theme-boundary/50"
                   />
-                  <span className="text-xs font-bold text-theme-text">Sintoma Presente</span>
+                  <span className="text-xs font-bold text-theme-text">Sintoma presente</span>
                 </label>
               </div>
             </div>
@@ -664,7 +664,7 @@ export default function GuidedAssessmentWorkflow({
         {currentStageIndex === 4 && (
           <div className="space-y-6">
             <div className="p-3 bg-theme-secondary border border-theme-border rounded-xl text-xs text-theme-text">
-              <strong>Abordagem Educacional:</strong> A classificação mecanística permite orientar a terapêutica de forma mais assertiva. Sem pontuações automáticas de probabilidade em V1.
+              <strong>Abordagem educacional:</strong> A classificação mecanística permite orientar a terapêutica de forma mais assertiva. Sem pontuações automáticas de probabilidade em V1.
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -766,7 +766,7 @@ export default function GuidedAssessmentWorkflow({
         {currentStageIndex === 5 && (
           <div className="space-y-6">
             <div className="p-3 bg-status-caution-bg border border-status-caution-border rounded-xl text-xs text-status-caution-fg">
-              <strong>Proteção de Direitos Autorais e Licenciamento:</strong> As fichas abaixo apresentam a fundamentação metodológica e referências validadas no Brasil. Não reproduzimos itens proprietários protegidos.
+              <strong>Direitos autorais e licença:</strong> As fichas abaixo apresentam a fundamentação metodológica e referências validadas no Brasil. Não reproduzimos itens proprietários protegidos.
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -953,7 +953,7 @@ export default function GuidedAssessmentWorkflow({
         {currentStageIndex === 7 && (
           <div className="space-y-6">
             <div className="p-3 bg-theme-secondary border border-theme-border rounded-xl text-xs text-theme-text">
-              <strong>Abordagem Ética:</strong> A identificação de fatores psicossociais serve para personalizar a comunicação e o ritmo de progressão, jamais para rotular ou responsabilizar o aluno.
+              <strong>Abordagem ética:</strong> A identificação de fatores psicossociais serve para personalizar a comunicação e o ritmo de progressão, jamais para rotular ou responsabilizar o aluno.
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -1185,7 +1185,7 @@ export default function GuidedAssessmentWorkflow({
             }`}
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Etapa Anterior</span>
+            <span>Etapa anterior</span>
           </button>
 
           <span className="text-xs text-theme-muted hidden sm:inline">
@@ -1202,7 +1202,7 @@ export default function GuidedAssessmentWorkflow({
                 : "bg-inverse hover:bg-inverse-hover text-inverse-fg shadow-xs"
             }`}
           >
-            <span>Próxima Etapa</span>
+            <span>Próxima etapa</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

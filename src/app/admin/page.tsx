@@ -168,21 +168,21 @@ export default function AdminPage() {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-brand-400" />
               <span className="text-xs font-bold uppercase tracking-wider text-theme-text">
-                Segurança & Governança
+                Administração
               </span>
             </div>
             <h1 className="lr-app-title text-2xl sm:text-3xl font-extrabold text-theme-text mt-1">
-              Console de Gestão de Acessos
+              Gestão de acessos
             </h1>
             <p className="text-xs sm:text-sm text-theme-muted mt-0.5">
-              Aprovação de novos pedidos, congelamento de prazos, prorrogações e auditoria imutável.
+              Aprove pedidos, pause ou prorrogue prazos e veja o histórico de cada ação.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             {!isSupabaseConfigured && (
               <span className="px-3 py-1 bg-status-caution-bg text-status-caution-fg border border-status-caution-border rounded-lg text-xs font-bold">
-                Modo Prévia Segura (Simulação Local)
+                Demonstração com dados locais
               </span>
             )}
           </div>
@@ -234,11 +234,11 @@ export default function AdminPage() {
               className="px-3 py-2 bg-theme-primary border border-theme-boundary/50 rounded-xl text-xs font-semibold text-theme-text"
             >
               <option value="all">Todos os status</option>
-              <option value="pending">Apenas Pendentes</option>
-              <option value="active">Apenas Ativos</option>
-              <option value="paused">Apenas Pausados</option>
-              <option value="expired">Apenas Expirados</option>
-              <option value="revoked">Apenas Revogados</option>
+              <option value="pending">Pendentes</option>
+              <option value="active">Ativos</option>
+              <option value="paused">Pausados</option>
+              <option value="expired">Expirados</option>
+              <option value="revoked">Revogados</option>
             </select>
           </div>
         </div>
@@ -380,9 +380,9 @@ export default function AdminPage() {
         <div className="bg-theme-primary rounded-2xl p-6 border border-theme-border shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-theme-border">
             <h3 className="text-base font-bold text-theme-text">
-              Trilha de Auditoria do Servidor (Audit Log)
+              Histórico de ações
             </h3>
-            <span className="text-xs text-theme-muted">Registros imutáveis de transição</span>
+            <span className="text-xs text-theme-muted">Cada mudança de acesso fica registrada e não pode ser apagada</span>
           </div>
 
           <div className="space-y-2 max-h-64 overflow-y-auto pr-1">

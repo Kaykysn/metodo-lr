@@ -38,11 +38,252 @@ export interface Repository {
   addSessionChange(actor: Actor, change: SessionChangeInput): Promise<SaveReceipt>;
   removeSessionChange(actor: Actor, traineeId: string, changeId: string): Promise<SaveReceipt>;
   saveFollowUpNote(actor: Actor, note: NoteInput): Promise<SaveReceipt>;
+
+  // ---- Vínculo aluno-professor: vem do convite do professor (practitioner-access) ----
+  listMyTeachers(actor: Actor): Promise<{ id: string; teacherUserId: string; traineeId: string; fullName: string; institution: string | null }[]>;
+
+  // ---- Planos do professor ----
+  listTeacherPlans(actor: Actor): Promise<TeacherPlan[]>;
+  createTeacherPlan(actor: Actor, input: TeacherPlanInput): Promise<TeacherPlan>;
+  updateTeacherPlan(actor: Actor, id: string, input: Partial<TeacherPlanInput>): Promise<TeacherPlan>;
+  archiveTeacherPlan(actor: Actor, id: string): Promise<TeacherPlan>;
+
+  // ---- Chave Pix do professor ----
+  getTeacherPixKey(actor: Actor): Promise<TeacherPixKey | null>;
+  upsertTeacherPixKey(actor: Actor, input: TeacherPixKeyInput): Promise<TeacherPixKey>;
+
+  // ---- Mensalidades do aluno ----
+  listStudentMonthlyPayments(actor: Actor, traineeId?: string): Promise<StudentMonthlyPayment[]>;
+  generateMonthlyPayments(actor: Actor, competence: string): Promise<number>;
+  recordPayment(actor: Actor, paymentId: string, paidValueCents: number, method: string, note?: string): Promise<StudentMonthlyPayment>;
+
+  // ---- Disponibilidade do professor ----
+  listTeacherAvailability(actor: Actor): Promise<TeacherAvailability[]>;
+  createTeacherAvailability(actor: Actor, input: TeacherAvailabilityInput): Promise<TeacherAvailability>;
+  updateTeacherAvailability(actor: Actor, id: string, input: Partial<TeacherAvailabilityInput>): Promise<TeacherAvailability>;
+  deleteTeacherAvailability(actor: Actor, id: string): Promise<void>;
+
+  // ---- Agendamento fixo do aluno ----
+  listStudentSchedules(actor: Actor, traineeId?: string): Promise<StudentSchedule[]>;
+  createStudentSchedule(actor: Actor, input: StudentScheduleInput): Promise<StudentSchedule>;
+  /** Aluno escolhe (ou troca) o horário fixo; professor, plano e registro vêm do vínculo. */
+  chooseStudentSchedule(actor: Actor, input: { traineeId: string; availabilityId: string; gymName?: string; scheduleId?: string }): Promise<StudentSchedule>;
+  updateStudentSchedule(actor: Actor, id: string, input: Partial<StudentScheduleInput>): Promise<StudentSchedule>;
+  deleteStudentSchedule(actor: Actor, id: string): Promise<void>;
+
+  // ---- Ocorrências semanais ----
+  listScheduleOccurrences(actor: Actor, traineeId?: string, weekStart?: string): Promise<ScheduleOccurrence[]>;
+  cancelOccurrence(actor: Actor, occurrenceId: string, reason?: string): Promise<CancelOccurrenceResult>;
+  rescheduleOccurrence(actor: Actor, occurrenceId: string, newAvailabilityId: string, newGymName?: string, isReplacement?: boolean): Promise<{ status: string; newOccurrenceId: string; message: string }>;
+  generateWeeklyOccurrences(actor: Actor, weekStart: string): Promise<number>;
+  initWeeklyReplacementBalance(actor: Actor, traineeId: string, weekStart: string): Promise<WeeklyReplacementBalance>;
+
+  // ---- Feedback do aluno ----
+  listStudentExerciseFeedback(actor: Actor, occurrenceId: string): Promise<StudentExerciseFeedback[]>;
+  upsertStudentExerciseFeedback(actor: Actor, input: StudentExerciseFeedbackInput): Promise<StudentExerciseFeedback>;
+
+  // ---- Notificações do professor ----
+  listTeacherNotifications(actor: Actor, unreadOnly?: boolean): Promise<TeacherNotification[]>;
+  markNotificationRead(actor: Actor, notificationId: string): Promise<void>;
 }
 
 export type SlotInput = Pick<WeeklySlot, "weekday" | "startTime" | "durationMin">;
 export type SessionChangeInput = Pick<SessionChange, "traineeId" | "kind" | "originalAt" | "scheduledAt" | "durationMin" | "note">;
 export type NoteInput = Pick<FollowUpNote, "traineeId" | "occurredOn" | "sessionAt" | "studentReport" | "professionalNote"> & { id?: string };
+
+// ---- Novos tipos para Método LR ----
+
+export interface TeacherPlan {
+  id: string;
+  ownerId: string;
+  name: string;
+  monthlyValueCents: number;
+  weeklyFrequency: number;
+  isActive: boolean;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeacherPlanInput {
+  name: string;
+  monthlyValueCents: number;
+  weeklyFrequency: number;
+  isActive?: boolean;
+}
+
+export interface TeacherPixKey {
+  ownerId: string;
+  pixKey: string;
+  pixKeyType: "cpf" | "cnpj" | "email" | "phone" | "evp" | "aleatoria";
+  holderName: string;
+  holderDocument: string | null;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+export interface TeacherPixKeyInput {
+  pixKey: string;
+  pixKeyType: "cpf" | "cnpj" | "email" | "phone" | "evp" | "aleatoria";
+  holderName: string;
+  holderDocument?: string;
+}
+
+export interface StudentMonthlyPayment {
+  id: string;
+  traineeId: string;
+  ownerId: string;
+  teacherPlanId: string;
+  competence: string; // YYYY-MM-DD
+  dueDate: string;
+  valueCents: number;
+  status: "pendente" | "pago" | "parcial" | "isento" | "cancelado";
+  paidAt: string | null;
+  paidValueCents: number | null;
+  paymentMethod: string | null;
+  notedBy: string | null;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeacherAvailability {
+  id: string;
+  ownerId: string;
+  weekday: number; // 0=dom ... 6=sab
+  startTime: string; // HH:MM
+  durationMin: number;
+  capacity: number;
+  gymName: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface TeacherAvailabilityInput {
+  weekday: number;
+  startTime: string;
+  durationMin: number;
+  capacity?: number;
+  gymName?: string;
+  isActive?: boolean;
+}
+
+/** Resposta do cancelamento: status e minutos de antecedência vêm do servidor. */
+export interface CancelOccurrenceResult {
+  status: string;
+  message: string;
+  weekStart: string;
+  minutesBefore: number;
+  balance: number;
+}
+
+export interface StudentSchedule {
+  id: string;
+  traineeId: string;
+  ownerId: string;
+  teacherPlanId: string;
+  teacherAvailabilityId: string;
+  weekday: number;
+  startTime: string;
+  durationMin: number;
+  gymName: string | null;
+  status: "ativo" | "pausado" | "cancelado";
+  weekStart: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudentScheduleInput {
+  traineeId: string;
+  teacherPlanId: string;
+  teacherAvailabilityId: string;
+  weekday: number;
+  startTime: string;
+  durationMin: number;
+  gymName?: string;
+  status?: "ativo" | "pausado" | "cancelado";
+  weekStart: string;
+}
+
+export interface ScheduleOccurrence {
+  id: string;
+  studentScheduleId: string;
+  traineeId: string;
+  ownerId: string;
+  weekStart: string;
+  scheduledAt: string; // ISO timestamp
+  durationMin: number;
+  gymName: string | null;
+  status: "agendada" | "realizada" | "cancelada" | "remarcada" | "perdida" | "reposicao";
+  originalScheduledAt: string | null;
+  changeReason: string | null;
+  changedBy: string | null;
+  changedAt: string | null;
+  createdAt: string;
+}
+
+export interface WeeklyReplacementBalance {
+  id: string;
+  traineeId: string;
+  ownerId: string;
+  weekStart: string;
+  balance: number;
+  updatedAt: string;
+}
+
+export interface StudentExerciseFeedback {
+  id: string;
+  occurrenceId: string;
+  planVersionId: string;
+  traineeId: string;
+  ownerId: string;
+  sessionId: string;
+  prescribedId: string;
+  exerciseName: string;
+  prescribedDose: any;
+  prescribedResistance: any;
+  prescribedEffort: any | null;
+  performedDose: any | null;
+  performedResistance: any | null;
+  performedEffort: any | null;
+  discomfortLevel: number | null;
+  discomfortNote: string | null;
+  studentReport: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudentExerciseFeedbackInput {
+  occurrenceId: string;
+  planVersionId: string;
+  traineeId: string;
+  sessionId: string;
+  prescribedId: string;
+  exerciseName: string;
+  prescribedDose: any;
+  prescribedResistance: any;
+  prescribedEffort?: any;
+  performedDose?: any;
+  performedResistance?: any;
+  performedEffort?: any;
+  discomfortLevel?: number;
+  discomfortNote?: string;
+  studentReport?: string;
+}
+
+export interface TeacherNotification {
+  id: string;
+  ownerId: string;
+  traineeId: string | null;
+  studentUserId: string | null;
+  type: "link_request" | "schedule_choice" | "gym_change" | "reschedule" | "cancellation" | "late_cancellation" | "feedback_edit" | "payment_recorded";
+  title: string;
+  summary: string;
+  referenceId: string | null;
+  referenceType: "trainee" | "occurrence" | "payment" | "link_request" | "feedback" | null;
+  readAt: string | null;
+  createdAt: string;
+}
 
 /** Mesmas regras dos CHECKs do banco (migração 20261118000100), com mensagens para a tela. */
 export function followUpProblem(x: { slots?: SlotInput[]; change?: SessionChangeInput; note?: NoteInput }): string | null {
@@ -215,7 +456,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "trainee.write")) deny("trainee.write", "Seu perfil não pode alterar alunos.");
     const s = this.load();
     const t = s.trainees.find((x) => x.id === id);
-    if (!t || !canAccessTrainee(actor, t)) deny("trainee.write", "Aluno não encontrado.");
+    if (!t || !canAccessTrainee(actor, t)) deny("trainee.write", "Aluno não encontrado ou fora da sua responsabilidade.");
     if (!archived && t.archivedAt) {
       this.assertCanCreate("trainee.write");
       this.assertActivation(s, t.ownerId);
@@ -239,7 +480,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "assessment.write")) deny("assessment.write", "Seu perfil não pode criar avaliações.");
     this.assertCanCreate("assessment.write");
     const t = await this.getTrainee(actor, traineeId);
-    if (!t) deny("assessment.write", "Aluno não encontrado.");
+    if (!t) deny("assessment.write", "Aluno não encontrado ou fora da sua responsabilidade.");
     this.assertNotArchived(t, "assessment.write");
     const s = this.load();
     const prev = s.assessments.filter((a) => a.traineeId === traineeId);
@@ -262,7 +503,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "assessment.write")) deny("assessment.write", "Seu perfil não pode editar avaliações.");
     const s = this.load();
     const t = s.trainees.find((x) => x.id === a.traineeId);
-    if (!t || !canAccessTrainee(actor, t)) deny("assessment.write", "Avaliação não encontrada.");
+    if (!t || !canAccessTrainee(actor, t)) deny("assessment.write", "Avaliação fora da sua responsabilidade.");
     this.assertNotArchived(t, "assessment.write");
     const i = s.assessments.findIndex((x) => x.id === a.id);
     if (i < 0) deny("assessment.write", "Avaliação inexistente.");
@@ -287,7 +528,7 @@ export class DemoRepository implements Repository {
     if (!can(actor.role, "plan.draft")) deny("plan.draft", "Seu perfil não pode salvar treinos.");
     const s = this.load();
     const t = s.trainees.find((x) => x.id === plan.traineeId);
-    if (!t || !canAccessTrainee(actor, t)) deny("plan.draft", "Aluno não encontrado.");
+    if (!t || !canAccessTrainee(actor, t)) deny("plan.draft", "Aluno fora da sua responsabilidade.");
     this.assertNotArchived(t, "plan.draft");
     const i = s.plans.findIndex((p) => p.id === plan.id);
     const prev = i >= 0 ? s.plans[i] : null;
@@ -329,7 +570,7 @@ export class DemoRepository implements Repository {
     const s = this.load();
     for (const l of logs) {
       const t = s.trainees.find((x) => x.id === l.traineeId);
-      if (!t || !canAccessTrainee(actor, t)) deny("execution.log", "Registro não encontrado.");
+      if (!t || !canAccessTrainee(actor, t)) deny("execution.log", "Registro fora da sua responsabilidade.");
       this.assertNotArchived(t, "execution.log");
       const plan = s.plans.find((p) => p.versions.some((v) => v.id === l.planVersionId));
       const v = plan?.versions.find((x) => x.id === l.planVersionId);
@@ -342,7 +583,7 @@ export class DemoRepository implements Repository {
   // ---------- Acompanhamento ----------
   private followUpTrainee(s: DemoState, actor: Actor, traineeId: string, write: boolean) {
     const t = s.trainees.find((x) => x.id === traineeId);
-    if (!t || !canAccessTrainee(actor, t) || !can(actor.role, write ? "trainee.write" : "trainee.read")) deny("trainee.read", "Aluno não encontrado.");
+    if (!t || !canAccessTrainee(actor, t) || !can(actor.role, write ? "trainee.write" : "trainee.read")) deny("trainee.read", "Aluno fora da sua responsabilidade.");
     if (write) {
       this.assertNotArchived(t, "trainee.write");
       this.assertCanCreate("trainee.write");
@@ -401,6 +642,108 @@ export class DemoRepository implements Repository {
     }
     s.followups = list;
     return this.commit(s);
+  }
+
+  // ---------- Planos do professor (demo) ----------
+  async listTeacherPlans(_actor: Actor): Promise<TeacherPlan[]> {
+    return [];
+  }
+  async createTeacherPlan(_actor: Actor, _input: TeacherPlanInput): Promise<TeacherPlan> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async updateTeacherPlan(_actor: Actor, _id: string, _input: Partial<TeacherPlanInput>): Promise<TeacherPlan> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async archiveTeacherPlan(_actor: Actor, _id: string): Promise<TeacherPlan> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Chave Pix do professor (demo) ----------
+  async getTeacherPixKey(_actor: Actor): Promise<TeacherPixKey | null> {
+    return null;
+  }
+  async upsertTeacherPixKey(_actor: Actor, _input: TeacherPixKeyInput): Promise<TeacherPixKey> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Mensalidades do aluno (demo) ----------
+  async listStudentMonthlyPayments(_actor: Actor, _traineeId?: string): Promise<StudentMonthlyPayment[]> {
+    return [];
+  }
+  async generateMonthlyPayments(_actor: Actor, _competence: string): Promise<number> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async recordPayment(_actor: Actor, _paymentId: string, _paidValueCents: number, _method: string, _note?: string): Promise<StudentMonthlyPayment> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Disponibilidade do professor (demo) ----------
+  async listTeacherAvailability(_actor: Actor): Promise<TeacherAvailability[]> {
+    return [];
+  }
+  async createTeacherAvailability(_actor: Actor, _input: TeacherAvailabilityInput): Promise<TeacherAvailability> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async updateTeacherAvailability(_actor: Actor, _id: string, _input: Partial<TeacherAvailabilityInput>): Promise<TeacherAvailability> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async deleteTeacherAvailability(_actor: Actor, _id: string): Promise<void> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Agendamento fixo do aluno (demo) ----------
+  async listStudentSchedules(_actor: Actor, _traineeId?: string): Promise<StudentSchedule[]> {
+    return [];
+  }
+  async createStudentSchedule(_actor: Actor, _input: StudentScheduleInput): Promise<StudentSchedule> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async updateStudentSchedule(_actor: Actor, _id: string, _input: Partial<StudentScheduleInput>): Promise<StudentSchedule> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async deleteStudentSchedule(_actor: Actor, _id: string): Promise<void> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Ocorrências semanais (demo) ----------
+  async listScheduleOccurrences(_actor: Actor, _traineeId?: string, _weekStart?: string): Promise<ScheduleOccurrence[]> {
+    return [];
+  }
+  async chooseStudentSchedule(_actor: Actor, _input: { traineeId: string; availabilityId: string; gymName?: string; scheduleId?: string }): Promise<StudentSchedule> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async cancelOccurrence(_actor: Actor, _occurrenceId: string, _reason?: string): Promise<CancelOccurrenceResult> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async rescheduleOccurrence(_actor: Actor, _occurrenceId: string, _newAvailabilityId: string, _newGymName?: string, _isReplacement?: boolean): Promise<{ status: string; newOccurrenceId: string; message: string }> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async generateWeeklyOccurrences(_actor: Actor, _weekStart: string): Promise<number> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+  async initWeeklyReplacementBalance(_actor: Actor, _traineeId: string, _weekStart: string): Promise<WeeklyReplacementBalance> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Feedback do aluno (demo) ----------
+  async listStudentExerciseFeedback(_actor: Actor, _occurrenceId: string): Promise<StudentExerciseFeedback[]> {
+    return [];
+  }
+  async upsertStudentExerciseFeedback(_actor: Actor, _input: StudentExerciseFeedbackInput): Promise<StudentExerciseFeedback> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Notificações do professor (demo) ----------
+  async listTeacherNotifications(_actor: Actor, _unreadOnly?: boolean): Promise<TeacherNotification[]> {
+    return [];
+  }
+  async markNotificationRead(_actor: Actor, _notificationId: string): Promise<void> {
+    throw new Error("Não disponível na demonstração. Configure o Supabase.");
+  }
+
+  // ---------- Meus professores (demo) ----------
+  async listMyTeachers(_actor: Actor): Promise<{ id: string; teacherUserId: string; traineeId: string; fullName: string; institution: string | null }[]> {
+    return [];
   }
 
   // Identidade simulada (só na demonstração)

@@ -101,7 +101,7 @@ export default function BodyMap({ selectedRegions = [], onChange, isReadOnly = f
     <div className="bg-theme-primary border border-theme-border rounded-2xl p-6 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-theme-border">
         <div>
-          <h3 className="text-base font-semibold text-theme-text">Mapa Anatômico de Localização dos Sintomas</h3>
+          <h3 className="text-base font-semibold text-theme-text">Mapa dos sintomas no corpo</h3>
           <p className="text-xs text-theme-muted mt-0.5">
             Clique nas regiões anatômicas para registrar as queixas relatadas pelo aluno.
           </p>

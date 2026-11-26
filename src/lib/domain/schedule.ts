@@ -160,3 +160,13 @@ export function sortNotes(notes: FollowUpNote[]): FollowUpNote[] {
   const key = (n: FollowUpNote) => n.sessionAt ?? `${n.occurredOn}T23:59:59.999Z`;
   return [...notes].sort((a, b) => (b.occurredOn.localeCompare(a.occurredOn)) || key(b).localeCompare(key(a)) || b.createdAt.localeCompare(a.createdAt));
 }
+
+/** Segunda-feira da semana (fuso do professor, padrão America/Sao_Paulo). */
+export function weekStartOf(date: Date | string, tz: string = STUDIO_TZ): string {
+  // Data no relógio do fuso (não no do navegador, nem em UTC): depois das 21h em Brasília
+  // o UTC já está no dia seguinte e a semana saía errada.
+  const day = typeof date === "string" ? date.slice(0, 10) : localParts(date.getTime(), tz).date;
+  const [y, m, d] = day.split("-").map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay(); // 0 = domingo
+  return addDays(day, -((dow + 6) % 7));
+}

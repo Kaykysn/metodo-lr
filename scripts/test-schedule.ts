@@ -1,7 +1,7 @@
 /* Acompanhamento: próximos atendimentos no fuso do estabelecimento, remarcação pontual e histórico.
    Executar: node scripts/run-ts.mjs scripts/test-schedule.ts */
 import assert from "node:assert/strict";
-import { localParts, sortNotes, upcomingAppointments, zonedToUtc, type FollowUpNote, type SessionChange, type WeeklySlot } from "../src/lib/domain/schedule";
+import { localParts, sortNotes, weekStartOf, upcomingAppointments, zonedToUtc, type FollowUpNote, type SessionChange, type WeeklySlot } from "../src/lib/domain/schedule";
 
 let n = 0;
 const ok = (m: string) => console.log(`✓ ${++n}. ${m}`);
@@ -46,5 +46,12 @@ const notes: FollowUpNote[] = [
 ];
 assert.deepEqual(sortNotes(notes).map((x) => x.id), ["c", "b", "a"]);
 ok("Histórico do mais recente para o mais antigo");
+
+// Semana começa na segunda, no relógio de Brasília (não no UTC nem no fuso do navegador)
+assert.equal(weekStartOf("2026-11-22"), "2026-11-16", "domingo pertence à semana que começou na segunda anterior");
+assert.equal(weekStartOf("2026-11-23"), "2026-11-23");
+assert.equal(weekStartOf(new Date(zonedToUtc("2026-11-22", "22:30"))), "2026-11-16", "domingo 22:30 em Brasília (já segunda em UTC)");
+assert.equal(weekStartOf(new Date(zonedToUtc("2026-11-23", "00:10"))), "2026-11-23");
+ok("Início da semana no fuso do estabelecimento");
 
 console.log(`\n${n} testes do acompanhamento passaram.`);

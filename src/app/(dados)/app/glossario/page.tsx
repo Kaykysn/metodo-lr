@@ -35,7 +35,7 @@ export default function GlossarioPage() {
       <div className="p-4 bg-theme-secondary/70 border border-theme-border rounded-xl text-xs text-theme-text flex items-start gap-2.5">
         <ShieldCheck className="w-4 h-4 text-theme-text shrink-0 mt-0.5" />
         <p className="text-theme-muted leading-relaxed">
-          <strong>Aviso Metodológico de Evidências:</strong> As referências científicas listadas representam literatura clássica candidata à verificação e estudo comparativo, e não garantia ou validação automática do software como dispositivo médico.
+          <strong>Sobre as referências:</strong> As referências científicas listadas representam literatura clássica candidata à verificação e estudo comparativo, e não garantia ou validação automática do software como dispositivo médico.
         </p>
       </div>
 
@@ -87,11 +87,11 @@ export default function GlossarioPage() {
               {item.definition}
             </p>
             <div className="p-3 bg-theme-primary rounded-xl border border-theme-border text-xs text-theme-muted">
-              <strong className="text-theme-text block mb-0.5 font-semibold">Relevância Clínica Prática:</strong>
+              <strong className="text-theme-text block mb-0.5 font-semibold">Na prática clínica:</strong>
               {item.clinicalRelevance}
             </div>
             <span className="text-[11px] text-theme-subtle block pt-1">
-              <strong>Referência Candidata:</strong> {item.sourceCandidate}
+              <strong>Referência a conferir:</strong> {item.sourceCandidate}
             </span>
           </div>
         ))}

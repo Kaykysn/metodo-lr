@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ClipboardList, Dumbbell, Users } from "lucide-react";
 import { useAsync, useData } from "@/components/providers/DataProvider";
-import { ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading, PageHeader, Panel, formatDateBR, Badge } from "@/components/ui/primitives";
+import { ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading, Panel, formatDateBR, Badge } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { latest, published } from "@/lib/domain/plans";
 import { can } from "@/lib/domain/roles";
 

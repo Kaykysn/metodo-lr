@@ -8,7 +8,7 @@ import { COMPARE_ROWS, FEATURE_LABEL, PLANS, formatPrice, getPlan, isPlanId, pri
 import { BILLING_ENABLED, BILLING_UNAVAILABLE_MESSAGE, firstChargeDate } from "@/lib/subscription/billing";
 import { startCheckout } from "@/lib/subscription/checkout";
 import { formatSaoPauloDate } from "@/lib/access-policy";
-import { isProfessionalRole } from "@/lib/subscription/entitlements";
+import { isProfessionalRole, hasValidPaidPeriod } from "@/lib/subscription/entitlements";
 
 export interface PlanosViewProps {
   prioritySupportReady: boolean;
@@ -139,8 +139,8 @@ function Confirmation({ planId, onClose }: { planId: PlanId; onClose: () => void
   const canSubscribe = session.status === "active" || (session.status === "blocked" && session.reason === "expired");
   const access = commercial.access;
   const sub = commercial.subscription;
-  // Mesma regra do servidor: assinatura viva (paga, em atraso ou agendada) não abre outra
-  const subscribed = !!sub?.providerSubscriptionId && !sub.cancelAtPeriodEnd && sub.billingStatus !== "canceled";
+  // Mesma regra do servidor: só considera "assinado" se há período pago válido (paidThrough > now)
+  const subscribed = !!sub && hasValidPaidPeriod(sub, Date.now());
   const [pay, setPay] = useState<{ status: "idle" | "opening" | "error"; message?: string }>({ status: "idle" });
   useEffect(() => setPay({ status: "idle" }), [planId]);
 
@@ -177,7 +177,7 @@ function Confirmation({ planId, onClose }: { planId: PlanId; onClose: () => void
           <p className="mt-4 text-[15px] text-theme-muted">A contratação fica disponível quando o seu cadastro estiver aprovado e ativo. Veja a situação em <Link href="/conta/acesso" className="font-semibold underline">Plano e acesso</Link>.</p>
         ) : subscribed ? (
           <p className="mt-4 text-[15px]">
-            {access?.paidPlanId ? `Você já tem o plano ${getPlan(access.paidPlanId).name}${access.paidThrough ? `, pago até ${formatSaoPauloDate(access.paidThrough)}` : ""}.` : "Você já tem uma assinatura agendada."} Para trocar de plano, fale com o suporte. Detalhes em{" "}
+            {access?.paidPlanId ? `Você já tem o plano ${getPlan(access.paidPlanId).name}${sub.paidThrough ? `, pago até ${formatSaoPauloDate(sub.paidThrough)}` : ""}.` : "Você já tem uma assinatura ativa."} Para trocar de plano, fale com o suporte. Detalhes em{" "}
             <Link href="/conta/acesso" className="font-semibold underline">Plano e acesso</Link>.
           </p>
         ) : (

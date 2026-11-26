@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAsync, useData } from "@/components/providers/DataProvider";
-import { Button, EmptyState, ErrorNote, Field, Loading, PageHeader, Panel, inputClass } from "@/components/ui/primitives";
+import { Button, EmptyState, ErrorNote, Field, Loading, Panel, inputClass } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function NovaAvaliacaoPage() {
   const { repo, actor, revision } = useData();

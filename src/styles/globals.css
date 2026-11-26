@@ -1694,7 +1694,7 @@ html.lite.theme-switching *::after {
 
 /* ==============================================================================
    Cores dos componentes shadcn/ui, ligadas Ã  paleta do Studio (tokens.css).
-   Só geram utilitários novos (bg-primary, border-inputâ€¦): nada aqui muda o que já existe.
+   Só geram utilitários novos (bg-primary, border-input…): nada aqui muda o que já existe.
    Raios e fonte ficam com os padrões do Tailwind e do site, de propósito.
    ============================================================================== */
 @theme inline {

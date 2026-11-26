@@ -381,22 +381,22 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Modal de Recuperação de Senha */}
+      {/* Modal de Recuperar senha */}
       {showForgotModal && (
         <div className="fixed inset-0 z-50 bg-ink-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-theme-primary rounded-2xl max-w-md w-full p-6 space-y-4 shadow-elevated border border-theme-border">
-            <h3 className="text-lg font-bold text-theme-text">Recuperação de Senha</h3>
+            <h3 className="text-lg font-bold text-theme-text">Recuperar senha</h3>
             <p className="text-xs text-theme-muted leading-relaxed">
-              Informe seu e-mail cadastrado para receber instruções seguras de redefinição de acesso.
+              Digite o e-mail da sua conta. Se ele estiver cadastrado, enviamos um link para criar uma nova senha.
             </p>
 
             {recoverySent ? (
               <div className="p-4 bg-status-success-bg border border-status-success-border rounded-xl text-xs text-status-success-fg space-y-2">
                 <div className="flex items-center gap-1.5 font-bold">
                   <Check className="w-4 h-4 text-status-success-fg" />
-                  <span>Solicitação registrada</span>
+                  <span>Pedido recebido</span>
                 </div>
-                <p>Se houver uma conta aprovada com este e-mail, as instruções foram enviadas.</p>
+                <p>Se houver uma conta com este e-mail, o link chega em alguns minutos. Confira também o spam.</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -412,7 +412,7 @@ export default function LoginPage() {
               <form onSubmit={handlePasswordRecovery} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-theme-text mb-1">
-                    E-mail Cadastrado
+                    E-mail da conta
                   </label>
                   <input
                     type="email"
@@ -441,7 +441,7 @@ export default function LoginPage() {
                     type="submit"
                     className="px-4 py-2 bg-inverse hover:bg-inverse-hover text-inverse-fg rounded-xl text-xs font-bold"
                   >
-                    Enviar Link de Recuperação
+                    Enviar link
                   </button>
                 </div>
               </form>

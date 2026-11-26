@@ -17,7 +17,8 @@ import {
   type PurposeFilter,
 } from "@/lib/domain/exercise-library";
 import { LATERALITY_LABEL, PURPOSE_LABEL, type Difficulty, type Laterality } from "@/lib/domain/exercise-catalog";
-import { InfoNote, PageHeader, Panel, inputClass } from "@/components/ui/primitives";
+import { InfoNote, Panel, inputClass } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/ui/PageHeader";
 import ExerciseDetailView from "@/components/exercises/ExerciseDetailView";
 import AddToPlan from "@/components/exercises/AddToPlan";
 import CatalogBrowser from "@/components/catalog/CatalogBrowser";

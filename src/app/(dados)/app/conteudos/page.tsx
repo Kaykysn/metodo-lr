@@ -86,17 +86,17 @@ export default function ConteudosPage() {
               {lesson.status === "published" ? (
                 <span className="inline-flex items-center gap-1.5 font-bold text-status-success-fg">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Lição Disponível</span>
+                  <span>Disponível</span>
                 </span>
               ) : lesson.status === "under_review" ? (
                 <span className="inline-flex items-center gap-1.5 font-bold text-status-caution-fg">
                   <Clock className="w-4 h-4" />
-                  <span>Em Revisão Docente</span>
+                  <span>Em revisão pelos professores</span>
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 font-medium text-theme-subtle">
                   <Lock className="w-4 h-4" />
-                  <span>Conteúdo Não Publicado</span>
+                  <span>Ainda não publicado</span>
                 </span>
               )}
 

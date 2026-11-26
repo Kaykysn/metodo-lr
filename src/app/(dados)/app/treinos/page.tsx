@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { useAsync, useData } from "@/components/providers/DataProvider";
-import { Badge, ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading, PageHeader, formatDateBR } from "@/components/ui/primitives";
+import { Badge, ButtonLink, DemoBadge, EmptyState, ErrorNote, Loading, formatDateBR } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { latest, published } from "@/lib/domain/plans";
 import { can } from "@/lib/domain/roles";
 
