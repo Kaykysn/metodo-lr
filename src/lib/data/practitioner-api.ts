@@ -22,7 +22,9 @@ export interface PractitionerInvite extends PractitionerAccess {
   kind: "invite" | "password";
   emailed: boolean;
   email_outcome: MailOutcome;
-  link: string;
+  /** Cópia do link só quando o e-mail não saiu; nunca para nova senha de aluno já ativado. */
+  link: string | null;
+  link_withheld?: boolean;
   validity: string;
 }
 

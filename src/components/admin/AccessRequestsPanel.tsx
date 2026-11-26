@@ -204,12 +204,15 @@ export default function AccessRequestsPanel() {
                   <div className="mt-3 rounded-xl border border-theme-border bg-theme-secondary/60 p-3 text-sm">
                     <p className="font-semibold text-theme-text">{OUTCOME[res.email ?? (res.emailed ? "sent" : "failed")]}</p>
                     <p className="mt-0.5 text-theme-muted">
-                      {res.kind === "password" ? "Link para criar nova senha" : "Convite"} de uso único, válido por {res.validity}, enviado para {r.email}. Se precisar, copie e mande só para essa pessoa.
+                      {res.kind === "password" ? "Link para criar nova senha" : "Convite"} de uso único, válido por {res.validity}, para {r.email}.
+                      {res.link ? " O e-mail não saiu: copie o link e mande só para essa pessoa." : " Por segurança, o link fica só no e-mail da pessoa."}
                     </p>
-                    <button type="button" onClick={() => void copy(r.id, res.link)} className="mt-2 inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-theme-boundary/60 px-3 font-semibold hover:bg-theme-primary">
-                      {copied === r.id ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
-                      {copied === r.id ? "Link copiado" : "Copiar link"}
-                    </button>
+                    {res.link && (
+                      <button type="button" onClick={() => void copy(r.id, res.link!)} className="mt-2 inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-theme-boundary/60 px-3 font-semibold hover:bg-theme-primary">
+                        {copied === r.id ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
+                        {copied === r.id ? "Link copiado" : "Copiar link"}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

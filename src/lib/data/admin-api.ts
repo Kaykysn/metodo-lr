@@ -106,12 +106,14 @@ export interface InviteResult {
   kind?: "invite" | "password";
   emailed: boolean;
   email?: MailOutcome;
-  link: string;
+  /** Cópia do link só quando o e-mail não saiu (plano B por outro canal). */
+  link: string | null;
+  link_withheld?: boolean;
   validity: string;
   validity_hours?: number;
 }
 
-/** Aprova e envia o convite ao e-mail do pedido (ou reenvia). O link também volta para o admin. */
+/** Aprova e envia o convite ao e-mail do pedido (ou reenvia). O link só volta se o e-mail não saiu. */
 export async function inviteRequest(id: string) {
   return callFunction<InviteResult>("admin-access", `/requests/${id}/invite`, { method: "POST" });
 }

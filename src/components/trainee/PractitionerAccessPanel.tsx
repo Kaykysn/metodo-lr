@@ -16,10 +16,10 @@ import {
 } from "@/lib/data/practitioner-api";
 
 const OUTCOME: Record<MailOutcome, string> = {
-  sent: "E-mail enviado para o aluno. Se não chegar em alguns minutos, peça para ele olhar o spam.",
-  not_configured: "O e-mail não saiu: o envio de e-mails ainda não está configurado. Copie o link abaixo e mande ao aluno.",
-  test_sender: "O e-mail não saiu: o envio está em modo de teste. Copie o link abaixo e mande ao aluno.",
-  failed: "O e-mail não saiu: o serviço de e-mail não respondeu. Tente de novo ou copie o link abaixo.",
+  sent: "E-mail enviado para o aluno. Se não chegar em alguns minutos, peça para ele olhar o spam. Por segurança, o link fica só no e-mail dele.",
+  not_configured: "O e-mail não saiu: o envio de e-mails ainda não está configurado.",
+  test_sender: "O e-mail não saiu: o envio está em modo de teste.",
+  failed: "O e-mail não saiu: o serviço de e-mail não respondeu.",
 };
 
 const when = (iso?: string | null) =>
@@ -100,7 +100,7 @@ export default function PractitionerAccessPanel({ traineeId, demo, archived }: {
   };
 
   const copy = async () => {
-    if (!result) return;
+    if (!result?.link) return;
     try {
       await navigator.clipboard.writeText(result.link);
       setCopied(true);
@@ -178,15 +178,20 @@ export default function PractitionerAccessPanel({ traineeId, demo, archived }: {
                 <span>
                   {result.kind === "password" ? "Link para criar nova senha gerado. " : "Convite gerado. "}
                   {OUTCOME[result.email_outcome]} O link vale por {result.validity} e só funciona uma vez.
+                  {result.link && " Copie o link abaixo e mande só para o aluno."}
+                  {!result.link && !result.emailed && result.kind === "password" &&
+                    " Por segurança, o link de nova senha não aparece aqui: peça ao aluno para usar “Esqueci minha senha” na tela de login. Tente reenviar mais tarde."}
                 </span>
               </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <code className="max-w-full flex-1 truncate rounded bg-theme-primary px-2 py-1 text-xs">{result.link}</code>
-                <Button type="button" variant="secondary" onClick={copy}>
-                  {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
-                  {copied ? "Copiado" : "Copiar link"}
-                </Button>
-              </div>
+              {result.link && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <code className="max-w-full flex-1 truncate rounded bg-theme-primary px-2 py-1 text-xs">{result.link}</code>
+                  <Button type="button" variant="secondary" onClick={copy}>
+                    {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
+                    {copied ? "Copiado" : "Copiar link"}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
